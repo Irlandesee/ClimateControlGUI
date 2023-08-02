@@ -75,7 +75,6 @@ public class MainWindowController{
     private TextField centroID;
     private Button btnRegistraOp;
 
-
     //alerts
     private Alert coordAlert;
     private Alert denomAlert;
@@ -91,6 +90,7 @@ public class MainWindowController{
         loggedInLabel.setText(text);
     }
 
+
     @FXML
     private void initialize(){
         //Init the sceneController
@@ -104,6 +104,11 @@ public class MainWindowController{
 
         LineChart lineChart = new LineChart(xAxis, yAxis);
         contentBox.getChildren().add(lineChart);
+
+        initAlerts();
+    }
+
+    private void initAlerts(){
 
         this.denomAlert = new Alert(Alert.AlertType.ERROR);
         this.denomAlert.setHeaderText("Input non valido");
@@ -133,6 +138,7 @@ public class MainWindowController{
         this.cmAlert.setHeaderText("Invalid cm");
         this.cmAlert.setContentText("centro in input non valido");
     }
+
 
     @FXML
     public void login(ActionEvent actionEvent) {
@@ -280,20 +286,12 @@ public class MainWindowController{
     public void inserisciParametriClimatici(ActionEvent actionEvent) {
         try{
             Parent root = FXMLLoader.load(getClass().getResource("parametro_climatico-scene.fxml")); //watch out for this line of code
-            Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            Stage pcStage = new Stage();
             Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            pcStage.setScene(scene);
+            pcStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
-    }
-
-    private void inserisciPC(ActionEvent actionEvent){
-
-
-
-        //build the query
-        String query;
-
     }
 
     public void inserisciCentroMonitoraggio(ActionEvent actionEvent) {

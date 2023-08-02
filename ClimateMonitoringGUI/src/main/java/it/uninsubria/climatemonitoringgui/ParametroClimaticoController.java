@@ -2,10 +2,13 @@ package it.uninsubria.climatemonitoringgui;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.time.LocalDate;
 
@@ -14,7 +17,7 @@ public class ParametroClimaticoController {
 
     public TextField areaInteresseField;
     public TextField cmField;
-    public DatePicker pubdateField;
+    public DatePicker pubDate;
     public TextField ventoField;
     public TextField notaVentoField;
     public TextField umiditaField;
@@ -55,13 +58,13 @@ public class ParametroClimaticoController {
     public void insericiPC(ActionEvent actionEvent) {
         String nomeArea = areaInteresseField.getText();
         String centroMon = cmField.getText();
-        LocalDate pubdate = pubdateField.getValue();
+        LocalDate pubdate = pubDate.getValue();
         String ventoTmp = ventoField.getText();
         String notaVento = notaVentoField.getText();
         String umiditaTmp = umiditaField.getText();
         String notaUmidita = notaUmiditaField.getText();
         String pressioneTmp = pressioneField.getText();
-        String notaPressioen = notaPressioneField.getText();
+        String notaPressione = notaPressioneField.getText();
         String precipitazioniTmp = precipitazioniField.getText();
         String notaPrecipitazioni = notaPrecipitazioniField.getText();
         String temperaturaTmp = temperaturaField.getText();
@@ -136,8 +139,32 @@ public class ParametroClimaticoController {
         }else{
             massaGhiacciaiValue = Short.MIN_VALUE;
         }
+        short[] paramValues = new short[7];
+        String[] notes = new String[7];
+        paramValues[0] = ventoValue;
+        paramValues[1] = umiditaValue;
+        paramValues[2] = pressioneValue;
+        paramValues[3] = precipitazioniValue;
+        paramValues[4] = tempValue;
+        paramValues[5] = altGhiacciaiValue;
+        paramValues[6] = massaGhiacciaiValue;
+        notes[0] = notaVento;
+        notes[1] = notaUmidita;
+        notes[2] = notaPressione;
+        notes[3] = notaPrecipitazioni;
+        notes[4] = notaTemperatura;
+        notes[5] = notaAltGhiacciai;
+        notes[6] = notaMassaGhiacciai;
+
+        
+
+
     }
 
+
     public void cancel(ActionEvent actionEvent) {
+        Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
+        if(s != null)
+            s.close();
     }
 }

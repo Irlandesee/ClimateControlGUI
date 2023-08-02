@@ -23,7 +23,7 @@
         GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <Label text="Data rilevamento"
         GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-    <DatePicker fx:id="pubdate"
+    <DatePicker fx:id="pubDate"
         GridPane.columnIndex="1" GridPane.rowIndex="2"/>
     <Label text="Valore vento"
            GridPane.columnIndex="0" GridPane.rowIndex="3"/>
