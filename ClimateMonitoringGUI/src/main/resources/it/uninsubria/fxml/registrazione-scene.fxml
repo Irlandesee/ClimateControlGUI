@@ -9,7 +9,7 @@
 <?import java.net.URL?>
 <GridPane
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="it.uninsubria.climatemonitoringgui.controller.registrazione.RegistrazioneController"
+            fx:controller="it.uninsubria.controller.registrazione.RegistrazioneController"
             prefHeight="600.0" prefWidth="400.0"
             alignment="CENTER" vgap="10" hgap="10">
             <Label text="Nome Operatore"

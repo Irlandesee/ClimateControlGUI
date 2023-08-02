@@ -10,16 +10,16 @@ module it.uninsubria.climatemonitoringgui {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
 
-    opens it.uninsubria.climatemonitoringgui to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui;
-    exports it.uninsubria.climatemonitoringgui.controller.loginview;
-    opens it.uninsubria.climatemonitoringgui.controller.loginview to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.registrazione;
-    opens it.uninsubria.climatemonitoringgui.controller.registrazione to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.scene;
-    opens it.uninsubria.climatemonitoringgui.controller.scene to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.parametroclimatico;
-    opens it.uninsubria.climatemonitoringgui.controller.parametroclimatico to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.mainscene;
-    opens it.uninsubria.climatemonitoringgui.controller.mainscene to javafx.fxml;
+    opens it.uninsubria to javafx.fxml;
+    exports it.uninsubria;
+    exports it.uninsubria.controller.loginview;
+    opens it.uninsubria.controller.loginview to javafx.fxml;
+    exports it.uninsubria.controller.registrazione;
+    opens it.uninsubria.controller.registrazione to javafx.fxml;
+    exports it.uninsubria.controller.scene;
+    opens it.uninsubria.controller.scene to javafx.fxml;
+    exports it.uninsubria.controller.parametroclimatico;
+    opens it.uninsubria.controller.parametroclimatico to javafx.fxml;
+    exports it.uninsubria.controller.mainscene;
+    opens it.uninsubria.controller.mainscene to javafx.fxml;
 }

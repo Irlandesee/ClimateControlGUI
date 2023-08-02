@@ -1,6 +1,6 @@
-package it.uninsubria.climatemonitoringgui.controller.loginview;
+package it.uninsubria.controller.loginview;
 
-import it.uninsubria.climatemonitoringgui.MainWindow;
+import it.uninsubria.MainWindow;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

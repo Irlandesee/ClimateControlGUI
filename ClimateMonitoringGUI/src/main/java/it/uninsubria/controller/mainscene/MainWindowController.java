@@ -1,6 +1,6 @@
-package it.uninsubria.climatemonitoringgui.controller.mainscene;
-import it.uninsubria.climatemonitoringgui.MainWindow;
-import it.uninsubria.climatemonitoringgui.controller.scene.SceneController;
+package it.uninsubria.controller.mainscene;
+import it.uninsubria.MainWindow;
+import it.uninsubria.controller.scene.SceneController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

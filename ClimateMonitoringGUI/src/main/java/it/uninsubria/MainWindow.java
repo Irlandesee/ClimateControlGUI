@@ -1,4 +1,4 @@
-package it.uninsubria.climatemonitoringgui;
+package it.uninsubria;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

@@ -13,7 +13,7 @@
 <?import javafx.scene.chart.LineChart?>
 <BorderPane xmlns="http://javafx.com/javafx/17.02.2-ea"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="it.uninsubria.climatemonitoringgui.controller.mainscene.MainWindowController"
+            fx:controller="it.uninsubria.controller.mainscene.MainWindowController"
             fx:id="borderPane">
     <top>
         <BorderPane styleClass="header-section">
