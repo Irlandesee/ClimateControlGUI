@@ -1,4 +1,6 @@
-package it.uninsubria.climatemonitoringgui;
+package it.uninsubria.climatemonitoringgui.controller.mainscene;
+import it.uninsubria.climatemonitoringgui.MainWindow;
+import it.uninsubria.climatemonitoringgui.controller.scene.SceneController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -46,17 +48,6 @@ public class MainWindowController{
     private DatePicker endDatePicker;
     private Button btnRicercaPC;
 
-    //per inserimento
-    private DatePicker pubdate;
-    private TextField ventoField;
-    private TextField umiditaField;
-    private TextField pressioneField;
-    private TextField precipitazioniField;
-    private TextField tempField;
-    private TextField altGhiacciaiField;
-    private TextField massaGhiacciaiField;
-
-    private Button inserisciPC;
 
     //per centro monitoraggio
     private TextField nomeCentroField;
@@ -64,6 +55,7 @@ public class MainWindowController{
     private TextField statoCMField;
     private TextField areaInteresseCMField;
     private Button inserisciCM;
+    private Button clearCM;
 
     //per operatore
     private TextField nomeOp;
@@ -142,8 +134,13 @@ public class MainWindowController{
 
     @FXML
     public void login(ActionEvent actionEvent) {
-        try {
-            sceneController.switchToLoginScene(actionEvent);
+        try{
+            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/login-scene.fxml")); //watch out for this line of code
+            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            Stage registrazioneStage = new Stage();
+            Scene scene = new Scene(root);
+            registrazioneStage.setScene(scene);
+            registrazioneStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
@@ -285,13 +282,22 @@ public class MainWindowController{
 
     public void inserisciParametriClimatici(ActionEvent actionEvent) {
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("parametro_climatico-scene.fxml")); //watch out for this line of code
+            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml")); //watch out for this line of code
+
             //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             Stage pcStage = new Stage();
             Scene scene = new Scene(root);
             pcStage.setScene(scene);
             pcStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
+    }
+
+    public void executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
+        System.out.println(nomeArea+centroMon);
+    }
+
+    public void executeRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
+        System.out.println(nomeOp+cognomeOp+codFisc);
     }
 
     public void inserisciCentroMonitoraggio(ActionEvent actionEvent) {
@@ -306,6 +312,8 @@ public class MainWindowController{
         areaInteresseCMField.setOnMouseClicked((event) -> areaInteresseCMField.clear());
         inserisciCM = new Button("Inserisci CM");
         inserisciCM.setOnAction((event) -> inserisciCM());
+        clearCM = new Button("Pulisci");
+        clearCM.setOnAction((event) -> clearCMFields());
 
         LinkedList<Node> nodesToAdd = new LinkedList<Node>();
         nodesToAdd.add(nomeCentroField);
@@ -313,6 +321,7 @@ public class MainWindowController{
         nodesToAdd.add(statoCMField);
         nodesToAdd.add(areaInteresseCMField);
         nodesToAdd.add(inserisciCM);
+        nodesToAdd.add(clearCM);
 
         addNodesToParamBox(nodesToAdd);
 
@@ -320,29 +329,38 @@ public class MainWindowController{
 
     }
 
+    private void clearCMFields(){
+        nomeCentroField.clear();
+        comuneField.clear();
+        statoCMField.clear();
+        areaInteresseCMField.clear();
+    }
+
     private void inserisciCM(){
-        //TODO
         String nomeCentro = nomeCentroField.getText();
         String comuneCentro = comuneField.getText();
         String statoCentro = statoCMField.getText();
         //Area interesse è campo particolare, si possono inserire una quantita
-        //indefinita di aree di interesse
+        //indefinita di aree di interesse -> si cancella in automatico
+        //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
         String areaInteresseCentro = areaInteresseCMField.getText();
 
         if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){cmAlert.showAndWait();}
 
-        String query = nomeCentro + comuneCentro + statoCentro;
+        areaInteresseCMField.clear();
+        String query = nomeCentro + comuneCentro + statoCentro + areaInteresseCentro;
         System.out.println(query);
 
     }
 
     public void registraOperatore(ActionEvent actionEvent) {
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("registrazione-scene.fxml")); //watch out for this line of code
-            Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml")); //watch out for this line of code
+            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            Stage registrazioneStage = new Stage();
             Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            registrazioneStage.setScene(scene);
+            registrazioneStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 

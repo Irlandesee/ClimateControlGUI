@@ -1,5 +1,6 @@
-package it.uninsubria.climatemonitoringgui;
+package it.uninsubria.climatemonitoringgui.controller.parametroclimatico;
 
+import it.uninsubria.climatemonitoringgui.controller.scene.SceneController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -8,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import java.time.LocalDate;
 
@@ -34,7 +34,8 @@ public class ParametroClimaticoController {
     public TextField notaMassaField;
     public Button cancelButton;
     public Button InserisciPC;
-    
+    public Button clearButton;
+
     private Alert nomeOrCentroError;
     private Alert invalidDateError;
     private Alert pcAlert;
@@ -156,9 +157,40 @@ public class ParametroClimaticoController {
         notes[5] = notaAltGhiacciai;
         notes[6] = notaMassaGhiacciai;
 
-        
+        //query the db
+        try {
+            SceneController
+                    .getMainSceneController()
+                    .executeInsertPCQuery(nomeArea, centroMon, pubdate, paramValues, notes);
+        }catch(NullPointerException npe){System.out.println("NullPointerException while executing insertPC query");}
+        clearValoriFields();
+    }
 
+    private void clearValoriFields(){
+        ventoField.clear();
+        notaVentoField.clear();
+        umiditaField.clear();
+        notaUmiditaField.clear();
+        pressioneField.clear();
+        notaPressioneField.clear();
+        precipitazioniField.clear();
+        notaPrecipitazioniField.clear();
+        temperaturaField.clear();
+        notaTemperaturaField.clear();
+        altGhiacciaiField.clear();
+        notaAltGhiacciaiField.clear();
+        massaField.clear();
+        notaMassaField.clear();
 
+    }
+
+    @FXML
+    private void clearAllFields(){
+        areaInteresseField.clear();
+        cmField.clear();
+        pubDate.getEditor().clear();
+        pubDate.setValue(null);
+        clearValoriFields();
     }
 
 

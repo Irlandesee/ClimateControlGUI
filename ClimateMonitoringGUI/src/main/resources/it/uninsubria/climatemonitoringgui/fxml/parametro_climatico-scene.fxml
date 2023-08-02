@@ -9,7 +9,7 @@
 <?import java.net.URL?>
 <GridPane xmlns="http://javafx.com/javafx"
           xmlns:fx="http://javafx.com/fxml"
-          fx:controller="it.uninsubria.climatemonitoringgui.ParametroClimaticoController"
+          fx:controller="it.uninsubria.climatemonitoringgui.controller.parametroclimatico.ParametroClimaticoController"
           prefHeight="400.0" prefWidth="600.0">
     <Label text="Nome area"
         GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -73,8 +73,11 @@
     <Button fx:id="InserisciPC" text="inserisci"
             GridPane.columnIndex="1" GridPane.rowIndex="10"
         onAction="#insericiPC"/>
+    <Button fx:id="clearButton" text="pulisci"
+            GridPane.columnIndex="2" GridPane.rowIndex="10"
+        onAction="#clearAllFields"/>
 
     <stylesheets>
-        <URL value="@stylesheets/parametro-climatico.css"/>
+        <URL value="@../stylesheets/parametro-climatico.css"/>
     </stylesheets>
 </GridPane>

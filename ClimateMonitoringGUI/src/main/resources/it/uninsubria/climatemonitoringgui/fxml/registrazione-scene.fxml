@@ -9,7 +9,7 @@
 <?import java.net.URL?>
 <GridPane
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="it.uninsubria.climatemonitoringgui.RegistrazioneController"
+            fx:controller="it.uninsubria.climatemonitoringgui.controller.registrazione.RegistrazioneController"
             prefHeight="600.0" prefWidth="400.0"
             alignment="CENTER" vgap="10" hgap="10">
             <Label text="Nome Operatore"
@@ -41,6 +41,6 @@
             <Button text="cancel" fx:id="cancelButton" onAction="#cancel"
                     GridPane.columnIndex="0" GridPane.rowIndex="6"/>
             <stylesheets>
-                <URL value="@stylesheets/registrazione.css"/>
+                <URL value="@../stylesheets/registrazione.css"/>
             </stylesheets>
 </GridPane>

@@ -12,4 +12,14 @@ module it.uninsubria.climatemonitoringgui {
 
     opens it.uninsubria.climatemonitoringgui to javafx.fxml;
     exports it.uninsubria.climatemonitoringgui;
+    exports it.uninsubria.climatemonitoringgui.controller.loginview;
+    opens it.uninsubria.climatemonitoringgui.controller.loginview to javafx.fxml;
+    exports it.uninsubria.climatemonitoringgui.controller.registrazione;
+    opens it.uninsubria.climatemonitoringgui.controller.registrazione to javafx.fxml;
+    exports it.uninsubria.climatemonitoringgui.controller.scene;
+    opens it.uninsubria.climatemonitoringgui.controller.scene to javafx.fxml;
+    exports it.uninsubria.climatemonitoringgui.controller.parametroclimatico;
+    opens it.uninsubria.climatemonitoringgui.controller.parametroclimatico to javafx.fxml;
+    exports it.uninsubria.climatemonitoringgui.controller.mainscene;
+    opens it.uninsubria.climatemonitoringgui.controller.mainscene to javafx.fxml;
 }

@@ -9,9 +9,9 @@ import java.io.IOException;
 public class MainWindow extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("main-scene.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 800, 480);
-        stage.setTitle("Hello!");
+        stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();
     }
