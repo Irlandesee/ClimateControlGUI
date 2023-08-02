@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<GridPane
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="it.uninsubria.climatemonitoringgui.RegistrazioneController"
+            prefHeight="600.0" prefWidth="400.0"
+            alignment="CENTER" vgap="10" hgap="10">
+            <Label text="Nome Operatore"
+                GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="nomeOpField"
+                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Cognome Operatore"
+                GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="cognomeField"
+                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="codice fiscale"
+                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="codFiscaleField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="email"
+                   GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <TextField fx:id="emailField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Label text="password"
+                   GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <PasswordField fx:id="passwordField"
+                           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Label text="Centro Afferenza"
+                    GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <TextField fx:id="centroField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+            <Button text="registra" fx:id="btnRegistra" onAction="#registraOp"
+                GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"/>
+            <stylesheets>
+                <URL value="@stylesheets/registrazione.css"/>
+            </stylesheets>
+</GridPane>
