@@ -9,6 +9,8 @@ module it.uninsubria.climatemonitoringgui {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires org.postgresql.jdbc;
+    requires java.sql;
 
     opens it.uninsubria to javafx.fxml;
     exports it.uninsubria;
