@@ -7,6 +7,7 @@ import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 import it.uninsubria.util.Item;
 
+import javax.sound.sampled.Line;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -69,46 +70,55 @@ public class QueryHandler{
                 LinkedList<String> res = w.selectObjFromPCWithCond(oggetto, fieldCond, cond);
                 res.forEach(System.out::println);
             }
+            //default -> {return null;}
         }
 
     }
 
-    public void selectAllWithCond(tables table, String fieldCond, String cond){
+    public <T> LinkedList<T> selectAllWithCond(tables table, String fieldCond, String cond){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
                 LinkedList<City> cities = w.selectAllFromCityWithCond(fieldCond, cond);
-                cities.forEach(System.out::println);
+                //cities.forEach(System.out::println);
+                return (LinkedList<T>) cities;
             }
             case CENTRO_MONITORAGGIO -> {
                 Worker w = new Worker(dbUrl, props, "workerCM");
                 LinkedList<CentroMonitoraggio> cms = w.selectAllFromCMWithCond(fieldCond, cond);
-                cms.forEach(System.out::println);
+                //cms.forEach(System.out::println);
+                return (LinkedList<T>) cms;
             }
             case OPERATORE -> {
                 Worker w = new Worker(dbUrl, props, "workerOperatore");
                 LinkedList<Operatore> operatori = w.selectAllFromOpWithCond(fieldCond, cond);
-                operatori.forEach(System.out::println);
+                //operatori.forEach(System.out::println);
+                return (LinkedList<T>) operatori;
             }
             case OP_AUTORIZZATO -> {
                 Worker w = new Worker(dbUrl, props, "workerAuthOP");
                 LinkedList<OperatoreAutorizzato> operatoriAutorizzati = w.selectAllFromAuthOpWithCond(fieldCond, cond);
-                operatoriAutorizzati.forEach(System.out::println);
+                //operatoriAutorizzati.forEach(System.out::println);
+                return (LinkedList<T>) operatoriAutorizzati;
             }
             case AREA_INTERESSE -> {
                 Worker w = new Worker(dbUrl, props, "workerAI");
                 LinkedList<AreaInteresse> areeInteresse = w.selectAllFromAIWithCond(fieldCond, cond);
-                areeInteresse.forEach(System.out::println);
+                //areeInteresse.forEach(System.out::println);
+                return (LinkedList<T>) areeInteresse;
             }
             case NOTA_PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerNota");
                 //TODO
+                return null;
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPM");
                 LinkedList<ClimateParameter> cps = w.selectAllFromCPWithCond(fieldCond, cond);
-                cps.forEach(System.out::println);
+                //cps.forEach(System.out::println);
+                return (LinkedList<T>) cps;
             }
+            default -> {return null;}
         }
     }
 

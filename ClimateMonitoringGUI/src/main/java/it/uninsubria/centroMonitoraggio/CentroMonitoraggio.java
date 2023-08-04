@@ -2,7 +2,6 @@ package it.uninsubria.centroMonitoraggio;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class CentroMonitoraggio {
@@ -82,8 +81,8 @@ public class CentroMonitoraggio {
     }
 
     public boolean addAreaInteresse(AreaInteresse area){
-        if(!this.areeInteresse.containsKey(area.getAreaID())) {
-            this.areeInteresse.put(area.getAreaID(), area);
+        if(!this.areeInteresse.containsKey(area.getAreaid())) {
+            this.areeInteresse.put(area.getAreaid(), area);
             return true;
         }
         return false;

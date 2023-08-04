@@ -1,14 +1,11 @@
 package it.uninsubria.parametroClimatico;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.time.LocalDate;
 
 public class ClimateParameter {
 
-    private String parameterID;
+    private String parameterId;
     private String idCentro;
     private String areaInteresse;
     private LocalDate pubDate;
@@ -53,6 +50,14 @@ public class ClimateParameter {
 
     public static final short defaultValue = -1;
 
+    private short ventoValue;
+    private short umiditaValue;
+    private short pressioneValue;
+    private short precipitazioniValue;
+    private short temperaturaValue;
+    private short altitudineValue;
+    private short massaValue;
+
     private String ventoNotes;
     private String umiditaNotes;
     private String pressioneNotes;
@@ -65,7 +70,7 @@ public class ClimateParameter {
     private HashMap<String, String> paramNotes;
 
     public ClimateParameter(String parameterID){
-        this.parameterID = parameterID;
+        this.parameterId = parameterID;
         this.paramValues = new HashMap<String, Short>();
         this.initParamValues();
     }
@@ -73,7 +78,7 @@ public class ClimateParameter {
     public ClimateParameter(String parameterID, String idCentro
             , String areaInteresse
             , LocalDate pubDate){
-        this.parameterID = parameterID;
+        this.parameterId = parameterID;
         this.idCentro = idCentro;
         this.areaInteresse = areaInteresse;
         this.pubDate = pubDate;
@@ -119,8 +124,8 @@ public class ClimateParameter {
         return false;
     }
 
-    public String getCpID(){
-        return this.parameterID;
+    public String getParameterId(){
+        return this.parameterId;
     }
 
     public String getIdCentro() {
@@ -151,22 +156,62 @@ public class ClimateParameter {
         return notes;
     }
 
-    public void setNotes(String key, String notes) {
-        if(notes.isBlank() || notes.isEmpty()) throw new IllegalArgumentException(ERROR_STR_NOT_VALID);
-        else if(notes.length() > ClimateParameter.maxNoteLength) throw new IllegalArgumentException(ERROR_TOO_MANY_CHARS);
-        else{
-            switch(key){
-                case ClimateParameter.notaVento-> this.setVentoNotes(notes);
-                case ClimateParameter.notaUmidita-> this.setUmiditaNotes(notes);
-                case ClimateParameter.notaTemp -> this.setTempNotes(notes);
-                case ClimateParameter.notePrecipitazioni -> this.setPrecipitazioniNotes(notes);
-                case ClimateParameter.notaPressione-> this.setPressioneNotes(notes);
-                case ClimateParameter.noteAltGhiacciai-> this.setAltGhicciaiNotes(notes);
-                case ClimateParameter.noteMassaGhiacciai-> this.setMassaGhiacciaiNotes(notes);
-                default -> throw new IllegalArgumentException(ERROR_INVALID_KEY + "-> "+key);
-            }
-        }
+    public short getVentoValue() {
+        return ventoValue;
     }
+
+    public void setVentoValue(short ventoValue) {
+        this.ventoValue = ventoValue;
+    }
+
+    public short getUmiditaValue() {
+        return umiditaValue;
+    }
+
+    public void setUmiditaValue(short umiditaValue) {
+        this.umiditaValue = umiditaValue;
+    }
+
+    public short getPressioneValue() {
+        return pressioneValue;
+    }
+
+    public void setPressioneValue(short pressioneValue) {
+        this.pressioneValue = pressioneValue;
+    }
+
+    public short getTemperaturaValue() {
+        return temperaturaValue;
+    }
+
+    public short getPrecipitazioniValue() {
+        return precipitazioniValue;
+    }
+
+    public void setPrecipitazioniValue(short precipitazioniValue) {
+        this.precipitazioniValue = precipitazioniValue;
+    }
+
+    public void setTemperaturaValue(short temperaturaValue) {
+        this.temperaturaValue = temperaturaValue;
+    }
+
+    public short getAltitudineValue() {
+        return altitudineValue;
+    }
+
+    public void setAltitudineValue(short altitudineValue) {
+        this.altitudineValue = altitudineValue;
+    }
+
+    public short getMassaValue() {
+        return massaValue;
+    }
+
+    public void setMassaValue(short massaValue) {
+        this.massaValue = massaValue;
+    }
+
 
     public String getVentoNotes() {
         return ventoNotes;
@@ -219,57 +264,37 @@ public class ClimateParameter {
         this.massaGhiacciaiNotes = massaGhiacciaiNotes;
     }
 
-    public String getParameterID() {
-        return parameterID;
-    }
-
     //params1,...,paramN;
-    public String getParamValues() {
-        StringBuilder builder = new StringBuilder();
-        int i = 0;
-        for(Map.Entry<String, Short> tmp: paramValues.entrySet()){
-            if(i == paramValues.size() - 1)
-                builder.append(tmp.getKey())
-                        .append(ClimateParameter.paramKeySeparator) //:
-                        .append(tmp.getValue());
-            else
-                builder.append(tmp.getKey())
-                        .append(ClimateParameter.paramKeySeparator) //:
-                        .append(tmp.getValue())
-                        .append(ClimateParameter.generalParamSeparator); //,
-            i++;
-        }
-        return builder.toString();
-    }
-
-    public TreeMap<String, Short> getParamsSortedByKey(){
-        return new TreeMap<>(paramValues);
-    }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ClimateParameter that = (ClimateParameter) o;
-        return Objects.equals(parameterID, that.parameterID)
+        return Objects.equals(parameterId, that.parameterId)
                 && Objects.equals(pubDate, that.pubDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parameterID, pubDate);
+        return Objects.hash(parameterId, pubDate);
     }
 
     //centroID;areaInteresse;data;params1,paramN;note
     @Override
     public String toString(){
         StringBuilder builder = new StringBuilder();
-        builder.append(this.parameterID).append(ClimateParameter.generalSeparator)
+        builder.append(this.parameterId).append(ClimateParameter.generalSeparator)
                 .append(this.idCentro).append(ClimateParameter.generalSeparator)
                 .append(this.areaInteresse).append(ClimateParameter.generalSeparator)
                 .append(this.pubDate).append(ClimateParameter.generalSeparator)
-                .append(this.getParamValues()).append(ClimateParameter.generalSeparator)
+                .append(this.ventoValue).append(ClimateParameter.generalSeparator)
+                .append(this.umiditaValue).append(ClimateParameter.generalSeparator)
+                .append(this.pressioneValue).append(ClimateParameter.generalSeparator)
+                .append(this.temperaturaValue).append(ClimateParameter.generalSeparator)
+                .append(this.precipitazioniValue).append(ClimateParameter.generalSeparator)
+                .append(this.altitudineValue).append(ClimateParameter.generalSeparator)
+                .append(this.massaValue).append(ClimateParameter.generalSeparator)
                 .append(ClimateParameter.notaVento).append(": ").append(this.getVentoNotes()).append(ClimateParameter.generalSeparator)
                 .append(ClimateParameter.notaUmidita).append(": ").append(this.getUmiditaNotes()).append(ClimateParameter.generalSeparator)
                 .append(ClimateParameter.notaPressione).append(": ").append(this.getPressioneNotes()).append(ClimateParameter.generalSeparator)

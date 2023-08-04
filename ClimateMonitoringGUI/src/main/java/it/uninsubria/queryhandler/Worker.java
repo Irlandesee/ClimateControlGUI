@@ -31,6 +31,7 @@ public class Worker extends Thread{
 
     public ResultSet prepAndExecuteStatement(String query, String arg) throws SQLException{
         PreparedStatement stat = conn.prepareStatement(query);
+        System.out.println(stat);
         stat.setString(1, arg);
         return stat.executeQuery();
     }
@@ -130,6 +131,7 @@ public class Worker extends Thread{
 
     public LinkedList<ClimateParameter> selectAllFromCPWithCond(String fieldCond, String cond){
         String query = "select * from parametro_climatico where " + fieldCond + " = ?";
+        System.out.println(query);
         LinkedList<ClimateParameter> parametriClimatici = new LinkedList<ClimateParameter>();
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
@@ -139,6 +141,14 @@ public class Worker extends Thread{
                         res.getString("areaid"),
                         res.getDate("pubdate").toLocalDate()
                 );
+                cp.setVentoValue(res.getShort("valore_vento"));
+                cp.setUmiditaValue(res.getShort("valore_umidita"));
+                cp.setPressioneValue(res.getShort("valore_pressione"));
+                cp.setTemperaturaValue(res.getShort("valore_temperatura"));
+                cp.setPrecipitazioniValue(res.getShort("valore_precipitazioni"));
+                cp.setAltitudineValue(res.getShort("valore_alt_ghiacciai"));
+                cp.setMassaValue(res.getShort("valore_massa_ghiacciai"));
+
                 parametriClimatici.add(cp);
             }
         }catch(SQLException sqle){sqle.printStackTrace();}

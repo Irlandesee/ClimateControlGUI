@@ -1,6 +1,10 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
+import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.parametroClimatico.ClimateParameter;
+import it.uninsubria.queryhandler.QueryHandler;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,13 +14,19 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
+import java.awt.geom.Area;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class MainWindowController{
     public Button buttonRicercaAreaInteresse;
@@ -39,6 +49,7 @@ public class MainWindowController{
     private TextField tLatitudine;
     private TextField tLongitudine;
     private Button btnRicercaAreaPerDenom;
+    private Button btnRicercaAreaPerStato;
     private Button btnRicercaAreaCoord;
 
     //per visualizzazione parametri climatici
@@ -78,15 +89,23 @@ public class MainWindowController{
 
     private SceneController sceneController;
 
-    public void setLoggedInLabel(String text){
-        loggedInLabel.setText(text);
-    }
+    private QueryHandler queryHandler;
+
+    private final String url = "jdbc:postgresql://localhost/postgres";
+    private Properties props;
 
 
     @FXML
     private void initialize(){
         //Init the sceneController
         sceneController = new SceneController();
+
+
+        //init the query handler
+        props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "qwerty");
+        queryHandler = new QueryHandler(url, props);
 
         //line chart
         NumberAxis xAxis = new NumberAxis();
@@ -101,6 +120,9 @@ public class MainWindowController{
     }
 
     private void initAlerts(){
+        //init db connection
+
+
 
         this.denomAlert = new Alert(Alert.AlertType.ERROR);
         this.denomAlert.setHeaderText("Input non valido");
@@ -161,11 +183,14 @@ public class MainWindowController{
         this.tLongitudine = new TextField("longitudine");
         this.tLongitudine.setOnMouseClicked((event) -> {this.tLongitudine.clear();});
         this.btnRicercaAreaPerDenom = new Button("Ricerca per nome");
+        this.btnRicercaAreaPerStato = new Button("Ricerca per stato");
         this.btnRicercaAreaCoord = new Button("Ricerca Coord");
 
         this.btnRicercaAreaPerDenom.setOnAction(event -> {
             ricercaAreaPerDenom();
         });
+
+        btnRicercaAreaPerStato.setOnAction(event -> {ricercaAreaPerStato();});
 
         this.btnRicercaAreaCoord.setOnAction(event -> {ricercaPerCoord();});
 
@@ -176,6 +201,7 @@ public class MainWindowController{
         nodesToAdd.add(tLatitudine);
         nodesToAdd.add(tLongitudine);
         nodesToAdd.add(btnRicercaAreaPerDenom);
+        nodesToAdd.add(btnRicercaAreaPerStato);
         nodesToAdd.add(btnRicercaAreaCoord);
 
         addNodesToParamBox(nodesToAdd);
@@ -183,24 +209,50 @@ public class MainWindowController{
         this.borderPane.setRight(paramBox);
     }
 
-    private void ricercaAreaPerDenom(){
-        String denom = this.tDenominazione.getText();
-        String stato = this.tStato.getText();
-        String query;
+    private void prepTableAreaInteresse(){
+        TableColumn keyColumn = new TableColumn("areaID");
+        keyColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
+        TableColumn denomColumn = new TableColumn("denominazione");
+        denomColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<>("stato"));
+        TableColumn latColumn = new TableColumn("latitudine");
+        latColumn.setCellValueFactory(new PropertyValueFactory<>("latitudine"));
+        TableColumn longColumn = new TableColumn("longitudine");
+        longColumn.setCellValueFactory(new PropertyValueFactory<>("longitudine"));
 
-        if(denom.isEmpty() || denom.equals("nome")){
-            this.denomAlert.showAndWait();
-        }
-
-        if(!stato.isEmpty() && !(stato.equals("stato"))){
-            query = denom + stato;
-        }else{
-            //query the db without using stato
-            query = denom;
-        }
-        System.out.println(query);
+        tableView.getColumns().addAll(keyColumn, denomColumn, countryColumn, latColumn, longColumn);
     }
 
+    private void ricercaAreaPerDenom(){
+        String denom = this.tDenominazione.getText();
+        prepTableAreaInteresse();
+        if(!denom.isEmpty() && !(denom.equals("nome"))){
+            LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
+            //res.forEach(System.out::println);
+            res.forEach((areaInteresse -> {
+                tableView.getItems().add(areaInteresse);
+            }));
+        }
+        else{
+            denomAlert.showAndWait();
+        }
+    }
+
+    private void ricercaAreaPerStato(){
+        String stato = this.tStato.getText();
+        prepTableAreaInteresse();
+        if(!stato.isEmpty() && !(stato.equals("stato"))){
+            LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
+            res.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
+            res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+        }else{
+            statoAlert.showAndWait();
+        }
+
+    }
+
+    //TODO
     private void ricercaPerCoord(){
         String stato = this.tStato.getText();
         String longi = this.tLongitudine.getText();
@@ -247,6 +299,32 @@ public class MainWindowController{
 
     }
 
+    private void prepTablePC(){
+        TableColumn keyColumn = new TableColumn("parameterId");
+        keyColumn.setCellValueFactory(new PropertyValueFactory<>("parameterId"));;
+        TableColumn centroColumn = new TableColumn("idCentro");
+        centroColumn.setCellValueFactory(new PropertyValueFactory<>("idCentro"));
+        TableColumn areaColumn = new TableColumn("areaInteresse");
+        areaColumn.setCellValueFactory(new PropertyValueFactory<>("areaInteresse"));
+        TableColumn dateColumn = new TableColumn("pubDate");
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("pubDate"));
+        TableColumn ventoColumn = new TableColumn("ventoValue");
+        ventoColumn.setCellValueFactory(new PropertyValueFactory<>("ventoValue"));
+        TableColumn umiditaColumn = new TableColumn("umiditaValue");
+        umiditaColumn.setCellValueFactory(new PropertyValueFactory<>("umiditaValue"));
+        TableColumn pressioneColumn = new TableColumn("pressioneValue");
+        pressioneColumn.setCellValueFactory(new PropertyValueFactory<>("pressioneValue"));
+        TableColumn temperaturaColumn = new TableColumn("temperaturaValue");
+        temperaturaColumn.setCellValueFactory(new PropertyValueFactory<>("temperaturaValue"));
+        TableColumn precipitazioniColumn = new TableColumn("precipitazioniValue");
+        precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<>("precipitazioniValue"));
+        TableColumn altitudineColumn = new TableColumn("altitudineValue");
+        altitudineColumn.setCellValueFactory(new PropertyValueFactory<>("altitudineValue"));
+        TableColumn massaColumn = new TableColumn("massaValue");
+        massaColumn.setCellValueFactory(new PropertyValueFactory<>("massaValue"));
+
+    }
+
     private void visualizzaPC(){
         String areaInteresseCercata = tAreaInteresse.getText();
         String centroMonitoraggioCercato = tCentroMonitoraggio.getText();
@@ -254,29 +332,24 @@ public class MainWindowController{
         LocalDate endDateTmp = LocalDate.of(2100, 1, 1);
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
+        prepTablePC();
 
         if(areaInteresseCercata.isEmpty()){
             this.areaInteresseAlert.showAndWait();
         }
-        if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp))
+        if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp) || startDate.isEqual(endDate))
             this.invalidDateAlert.showAndWait();
 
+        LinkedList<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
+        areeInteresse= queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", areaInteresseCercata);
+        String areaID = areeInteresse.pop().getAreaid();
+        LinkedList<ClimateParameter> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, areaID, areaID);
         if(!centroMonitoraggioCercato.isEmpty()){
-            if(!startDate.isEqual(endDate)) {
-                String params = areaInteresseCercata + centroMonitoraggioCercato + startDate + endDate;
-                System.out.println(params);
-            }else{
-                String params = areaInteresseCercata + centroMonitoraggioCercato + startDate;
-                System.out.println(params);
-            }
+            //filtro via i risultati non appertenti al cm cercato
         }else{//Formulo query senza centromonitoraggio
-            if(!startDate.isEqual(endDate)){
-                String params = areaInteresseCercata + startDate + endDate;
-                System.out.println(params);
-            }else{
-                String params = areaInteresseCercata + startDate;
-                System.out.println(params);
-            }
+            parametriClimatici.forEach((pc) -> {
+                tableView.getItems().add(pc);
+            });
         }
     }
 
