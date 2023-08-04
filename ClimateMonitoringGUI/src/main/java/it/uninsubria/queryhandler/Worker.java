@@ -133,6 +133,10 @@ public class Worker extends Thread{
         String query = "select * from parametro_climatico where " + fieldCond + " = ?";
         System.out.println(query);
         LinkedList<ClimateParameter> parametriClimatici = new LinkedList<ClimateParameter>();
+        //PSQLexception syntax error:
+        //la stringa passata: 1d8f7ab7844876d77567872d719ef819
+        //ERROR: syntax error at or near "d8f7ab7844876d77567872d719ef819" Posizione: 42
+        //Dove è finito il primo 1?
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
                 ClimateParameter cp = new ClimateParameter(
