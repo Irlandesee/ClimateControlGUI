@@ -10,6 +10,7 @@ import it.uninsubria.util.Item;
 import javax.sound.sampled.Line;
 import java.sql.*;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -73,6 +74,46 @@ public class QueryHandler{
             //default -> {return null;}
         }
 
+    }
+
+    public <T> List<T> selectAll(tables table){
+        switch(table){
+            case CITY -> {
+                Worker w = new Worker(dbUrl, props, "workerCity");
+                List<T> cities = w.selectAllFromTable(tables.CITY);
+                return cities;
+            }
+            case CENTRO_MONITORAGGIO -> {
+                Worker w = new Worker(dbUrl, props, "workerCM");
+                List<T> cms =  w.selectAllFromTable(tables.CENTRO_MONITORAGGIO);
+                return cms;
+            }
+            case OPERATORE -> {
+                Worker w = new Worker(dbUrl, props, "workerOP");
+                List<T> ops = w.selectAllFromTable(tables.OPERATORE);
+                return ops;
+            }
+            case OP_AUTORIZZATO -> {
+                Worker w = new Worker(dbUrl, props, "workerAuthOp");
+                List<T> authOps = w.selectAllFromTable(tables.OP_AUTORIZZATO);
+                return authOps;
+            }
+            case AREA_INTERESSE -> {
+                Worker w = new Worker(dbUrl, props, "workerAI");
+                List<T> ais = w.selectAllFromTable(tables.AREA_INTERESSE);
+                return ais;
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case PARAM_CLIMATICO -> {
+                Worker w = new Worker(dbUrl, props, "workerPC") ;
+                List<T> pcs = w.selectAllFromTable(tables.PARAM_CLIMATICO);
+                return pcs;
+            }
+            default -> {return null;}
+        }
     }
 
     public <T> LinkedList<T> selectAllWithCond(tables table, String fieldCond, String cond){

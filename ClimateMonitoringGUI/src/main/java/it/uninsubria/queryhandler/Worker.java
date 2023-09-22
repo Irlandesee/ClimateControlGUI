@@ -7,8 +7,10 @@ import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 
+import java.awt.geom.Area;
 import java.sql.*;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 public class Worker extends Thread{
@@ -133,10 +135,6 @@ public class Worker extends Thread{
         String query = "select * from parametro_climatico where " + fieldCond + " = ?";
         System.out.println(query);
         LinkedList<ClimateParameter> parametriClimatici = new LinkedList<ClimateParameter>();
-        //PSQLexception syntax error:
-        //la stringa passata: 1d8f7ab7844876d77567872d719ef819
-        //ERROR: syntax error at or near "d8f7ab7844876d77567872d719ef819" Posizione: 42
-        //Dove è finito il primo 1?
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
                 ClimateParameter cp = new ClimateParameter(
@@ -203,5 +201,85 @@ public class Worker extends Thread{
         String query = "select " +oggetto+ " from parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
-
+    
+    public <T> List<T> selectAllFromTable(QueryHandler.tables table){
+        switch (table){
+            case CITY -> {
+                List<City> res = new LinkedList<City>();
+                String query = "select * from city";
+                try{
+                    PreparedStatement stat = conn.prepareStatement(query);
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        City c = new City(
+                                rSet.getString("geoname_id"),
+                                rSet.getString("ascii_name"),
+                                rSet.getString("country"),
+                                rSet.getString("country_code"),
+                                rSet.getFloat("latitude"),
+                                rSet.getFloat("longitude")
+                        );
+                        res.add(c);
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace();}
+                return (List<T>) res;
+            }
+            case CENTRO_MONITORAGGIO -> {
+                List<CentroMonitoraggio> res = new LinkedList<CentroMonitoraggio>();
+                String query = "select * from centro_monitoraggio";
+                try{
+                    PreparedStatement stat = conn.prepareStatement(query);
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        CentroMonitoraggio cm = new CentroMonitoraggio(
+                                rSet.getString("centroid"),
+                                rSet.getString("nomecentro"),
+                                rSet.getString("comune"),
+                                rSet.getString("country")
+                        );
+                        String[] areeInteresseAssociate = (String[]) rSet.getArray("aree_interesse_ids").getArray();
+                        //String[] areeInteresseAssociate = (String[])tmp.getArray();
+                        for(String id : areeInteresseAssociate)
+                            cm.putAreaId(id);
+                        res.add(cm);
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace();}
+                return (List<T>) res;
+            }
+            case OPERATORE -> {
+                //TODO
+                return null;
+            }
+            case OP_AUTORIZZATO -> {
+                //TODO
+                return null;
+            }
+            case PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case AREA_INTERESSE -> {
+                List<AreaInteresse> res = new LinkedList<AreaInteresse>();
+                String query = "select * from area_interesse";
+                try {
+                    PreparedStatement stat = conn.prepareStatement(query);
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        AreaInteresse ai = new AreaInteresse(rSet.getString("areaid"),
+                                rSet.getString("denominazione"),
+                                rSet.getString("stato"),
+                                rSet.getFloat("latitudine"),
+                                rSet.getFloat("longitudine"));
+                        res.add(ai);
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace();}
+                return (List<T>) res;
+            }
+            default -> {return null;}
+        }
+    }
 }

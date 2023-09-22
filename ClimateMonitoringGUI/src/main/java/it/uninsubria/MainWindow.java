@@ -1,10 +1,15 @@
 package it.uninsubria;
+import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.city.City;
+import it.uninsubria.queryhandler.QueryHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import java.util.List;
+import java.util.LinkedList;
 import java.io.IOException;
+import java.util.Properties;
 
 public class MainWindow extends Application {
     @Override
@@ -17,6 +22,7 @@ public class MainWindow extends Application {
     }
 
     public static void main(String[] args) {
+
         launch();
     }
 }

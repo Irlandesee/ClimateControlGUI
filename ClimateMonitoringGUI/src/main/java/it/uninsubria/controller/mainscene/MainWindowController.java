@@ -1,7 +1,9 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.collections.ObservableList;
@@ -41,7 +43,6 @@ public class MainWindowController{
 
     public VBox contentBox;
     public VBox paramBox;
-    public Label loggedInLabel;
 
     //per area interesse
     private TextField tDenominazione;
@@ -107,22 +108,16 @@ public class MainWindowController{
         props.setProperty("password", "qwerty");
         queryHandler = new QueryHandler(url, props);
 
-        //line chart
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Num items");
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("time");
+        //show aree interesse presenti
+        showAreeInserite();
 
-        LineChart lineChart = new LineChart(xAxis, yAxis);
-        contentBox.getChildren().add(lineChart);
+        //line chart
+        contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
 
         initAlerts();
     }
 
     private void initAlerts(){
-        //init db connection
-
-
 
         this.denomAlert = new Alert(Alert.AlertType.ERROR);
         this.denomAlert.setHeaderText("Input non valido");
@@ -224,12 +219,20 @@ public class MainWindowController{
         tableView.getColumns().addAll(keyColumn, denomColumn, countryColumn, latColumn, longColumn);
     }
 
+    private void showAreeInserite(){
+        prepTableAreaInteresse();
+        List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+        res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+    }
+
     private void ricercaAreaPerDenom(){
         String denom = this.tDenominazione.getText();
         prepTableAreaInteresse();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
             LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
+
             //res.forEach(System.out::println);
+            tableView.getItems().clear();
             res.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
             }));
@@ -336,27 +339,43 @@ public class MainWindowController{
 
         if(areaInteresseCercata.isEmpty()){
             this.areaInteresseAlert.showAndWait();
-        }
+        }//TODO: add check dates != null
         if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp) || startDate.isEqual(endDate))
             this.invalidDateAlert.showAndWait();
 
+        LinkedList<CentroMonitoraggio> cms = new LinkedList<>();
         LinkedList<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
-        areeInteresse= queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", areaInteresseCercata);
+        areeInteresse = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", areaInteresseCercata);
         String areaID = areeInteresse.pop().getAreaid();
-        LinkedList<ClimateParameter> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, areaID, areaID);
+        LinkedList<ClimateParameter> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaID);
         if(!centroMonitoraggioCercato.isEmpty()){
-            //filtro via i risultati non appertenti al cm cercato
-        }else{//Formulo query senza centromonitoraggio
-            parametriClimatici.forEach((pc) -> {
-                tableView.getItems().add(pc);
-            });
+            if(!centroMonitoraggioCercato.equals("CentroMonitoraggio")){
+                cms = queryHandler.selectAllWithCond(QueryHandler.tables.CENTRO_MONITORAGGIO, "nomecentro", centroMonitoraggioCercato);
+                String centroCercatoId = cms.pop().getCentroID();
+                //filtro via i risultati non appertenti al cm cercato
+                tableView.getItems().clear();
+                parametriClimatici.forEach((pc) -> {
+                    parametriClimatici.removeIf((id) -> !pc.getIdCentro().equals(centroCercatoId));
+                    tableView.getItems().add(pc);
+                });
+            }else{//Formulo query senza centromonitoraggio
+                tableView.getItems().clear();
+                parametriClimatici.forEach((pc) -> {
+                    tableView.getItems().add(pc);
+                });
+            }
         }
     }
+
+    /**
+     * select ai.denominazione, cm.nomecentro, pc.pubdate, pc.valore_vento, pc.valore_umidita, pc.valore_pressione, pc.valore_temperatura, pc.valore_alt_ghiacciai, pc.valore_massa_ghiacciai
+     * from parametro_climatico pc join centro_monitoraggio cm on pc.idcentro = cm.centroid join area_interesse ai on pc.areaid = ai.areaid
+     * where pc.pubdate > '2011-1-1' and pc.pubdate < '2021-1-1'
+     */
 
     public void inserisciParametriClimatici(ActionEvent actionEvent) {
         try{
             Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml")); //watch out for this line of code
-
             //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             Stage pcStage = new Stage();
             Scene scene = new Scene(root);
@@ -366,11 +385,11 @@ public class MainWindowController{
     }
 
     public void executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
-        System.out.println(nomeArea+centroMon);
+        //TODO
     }
 
     public void executeRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
-        System.out.println(nomeOp+cognomeOp+codFisc);
+        //TODO
     }
 
     public void inserisciCentroMonitoraggio(ActionEvent actionEvent) {
@@ -421,9 +440,7 @@ public class MainWindowController{
         if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){cmAlert.showAndWait();}
 
         areaInteresseCMField.clear();
-        String query = nomeCentro + comuneCentro + statoCentro + areaInteresseCentro;
-        System.out.println(query);
-
+        //TODO
     }
 
     public void registraOperatore(ActionEvent actionEvent) {

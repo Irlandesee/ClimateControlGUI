@@ -2,6 +2,7 @@ package it.uninsubria.centroMonitoraggio;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Objects;
 
 public class CentroMonitoraggio {
@@ -13,6 +14,9 @@ public class CentroMonitoraggio {
 
     //key: String => areaID
     private HashMap<String, AreaInteresse> areeInteresse;
+
+    //contiene solo gli id delle aree interesse associate
+    private LinkedList<String> areeInteresseIdAssociate;
 
     final String emptyAreeInteresse = "empty";
     final String generalSeparator = ";";
@@ -30,6 +34,7 @@ public class CentroMonitoraggio {
         this.comune = comune;
         this.country = country;
         this.areeInteresse = new HashMap<String, AreaInteresse>();
+        this.areeInteresseIdAssociate = new LinkedList<String>();
     }
 
     public String getCentroID() {
@@ -75,6 +80,14 @@ public class CentroMonitoraggio {
         return true;
     }
 
+    public void putAreaId(String areaID){
+        if(!areeInteresseIdAssociate.contains(areaID))
+            areeInteresseIdAssociate.add(areaID);
+        else{
+            System.out.println("CM contenente già id");
+        }
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(centroID, nomeCentro);
@@ -103,9 +116,9 @@ public class CentroMonitoraggio {
                 .append(comune).append(generalSeparator)
                 .append(country).append(generalSeparator);
 
-        if(areeInteresse.isEmpty()) builder.append(emptyAreeInteresse);
+        if(areeInteresseIdAssociate.isEmpty()) builder.append(emptyAreeInteresse);
         else{
-            for (String tmp : areeInteresse.keySet()) //append the keys
+            for (String tmp : areeInteresseIdAssociate) //append the keys
                 builder.append(tmp).append(areeSeparator);
         }
         return builder.toString();
