@@ -1,6 +1,7 @@
 package it.uninsubria.controller.loginview;
 
 import it.uninsubria.MainWindow;
+import it.uninsubria.controller.scene.SceneController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,12 +24,17 @@ public class LoginViewController {
     public Button cancelButton;
 
     private Alert invalidUserNameOrPassword;
+    private Alert loggedIn;
 
     @FXML
     public void initialize(){
         invalidUserNameOrPassword = new Alert(Alert.AlertType.ERROR);
         invalidUserNameOrPassword.setHeaderText("Login Error");
         invalidUserNameOrPassword.setContentText("Invalid user name or password");
+
+        loggedIn = new Alert(Alert.AlertType.CONFIRMATION);
+        loggedIn.setHeaderText("Logged In");
+        loggedIn.setContentText("Logged in successfully");
     }
 
 
@@ -49,6 +55,21 @@ public class LoginViewController {
         else{
             String query = userID + password;
             System.out.println(query);
+            try{
+                boolean loggedIN = SceneController
+                        .getMainSceneController()
+                        .executeLoginQuery(userID, password);
+                if(loggedIN) {
+                    loggedIn.showAndWait();
+                    Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
+                    if(s != null)
+                        s.close();
+
+                }else{
+                    invalidUserNameOrPassword.showAndWait();
+                }
+
+            }catch(NullPointerException npe){npe.printStackTrace();}
         }
     }
 

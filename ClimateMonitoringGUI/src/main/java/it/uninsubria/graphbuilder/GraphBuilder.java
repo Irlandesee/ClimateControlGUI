@@ -48,7 +48,6 @@ public class GraphBuilder {
         yAxis.setTickUnit(1);
         xAxis.setLabel("Mese");
         yAxis.setLabel("Valore");
-        //Creating wind chart
         final LineChart<String, Number> lineChart =
                 new LineChart<String, Number>(xAxis, yAxis);
 

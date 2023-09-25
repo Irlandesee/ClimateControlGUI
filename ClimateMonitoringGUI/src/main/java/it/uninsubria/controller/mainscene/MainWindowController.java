@@ -4,6 +4,7 @@ import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
+import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.collections.ObservableList;
@@ -257,7 +258,6 @@ public class MainWindowController{
 
     //TODO
     private void ricercaPerCoord(){
-        String stato = this.tStato.getText();
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
         String query;
@@ -267,14 +267,8 @@ public class MainWindowController{
         }else{
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
-            if(stato.isEmpty()){//Query the db without using stato
-                query = lo + ":" +la;
-                System.out.println(query);
-            }
-            else{
-                query = lo + ":" +la + "=" +stato;
-                System.out.println(query);
-            }
+            //Sperical law of cosines?
+
         }
 
     }
@@ -386,6 +380,16 @@ public class MainWindowController{
 
     public void executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
         //TODO
+    }
+
+    public boolean executeLoginQuery(String userID, String password){
+        List<Operatore> operatori = queryHandler.selectAll(QueryHandler.tables.OPERATORE);
+        boolean loggedIN = false;
+        for(Operatore op : operatori)
+            if(op.getUserID().equals(userID) && op.getPassword().equals(password))
+                loggedIN = true;
+
+        return loggedIN;
     }
 
     public void executeRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){

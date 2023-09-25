@@ -1,5 +1,6 @@
 package it.uninsubria.controller.scene;
 
+import it.uninsubria.MainWindow;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
@@ -12,12 +13,8 @@ import java.io.IOException;
 
 
 public class SceneController {
-    private Stage stage;
-    private Scene scene;
-    private Parent root;
-
     public static LoginViewController getLoginSceneController(){
-        FXMLLoader loader = new FXMLLoader(SceneController.class.getResource("fxml/login-scene.fxml"));
+        FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
         try {
             Parent root = loader.load();
             return loader.getController();
@@ -25,7 +22,7 @@ public class SceneController {
     }
 
     public static MainWindowController getMainSceneController(){
-        FXMLLoader loader = new FXMLLoader(SceneController.class.getResource("fxml/main-scene.fxml"));
+        FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
         try{
             Parent root = loader.load();
             return loader.getController();
@@ -33,7 +30,7 @@ public class SceneController {
     }
 
     public static RegistrazioneController getRegistrazioneController(){
-        FXMLLoader loader = new FXMLLoader(SceneController.class.getResource("fxml/registrazione-scene.fxml"));
+        FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
         try{
             Parent root = loader.load();
             return loader.getController();

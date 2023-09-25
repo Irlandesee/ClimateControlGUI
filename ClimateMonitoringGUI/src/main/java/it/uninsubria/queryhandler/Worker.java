@@ -3,6 +3,7 @@ package it.uninsubria.queryhandler;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
+import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
@@ -247,8 +248,27 @@ public class Worker extends Thread{
                 return (List<T>) res;
             }
             case OPERATORE -> {
-                //TODO
-                return null;
+                List<Operatore> res = new LinkedList<Operatore>();
+                String query = "select * from operatore";
+                try{
+                    PreparedStatement stat = conn.prepareStatement(query);
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        Operatore o = new Operatore(
+                                rSet.getString("nome"),
+                                rSet.getString("cognome"),
+                                rSet.getString("codice_fiscale"),
+                                rSet.getString("email"),
+                                rSet.getString("userid"),
+                                rSet.getString("password"),
+                                rSet.getString("centroid")
+                        );
+                        System.out.println(o);
+                        res.add(o);
+                    }
+
+                }catch(SQLException sqle){sqle.printStackTrace();}
+                return (List<T>) res;
             }
             case OP_AUTORIZZATO -> {
                 //TODO
