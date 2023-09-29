@@ -202,6 +202,30 @@ public class Worker extends Thread{
         String query = "select " +oggetto+ " from parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
+
+    public Operatore executeLogin(String userID, String password){
+        String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userID, password);
+        System.out.println(query);
+        try{
+            PreparedStatement stat = conn.prepareStatement(query);
+            ResultSet rSet = stat.executeQuery();
+            rSet.next();
+            //expect 1 row ?
+            Operatore o = new Operatore(
+                    rSet.getString("nome"),
+                    rSet.getString("cognome"),
+                    rSet.getString("codice_fiscale"),
+                    rSet.getString("email"),
+                    rSet.getString("userid"),
+                    rSet.getString("password"),
+                    rSet.getString("centroid")
+            );
+            return o;
+        }catch(SQLException sqle){
+            sqle.printStackTrace();
+            return null;
+        }
+    }
     
     public <T> List<T> selectAllFromTable(QueryHandler.tables table){
         switch (table){
@@ -263,7 +287,6 @@ public class Worker extends Thread{
                                 rSet.getString("password"),
                                 rSet.getString("centroid")
                         );
-                        System.out.println(o);
                         res.add(o);
                     }
 

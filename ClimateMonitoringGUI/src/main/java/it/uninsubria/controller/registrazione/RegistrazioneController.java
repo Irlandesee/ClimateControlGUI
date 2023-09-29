@@ -22,6 +22,11 @@ public class RegistrazioneController {
 
     private Alert invalidFieldAlert;
 
+    private SceneController sceneController;
+    public RegistrazioneController(SceneController sceneController){
+        this.sceneController = sceneController;
+    }
+
     @FXML
     public void initialize(){
         invalidFieldAlert = new Alert(Alert.AlertType.ERROR);
@@ -44,9 +49,9 @@ public class RegistrazioneController {
         String query = nomeOp + cognomeOp + codFiscOp + email + password + centroAfferenza;
         System.out.println(query);
         try{
-            SceneController
-                    .getMainSceneController()
-                    .executeRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, email, password, centroAfferenza);
+            sceneController
+                    .getMainWindowController()
+                    .onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, email, password, centroAfferenza);
         }catch(NullPointerException npe){
             System.out.println("Null Pointer exception while executing registra op");
         }

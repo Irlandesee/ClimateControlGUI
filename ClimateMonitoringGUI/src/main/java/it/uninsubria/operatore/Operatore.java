@@ -79,7 +79,7 @@ public class Operatore {
 
     @Override
     public String toString(){
-        return this.nome + "," + this.cognome + "," + this.userID + "," + this.password + "," + this.email + this.codFiscale + "," + this.centroID;
+        return this.nome + "," + this.cognome + "," + this.userID + "," + this.password + "," + this.email+ "," + this.codFiscale + "," + this.centroID;
     }
 
 }

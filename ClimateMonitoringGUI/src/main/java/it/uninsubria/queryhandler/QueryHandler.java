@@ -163,5 +163,10 @@ public class QueryHandler{
         }
     }
 
+    public Operatore executeLogin(String userID, String password){
+        Worker w = new Worker(dbUrl, props, "workerLogin");
+        return w.executeLogin(userID, password);
+    }
+
 
 }

@@ -2,6 +2,7 @@ package it.uninsubria.controller.loginview;
 
 import it.uninsubria.MainWindow;
 import it.uninsubria.controller.scene.SceneController;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,6 +27,14 @@ public class LoginViewController {
     private Alert invalidUserNameOrPassword;
     private Alert loggedIn;
 
+    private boolean loggedIN;
+
+    private final SceneController sceneController;
+    public LoginViewController(SceneController sceneController){
+        this.sceneController = sceneController;
+
+    }
+
     @FXML
     public void initialize(){
         invalidUserNameOrPassword = new Alert(Alert.AlertType.ERROR);
@@ -40,31 +49,44 @@ public class LoginViewController {
 
     public void registra(ActionEvent actionEvent) {
         try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml")); //watch out for this line of code
-            Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
+            fxmlLoader.setController(sceneController.getRegistrazioneController());
+            Scene scene = new Scene(fxmlLoader.load(), 800, 400);
+            Stage registrazioneStage = (Stage)((Node) actionEvent
+                    .getSource())
+                    .getScene()
+                    .getWindow();
+            registrazioneStage.setScene(scene);
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
     public void login(ActionEvent actionEvent) {
         String userID = useridField.getText();
+        //TODO: hash the password for security reasons
         String password = passwordField.getText();
         if(userID.isEmpty() && password.isEmpty()) {invalidUserNameOrPassword.showAndWait();}
         else{
-            String query = userID + password;
-            System.out.println(query);
             try{
-                boolean loggedIN = SceneController
-                        .getMainSceneController()
-                        .executeLoginQuery(userID, password);
-                if(loggedIN) {
+                boolean loginQueryValue= sceneController
+                        .getMainWindowController()
+                        .onExecuteLoginQuery(userID, password);
+                if(loginQueryValue){
+                    //then switch to OperatoreView
                     loggedIn.showAndWait();
-                    Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
-                    if(s != null)
-                        s.close();
-
+                    Stage loginStage = (Stage)((Node) actionEvent
+                            .getSource())
+                            .getScene()
+                            .getWindow();
+                    if(loginStage != null) loginStage.close();
+                    try {
+                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
+                        fxmlLoader.setController(sceneController.getOperatoreViewController());
+                        Scene scene = new Scene(fxmlLoader.load(), 800, 480);
+                        Stage operatoreStage = new Stage();
+                        operatoreStage.setTitle("OperatoreView");
+                        operatoreStage.setScene(scene);
+                        operatoreStage.show();
+                    }catch(IOException ioe){ioe.printStackTrace();}
                 }else{
                     invalidUserNameOrPassword.showAndWait();
                 }
@@ -73,9 +95,11 @@ public class LoginViewController {
         }
     }
 
+
     public void cancel(ActionEvent actionEvent) {
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
         if(s != null)
             s.close();
     }
+
 }

@@ -39,6 +39,11 @@ public class ParametroClimaticoController {
     private Alert nomeOrCentroError;
     private Alert invalidDateError;
     private Alert pcAlert;
+
+    private SceneController sceneController;
+    public ParametroClimaticoController(SceneController sceneController){
+        this.sceneController = sceneController;
+    }
     
     @FXML
     public void initialize(){
@@ -159,8 +164,8 @@ public class ParametroClimaticoController {
 
         //query the db
         try {
-            SceneController
-                    .getMainSceneController()
+            sceneController
+                    .getOperatoreViewController()
                     .executeInsertPCQuery(nomeArea, centroMon, pubdate, paramValues, notes);
         }catch(NullPointerException npe){System.out.println("NullPointerException while executing insertPC query");}
         clearValoriFields();

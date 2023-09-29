@@ -2,41 +2,37 @@ package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.controller.loginview.LoginViewController;
+import it.uninsubria.controller.operatore.OperatoreViewController;
+import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
+import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.collections.ObservableList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
-import java.awt.geom.Area;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class MainWindowController{
     public Button buttonRicercaAreaInteresse;
     public Button buttonVisualizzaParametri;
-    public Button buttonInserisciParametri;
-    public Button buttonInserisciCentroMonitoraggio;
-    public Button buttonRegistraOp;
     public TableView tableView;
     public Button loginButton;
 
@@ -61,25 +57,6 @@ public class MainWindowController{
     private DatePicker endDatePicker;
     private Button btnRicercaPC;
 
-
-    //per centro monitoraggio
-    private TextField nomeCentroField;
-    private TextField comuneField;
-    private TextField statoCMField;
-    private TextField areaInteresseCMField;
-    private Button inserisciCM;
-    private Button clearCM;
-
-    //per operatore
-    private TextField nomeOp;
-    private TextField cognomeOp;
-    private TextField codFiscOp;
-    private TextField emailOp;
-    private TextField useridOp;
-    private PasswordField passwordOp;
-    private TextField centroID;
-    private Button btnRegistraOp;
-
     //alerts
     private Alert coordAlert;
     private Alert denomAlert;
@@ -89,18 +66,27 @@ public class MainWindowController{
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
-    private SceneController sceneController;
-
     private QueryHandler queryHandler;
 
     private final String url = "jdbc:postgresql://localhost/postgres";
     private Properties props;
 
+    //set login status to false
+    //private boolean loggedIN = false;
+    private BooleanProperty loggedIN;
 
-    @FXML
-    private void initialize(){
-        //Init the sceneController
-        sceneController = new SceneController();
+    private Stage mainWindowStage;
+    private SceneController sceneController;
+
+    public MainWindowController(){
+        //set up the controllers
+        sceneController = new SceneController(this);
+        sceneController.setLoginViewController(new LoginViewController(sceneController));
+        sceneController.setOperatoreViewController(new OperatoreViewController(sceneController));
+        sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
+        sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
+
+        loggedIN = new SimpleBooleanProperty(false);
 
 
         //init the query handler
@@ -109,13 +95,24 @@ public class MainWindowController{
         props.setProperty("password", "qwerty");
         queryHandler = new QueryHandler(url, props);
 
-        //show aree interesse presenti
-        showAreeInserite();
 
+        /**
+        loggedIN.addListener((listener, oldValue, newValue) -> sceneController
+                .getLoginViewController().setLoggedIn(newValue));
+         **/
+
+        initAlerts();
+
+
+    }
+
+    @FXML
+    public void initialize(){
+        //table view
+        showAreeInserite();
         //line chart
         contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
 
-        initAlerts();
     }
 
     private void initAlerts(){
@@ -153,12 +150,13 @@ public class MainWindowController{
     @FXML
     public void login(ActionEvent actionEvent) {
         try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/login-scene.fxml")); //watch out for this line of code
-            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
-            Stage registrazioneStage = new Stage();
-            Scene scene = new Scene(root);
-            registrazioneStage.setScene(scene);
-            registrazioneStage.show();
+            mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
+            fxmlLoader.setController(sceneController.getLoginViewController());
+            Stage loginStage = new Stage();
+            Scene scene = new Scene(fxmlLoader.load(), 400, 300);
+            loginStage.setScene(scene);
+            loginStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
@@ -361,101 +359,20 @@ public class MainWindowController{
         }
     }
 
-    /**
-     * select ai.denominazione, cm.nomecentro, pc.pubdate, pc.valore_vento, pc.valore_umidita, pc.valore_pressione, pc.valore_temperatura, pc.valore_alt_ghiacciai, pc.valore_massa_ghiacciai
-     * from parametro_climatico pc join centro_monitoraggio cm on pc.idcentro = cm.centroid join area_interesse ai on pc.areaid = ai.areaid
-     * where pc.pubdate > '2011-1-1' and pc.pubdate < '2021-1-1'
-     */
 
-    public void inserisciParametriClimatici(ActionEvent actionEvent) {
-        try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml")); //watch out for this line of code
-            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
-            Stage pcStage = new Stage();
-            Scene scene = new Scene(root);
-            pcStage.setScene(scene);
-            pcStage.show();
-        }catch(IOException ioe){ioe.printStackTrace();}
+    public boolean onExecuteLoginQuery(String userID, String password){
+        Operatore o = queryHandler.executeLogin(userID, password);
+        if(o != null){
+            mainWindowStage.close();
+            return true;
+        }
+        return false;
     }
 
-    public void executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
+
+    public void onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
         //TODO
     }
 
-    public boolean executeLoginQuery(String userID, String password){
-        List<Operatore> operatori = queryHandler.selectAll(QueryHandler.tables.OPERATORE);
-        boolean loggedIN = false;
-        for(Operatore op : operatori)
-            if(op.getUserID().equals(userID) && op.getPassword().equals(password))
-                loggedIN = true;
-
-        return loggedIN;
-    }
-
-    public void executeRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
-        //TODO
-    }
-
-    public void inserisciCentroMonitoraggio(ActionEvent actionEvent) {
-        this.paramBox = new VBox(10);
-        nomeCentroField = new TextField("Nome centro");
-        nomeCentroField.setOnMouseClicked((event) -> nomeCentroField.clear());
-        comuneField = new TextField("Comune centro");
-        comuneField.setOnMouseClicked((event) -> comuneField.clear());
-        statoCMField = new TextField("Stato centro");
-        statoCMField.setOnMouseClicked((event) -> statoCMField.clear());
-        areaInteresseCMField = new TextField("Area interesse");
-        areaInteresseCMField.setOnMouseClicked((event) -> areaInteresseCMField.clear());
-        inserisciCM = new Button("Inserisci CM");
-        inserisciCM.setOnAction((event) -> inserisciCM());
-        clearCM = new Button("Pulisci");
-        clearCM.setOnAction((event) -> clearCMFields());
-
-        LinkedList<Node> nodesToAdd = new LinkedList<Node>();
-        nodesToAdd.add(nomeCentroField);
-        nodesToAdd.add(comuneField);
-        nodesToAdd.add(statoCMField);
-        nodesToAdd.add(areaInteresseCMField);
-        nodesToAdd.add(inserisciCM);
-        nodesToAdd.add(clearCM);
-
-        addNodesToParamBox(nodesToAdd);
-
-        this.borderPane.setRight(paramBox);
-
-    }
-
-    private void clearCMFields(){
-        nomeCentroField.clear();
-        comuneField.clear();
-        statoCMField.clear();
-        areaInteresseCMField.clear();
-    }
-
-    private void inserisciCM(){
-        String nomeCentro = nomeCentroField.getText();
-        String comuneCentro = comuneField.getText();
-        String statoCentro = statoCMField.getText();
-        //Area interesse è campo particolare, si possono inserire una quantita
-        //indefinita di aree di interesse -> si cancella in automatico
-        //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
-        String areaInteresseCentro = areaInteresseCMField.getText();
-
-        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){cmAlert.showAndWait();}
-
-        areaInteresseCMField.clear();
-        //TODO
-    }
-
-    public void registraOperatore(ActionEvent actionEvent) {
-        try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml")); //watch out for this line of code
-            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
-            Stage registrazioneStage = new Stage();
-            Scene scene = new Scene(root);
-            registrazioneStage.setScene(scene);
-            registrazioneStage.show();
-        }catch(IOException ioe){ioe.printStackTrace();}
-    }
 
 }
