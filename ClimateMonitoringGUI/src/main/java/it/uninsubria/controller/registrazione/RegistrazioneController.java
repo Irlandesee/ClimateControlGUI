@@ -22,6 +22,7 @@ public class RegistrazioneController {
     public Button cancelButton;
 
     private Alert invalidFieldAlert;
+    private Alert registrationSuccess;
 
     private SceneController sceneController;
     public RegistrazioneController(SceneController sceneController){
@@ -33,6 +34,10 @@ public class RegistrazioneController {
         invalidFieldAlert = new Alert(Alert.AlertType.ERROR);
         invalidFieldAlert.setHeaderText("Invalid field");
         invalidFieldAlert.setContentText("Campo inserito non valido");
+
+        registrationSuccess = new Alert(Alert.AlertType.CONFIRMATION);
+        registrationSuccess.setHeaderText("Registrazione Successo");
+        registrationSuccess.setHeaderText("Registrazione avvenuta con successo");
     }
 
     public void registraOp(ActionEvent actionEvent) {
@@ -49,13 +54,21 @@ public class RegistrazioneController {
             invalidFieldAlert.showAndWait();
         }
         try{
-            sceneController
+            boolean  resultRegistrazione = sceneController
                     .getMainWindowController()
                     .onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, userID, email, password, centroAfferenza);
+            if(resultRegistrazione){
+                clearFields();
+                registrationSuccess.showAndWait();
+                Stage registrazioneStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+                registrazioneStage.close();
+            }else{
+                clearFields();
+                invalidFieldAlert.showAndWait();
+            }
         }catch(NullPointerException npe){
             System.out.println("Null Pointer exception while executing registra op");
         }
-        clearFields();
     }
 
     private void clearFields(){
