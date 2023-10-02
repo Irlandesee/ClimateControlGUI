@@ -23,22 +23,26 @@
                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
             <TextField fx:id="codFiscaleField"
                        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="email"
+            <Label text="user id:"
                    GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <TextField fx:id="emailField"
+            <TextField fx:id="userIDField"
                        GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-            <Label text="password"
+            <Label text="email"
                    GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <TextField fx:id="emailField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Label text="password"
+                   GridPane.columnIndex="0" GridPane.rowIndex="5"/>
             <PasswordField fx:id="passwordField"
-                           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                           GridPane.columnIndex="1" GridPane.rowIndex="5"/>
             <Label text="Centro Afferenza"
-                    GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-            <TextField fx:id="centroField"
-                       GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-            <Button text="registra" fx:id="btnRegistra" onAction="#registraOp"
-                GridPane.columnIndex="1" GridPane.rowIndex="6" />
-            <Button text="cancel" fx:id="cancelButton" onAction="#cancel"
                     GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+            <TextField fx:id="centroField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+            <Button text="registra" fx:id="btnRegistra" onAction="#registraOp"
+                GridPane.columnIndex="1" GridPane.rowIndex="7" />
+            <Button text="cancel" fx:id="cancelButton" onAction="#cancel"
+                    GridPane.columnIndex="0" GridPane.rowIndex="7"/>
             <stylesheets>
                 <URL value="@../stylesheets/registrazione.css"/>
             </stylesheets>

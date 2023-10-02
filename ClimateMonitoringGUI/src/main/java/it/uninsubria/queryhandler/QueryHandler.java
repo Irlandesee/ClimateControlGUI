@@ -35,43 +35,37 @@ public class QueryHandler{
         this.props = props;
     }
 
-    public void selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
+    public List<String> selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
-                LinkedList<String> res = w.selectObjFromCityWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromCityWithCond(oggetto, fieldCond, cond);
             }
             case CENTRO_MONITORAGGIO -> {
                 Worker w = new Worker(dbUrl, props, "workerCM");
-                LinkedList<String> res = w.selectObjFromCMWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromCMWithCond(oggetto, fieldCond, cond);
             }
             case OPERATORE -> {
                 Worker w = new Worker(dbUrl, props, "workerOP");
-                LinkedList<String> res = w.selectObjFromOPWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromOPWithCond(oggetto, fieldCond, cond);
             }
             case OP_AUTORIZZATO -> {
                 Worker w = new Worker(dbUrl, props, "workerAuthOP");
-                LinkedList<String> res = w.selectObjFromAuthOPWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromAuthOPWithCond(oggetto, fieldCond, cond);
             }
             case AREA_INTERESSE -> {
                 Worker w = new Worker(dbUrl, props, "workerAI");
-                LinkedList<String> res = w.selectObjFromAIWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromAIWithCond(oggetto, fieldCond, cond);
             }
             case NOTA_PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerNota");
-                //TODO
+                return w.selectObjFromNotaWithCond(oggetto, fieldCond, cond);
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPM");
-                LinkedList<String> res = w.selectObjFromPCWithCond(oggetto, fieldCond, cond);
-                res.forEach(System.out::println);
+                return w.selectObjFromPCWithCond(oggetto, fieldCond, cond);
             }
-            //default -> {return null;}
+            default -> {return null;}
         }
 
     }
@@ -166,6 +160,21 @@ public class QueryHandler{
     public Operatore executeLogin(String userID, String password){
         Worker w = new Worker(dbUrl, props, "workerLogin");
         return w.executeLogin(userID, password);
+    }
+
+    public boolean requestSignUp(String codFisc, String email){
+        Worker w = new Worker(dbUrl, props, "workerSignUp");
+        List<OperatoreAutorizzato> opAutorizzati = w.selectAllFromTable(tables.OP_AUTORIZZATO);
+        //should make this faster
+        for(OperatoreAutorizzato op : opAutorizzati)
+            if(op.getEmail().equals(email) && op.getCodFiscale().equals(codFisc))
+                return true;
+        return false;
+    }
+
+    public boolean executeSignUp(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
+        Worker w = new Worker(dbUrl, props, "workerSignUp");
+        return w.insertOperatore(nomeOp, cognomeOp, codFisc, userID, email, password, centroAfferenza);
     }
 
 

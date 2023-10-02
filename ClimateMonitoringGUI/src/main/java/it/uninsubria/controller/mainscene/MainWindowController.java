@@ -359,7 +359,6 @@ public class MainWindowController{
         }
     }
 
-
     public boolean onExecuteLoginQuery(String userID, String password){
         Operatore o = queryHandler.executeLogin(userID, password);
         if(o != null){
@@ -370,8 +369,14 @@ public class MainWindowController{
     }
 
 
-    public void onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
-        //TODO
+    public boolean onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
+        if(!queryHandler.requestSignUp(codFisc, email)){
+            System.out.println("Operatore inesistente");
+            return false;
+        }else{//
+            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza).get(0);
+            return queryHandler.executeSignUp(nomeOp, cognomeOp, codFisc, userID, email, password, centroID);
+        }
     }
 
 

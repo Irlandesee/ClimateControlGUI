@@ -158,8 +158,8 @@ public class Worker extends Thread{
         return parametriClimatici;
     }
 
-    private LinkedList<String> getQueryResult(String query, String oggetto, String cond){
-        LinkedList<String> objs = new LinkedList<String>();
+    private List<String> getQueryResult(String query, String oggetto, String cond){
+        List<String> objs = new LinkedList<String>();
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
                 objs.add(res.getString(oggetto));
@@ -168,65 +168,41 @@ public class Worker extends Thread{
         return objs;
     }
 
-    public LinkedList<String> selectObjFromCityWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromCityWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from city where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromCMWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromCMWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from centro_monitoraggio where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromOPWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromOPWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from operatore where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromAuthOPWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromAuthOPWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from operatore_autorizzati where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromAIWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromAIWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from area_interesse where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromNotaWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromNotaWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from nota_parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public LinkedList<String> selectObjFromPCWithCond(String oggetto, String fieldCond, String cond){
+    public List<String> selectObjFromPCWithCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public Operatore executeLogin(String userID, String password){
-        String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userID, password);
-        System.out.println(query);
-        try{
-            PreparedStatement stat = conn.prepareStatement(query);
-            ResultSet rSet = stat.executeQuery();
-            rSet.next();
-            //expect 1 row ?
-            Operatore o = new Operatore(
-                    rSet.getString("nome"),
-                    rSet.getString("cognome"),
-                    rSet.getString("codice_fiscale"),
-                    rSet.getString("email"),
-                    rSet.getString("userid"),
-                    rSet.getString("password"),
-                    rSet.getString("centroid")
-            );
-            return o;
-        }catch(SQLException sqle){
-            sqle.printStackTrace();
-            return null;
-        }
-    }
-    
     public <T> List<T> selectAllFromTable(QueryHandler.tables table){
         switch (table){
             case CITY -> {
@@ -294,8 +270,21 @@ public class Worker extends Thread{
                 return (List<T>) res;
             }
             case OP_AUTORIZZATO -> {
-                //TODO
-                return null;
+                List<OperatoreAutorizzato> operatoriAutorizzati = new LinkedList<OperatoreAutorizzato>();
+                String query = "select * from operatore_autorizzati";
+                try{
+                    PreparedStatement stat = conn.prepareStatement(query);
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        OperatoreAutorizzato oAutorizzato = new OperatoreAutorizzato(
+                                rSet.getString("codice_fiscale"),
+                                rSet.getString("email")
+                        );
+                        operatoriAutorizzati.add(oAutorizzato);
+                    }
+
+                }catch(SQLException sqle){sqle.printStackTrace();}
+                return (List<T>) operatoriAutorizzati;
             }
             case PARAM_CLIMATICO -> {
                 //TODO
@@ -325,4 +314,43 @@ public class Worker extends Thread{
             default -> {return null;}
         }
     }
+
+
+    public Operatore executeLogin(String userID, String password){
+        String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userID, password);
+        System.out.println(query);
+        try{
+            PreparedStatement stat = conn.prepareStatement(query);
+            ResultSet rSet = stat.executeQuery();
+            rSet.next();
+            //expect 1 row ?
+            Operatore o = new Operatore(
+                    rSet.getString("nome"),
+                    rSet.getString("cognome"),
+                    rSet.getString("codice_fiscale"),
+                    rSet.getString("email"),
+                    rSet.getString("userid"),
+                    rSet.getString("password"),
+                    rSet.getString("centroid")
+            );
+            return o;
+        }catch(SQLException sqle){
+            sqle.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean insertOperatore(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
+        String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+                .formatted(nomeOp, cognomeOp, codFisc, userID, email, password, centroAfferenza);
+        System.out.println(query);
+        try{
+            PreparedStatement stat = conn.prepareStatement(query);
+            int res = stat.executeUpdate();
+            System.out.println(res);
+            return res == 0;
+        }catch(SQLException sqle){sqle.printStackTrace(); return false;}
+    }
+
+
 }

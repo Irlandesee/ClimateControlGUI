@@ -14,6 +14,7 @@ public class RegistrazioneController {
     public TextField nomeOpField;
     public TextField cognomeField;
     public TextField codFiscaleField;
+    public TextField userIDField;
     public TextField emailField;
     public PasswordField passwordField;
     public TextField centroField;
@@ -38,20 +39,19 @@ public class RegistrazioneController {
         String nomeOp = nomeOpField.getText();
         String cognomeOp = cognomeField.getText();
         String codFiscOp = codFiscaleField.getText();
+        String userID = userIDField.getText();
         String email = emailField.getText();
         String password = passwordField.getText();
         String centroAfferenza = centroField.getText();
 
         if(nomeOp.isEmpty() || cognomeOp.isEmpty() || codFiscOp.isEmpty() ||
-            email.isEmpty() || password.isEmpty() || centroAfferenza.isEmpty()){
+                userID.isEmpty() || email.isEmpty() || password.isEmpty() || centroAfferenza.isEmpty()){
             invalidFieldAlert.showAndWait();
         }
-        String query = nomeOp + cognomeOp + codFiscOp + email + password + centroAfferenza;
-        System.out.println(query);
         try{
             sceneController
                     .getMainWindowController()
-                    .onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, email, password, centroAfferenza);
+                    .onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, userID, email, password, centroAfferenza);
         }catch(NullPointerException npe){
             System.out.println("Null Pointer exception while executing registra op");
         }
