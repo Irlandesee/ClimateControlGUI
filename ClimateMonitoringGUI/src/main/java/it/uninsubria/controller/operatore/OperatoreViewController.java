@@ -54,6 +54,8 @@ public class OperatoreViewController {
     private TextField comuneField;
     private TextField statoCMField;
     private TextField areaInteresseCMField;
+    private TextArea areeInteresseBox;
+    private Button inserisciArea;
     private Button inserisciCM;
     private Button clearCM;
 
@@ -70,10 +72,9 @@ public class OperatoreViewController {
     private final String url = "jdbc:postgresql://localhost/postgres";
     private Properties props;
 
-    private SceneController sceneController;
+    private final SceneController sceneController;
     public OperatoreViewController(SceneController sceneController){
         this.sceneController = sceneController;
-
     }
 
 
@@ -83,7 +84,7 @@ public class OperatoreViewController {
         //Init the query handler
         props = new Properties();
         props.setProperty("user", "postgres");
-        props.setProperty("password", "querty");
+        props.setProperty("password", "qwerty");
 
         queryHandler = new QueryHandler(url, props);
 
@@ -178,6 +179,10 @@ public class OperatoreViewController {
         statoCMField.setOnMouseClicked((event) -> statoCMField.clear());
         areaInteresseCMField = new TextField("Area interesse");
         areaInteresseCMField.setOnMouseClicked((event) -> areaInteresseCMField.clear());
+        areeInteresseBox = new TextArea();
+        areeInteresseBox.setEditable(false);
+        inserisciArea = new Button("Inserisci Area");
+        inserisciArea.setOnAction((event) -> addAreaToBox());
         inserisciCM = new Button("Inserisci CM");
         inserisciCM.setOnAction((event) -> executeInsertCMQuery());
         clearCM = new Button("Pulisci");
@@ -188,6 +193,8 @@ public class OperatoreViewController {
         nodesToAdd.add(comuneField);
         nodesToAdd.add(statoCMField);
         nodesToAdd.add(areaInteresseCMField);
+        nodesToAdd.add(areeInteresseBox);
+        nodesToAdd.add(inserisciArea);
         nodesToAdd.add(inserisciCM);
         nodesToAdd.add(clearCM);
 
@@ -195,6 +202,15 @@ public class OperatoreViewController {
 
         this.borderPane.setRight(paramBox);
 
+    }
+
+    private void addAreaToBox(){
+        String nomeArea = areaInteresseCMField.getText();
+        if(!nomeArea.isEmpty()){
+            String text = areeInteresseBox.getText();
+            text += nomeArea + "\n";
+            areeInteresseBox.setText(text);
+        }
     }
 
     private void clearCMFields(){
@@ -211,12 +227,20 @@ public class OperatoreViewController {
         //Area interesse è campo particolare, si possono inserire una quantita
         //indefinita di aree di interesse -> si cancella in automatico
         //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
-        String areaInteresseCentro = areaInteresseCMField.getText();
 
         if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){cmAlert.showAndWait();}
 
+        LinkedList<String> l = new LinkedList<String>();
+        for(String nome: areeInteresseBox.getText().split("\n"))
+            l.add(nome.trim());
+
         areaInteresseCMField.clear();
-        //TODO
+        boolean res = queryHandler.executeInsertCentroMonitoraggio(nomeCentro, comuneCentro, statoCentro, l);
+        if(res){
+            System.out.println("CM inserito");
+            new Alert(Alert.AlertType.CONFIRMATION).showAndWait();
+            clearCMFields();
+        }
     }
 
     public void handleRegistraOperatore(ActionEvent actionEvent){

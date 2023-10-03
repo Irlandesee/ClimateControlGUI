@@ -7,6 +7,7 @@ import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
+import it.uninsubria.util.IDGenerator;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -347,9 +348,28 @@ public class Worker extends Thread{
             PreparedStatement stat = conn.prepareStatement(query);
             int res = stat.executeUpdate();
             System.out.println(res);
-            return res == 0;
+            return res == 1;
         }catch(SQLException sqle){sqle.printStackTrace(); return false;}
     }
 
+    public boolean insertCentroMonitoraggio(String nomeCentro, String comune, String stato, List<String> areeInteresseAssociateIDs){
+        String centroid = IDGenerator.generateID();
+        int idsSize = areeInteresseAssociateIDs.size();
+        StringBuilder arrayIDS = new StringBuilder();
+        for(int i = 0; i < idsSize; i++){
+            arrayIDS.append(areeInteresseAssociateIDs.get(i));
+            if(i < idsSize - 1)
+                arrayIDS.append(",");
+        }
+        String query = "insert into centro_monitoraggio(centroid, nomecentro, comune, country, aree_interesse_ids) values ('%s', '%s', '%s', '%s', '{%s}')"
+                .formatted(centroid, nomeCentro, comune, stato, arrayIDS.toString());
+        System.out.println(query);
+        try{
+            PreparedStatement stat = conn.prepareStatement(query);
+            int res = stat.executeUpdate();
+            System.out.println(res);
+            return res == 1;
+        }catch(SQLException sqle){sqle.printStackTrace(); return false;}
+    }
 
 }

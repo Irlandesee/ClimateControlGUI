@@ -176,5 +176,18 @@ public class QueryHandler{
         return w.insertOperatore(nomeOp, cognomeOp, codFisc, userID, email, password, centroAfferenza);
     }
 
+    public boolean executeInsertCentroMonitoraggio(String nomeCentro, String comune, String stato, List<String> areeInteresseAssociate){
+        Worker workerIDs = new Worker(dbUrl, props, "workerAreeIDs");
+        List<String> areeIds = new LinkedList<String>();
+        for(String area : areeInteresseAssociate){
+            areeIds.add(workerIDs.selectObjFromAIWithCond("areaid", "denominazione", area).get(0));
+        }
+        try{
+            workerIDs.join();
+        }catch(InterruptedException ie){ie.printStackTrace();}
+        Worker w = new Worker(dbUrl, props, "workerInsertCM");
+        return w.insertCentroMonitoraggio(nomeCentro, comune, stato, areeIds);
+    }
+
 
 }
