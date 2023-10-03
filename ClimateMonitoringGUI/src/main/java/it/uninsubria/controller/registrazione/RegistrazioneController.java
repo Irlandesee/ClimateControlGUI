@@ -22,6 +22,7 @@ public class RegistrazioneController {
     public Button cancelButton;
 
     private Alert invalidFieldAlert;
+    private Alert registrationFailed;
     private Alert registrationSuccess;
 
     private SceneController sceneController;
@@ -35,9 +36,13 @@ public class RegistrazioneController {
         invalidFieldAlert.setHeaderText("Invalid field");
         invalidFieldAlert.setContentText("Campo inserito non valido");
 
+        registrationFailed = new Alert(Alert.AlertType.ERROR);
+        registrationFailed.setHeaderText("Fallimento Registrazione");
+        registrationFailed.setContentText("Campo Inserito non valido oppure utente non abilitato alla registrazione!");
+
         registrationSuccess = new Alert(Alert.AlertType.CONFIRMATION);
         registrationSuccess.setHeaderText("Registrazione Successo");
-        registrationSuccess.setHeaderText("Registrazione avvenuta con successo");
+        registrationSuccess.setHeaderText("Registrazione avvenuta con successo!");
     }
 
     public void registraOp(ActionEvent actionEvent) {
@@ -64,7 +69,7 @@ public class RegistrazioneController {
                 registrazioneStage.close();
             }else{
                 clearFields();
-                invalidFieldAlert.showAndWait();
+                registrationFailed.showAndWait();
             }
         }catch(NullPointerException npe){
             System.out.println("Null Pointer exception while executing registra op");
@@ -75,6 +80,7 @@ public class RegistrazioneController {
         nomeOpField.clear();
         cognomeField.clear();
         codFiscaleField.clear();
+        userIDField.clear();
         emailField.clear();
         passwordField.clear();
         centroField.clear();

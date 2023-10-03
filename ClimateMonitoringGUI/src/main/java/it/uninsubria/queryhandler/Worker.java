@@ -8,7 +8,6 @@ import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 
-import java.awt.geom.Area;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;

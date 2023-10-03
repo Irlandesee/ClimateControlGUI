@@ -7,7 +7,6 @@ import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ClimateParameter;
 import it.uninsubria.util.Item;
 
-import javax.sound.sampled.Line;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
