@@ -8,9 +8,12 @@ module it.uninsubria.climatemonitoringgui {
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
     requires org.postgresql.jdbc;
     requires java.sql;
+    requires junit;
+    requires javafx.graphics;
+    requires testfx.core;
+    requires testfx.junit5;
 
     opens it.uninsubria to javafx.fxml;
     exports it.uninsubria;
@@ -35,4 +38,5 @@ module it.uninsubria.climatemonitoringgui {
 
     opens it.uninsubria.areaInteresse;
     exports it.uninsubria.areaInteresse to javafx.fxml;
+
 }
