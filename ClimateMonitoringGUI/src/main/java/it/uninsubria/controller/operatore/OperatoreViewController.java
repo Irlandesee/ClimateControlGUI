@@ -192,8 +192,19 @@ public class OperatoreViewController {
 
         });
 
-
         //aree interesse?
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
+                    System.out.println(c);
+
+
+                }
+            });
+            return row;
+        });
 
         this.paramBox = new VBox(10);
         nomeCentroField = new TextField("Nome centro");
