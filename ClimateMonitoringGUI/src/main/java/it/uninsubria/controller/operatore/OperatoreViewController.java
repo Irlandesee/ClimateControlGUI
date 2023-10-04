@@ -1,6 +1,7 @@
 package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
+import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.queryhandler.QueryHandler;
@@ -11,13 +12,17 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 public class OperatoreViewController {
@@ -170,6 +175,26 @@ public class OperatoreViewController {
     }
 
     public void handleButtonInserisciCentroMonitoraggio(ActionEvent actionEvent){
+
+        //show centri di monitoraggio already present in the database
+        TableColumn nomeColumn = new TableColumn("denominazione");
+        nomeColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
+        TableColumn comuneColumn = new TableColumn("comune");
+        comuneColumn.setCellValueFactory(new PropertyValueFactory<>("comune"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<>("country"));
+        tableView.getColumns().addAll(nomeColumn, comuneColumn, countryColumn);
+
+        //populate the tableView
+        List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        centriPresenti.forEach(centro -> {
+            tableView.getItems().add(centro);
+
+        });
+
+
+        //aree interesse?
+
         this.paramBox = new VBox(10);
         nomeCentroField = new TextField("Nome centro");
         nomeCentroField.setOnMouseClicked((event) -> nomeCentroField.clear());
