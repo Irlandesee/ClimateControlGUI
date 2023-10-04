@@ -1,83 +1,72 @@
 package it.uninsubria.centroMonitoraggio;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
 public class CentroMonitoraggio {
 
-    private String centroID;
-    private String nomeCentro;
-    private String comune;
-    private String country;
 
     //key: String => areaID
-    private HashMap<String, AreaInteresse> areeInteresse;
 
     //contiene solo gli id delle aree interesse associate
     private LinkedList<String> areeInteresseIdAssociate;
 
-    final String emptyAreeInteresse = "empty";
-    final String generalSeparator = ";";
-    final String areeSeparator = ",";
+    public static final String emptyAreeInteresse = "empty";
+    public static final String generalSeparator = ";";
+    public static final String areeSeparator = ",";
 
-    public CentroMonitoraggio(String centroID){
-        this.centroID = centroID;
-        this.areeInteresse = new HashMap<String, AreaInteresse>();
-    }
+    private final StringProperty centroID;
+    private final StringProperty denominazione;
+    private final StringProperty comune;
+    private final StringProperty country;
 
-    public CentroMonitoraggio(String centroID, String nomeCentro,
+    public CentroMonitoraggio(String centroID, String denominazioneCentro,
                               String comune, String country){
-        this.centroID = centroID;
-        this.nomeCentro = nomeCentro;
-        this.comune = comune;
-        this.country = country;
-        this.areeInteresse = new HashMap<String, AreaInteresse>();
-        this.areeInteresseIdAssociate = new LinkedList<String>();
+        this.centroID = new SimpleStringProperty();
+        this.denominazione = new SimpleStringProperty();
+        this.comune = new SimpleStringProperty();
+        this.country = new SimpleStringProperty();
+        this.centroID.set(centroID);
+        this.denominazione.set(denominazioneCentro);
+        this.comune.set(comune);
+        this.country.set(country);
     }
 
     public String getCentroID() {
-        return centroID;
+        return centroID.get();
     }
 
     public void setCentroID(String centroID) {
-        this.centroID = centroID;
+        this.centroID.set(centroID);
     }
 
-    public String getNomeCentro() {
-        return nomeCentro;
+    public String getDenominazione() {
+        return this.denominazione.get();
     }
 
-    public void setNomeCentro(String nomeCentro) {
-        this.nomeCentro = nomeCentro;
+    public void setDenominazione(String denominazioneCentro) {
+        this.denominazione.set(denominazioneCentro);
     }
 
     public String getComune() {
-        return comune;
+        return this.comune.get();
     }
 
     public void setComune(String comune) {
-        this.comune = comune;
+        this.comune.set(comune);
     }
 
-    public String getAreeInteresse(){
-        StringBuilder builder = new StringBuilder();
-        if(!areeInteresse.isEmpty()) {
-            for (String key : areeInteresse.keySet())
-                builder.append(key).append(areeSeparator);
-            builder.append("\n");
-        }
-        else
-            builder.append(emptyAreeInteresse);
-        return builder.toString();
+    public String getCountry(){
+        return this.country.get();
     }
 
-
-    public boolean rmAreaInteresse(String areaID){
-        if(!areeInteresse.containsKey(areaID)) return false;
-        areeInteresse.remove(areaID);
-        return true;
+    public void setCountry(String country){
+        this.country.set(country);
     }
 
     public void putAreaId(String areaID){
@@ -89,32 +78,24 @@ public class CentroMonitoraggio {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CentroMonitoraggio that = (CentroMonitoraggio) o;
+        return Objects.equals(areeInteresseIdAssociate, that.areeInteresseIdAssociate) && Objects.equals(centroID, that.centroID) && Objects.equals(denominazione, that.denominazione) && Objects.equals(comune, that.comune) && Objects.equals(country, that.country);
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(centroID, nomeCentro);
-    }
-
-    public boolean addAreaInteresse(AreaInteresse area){
-        if(!this.areeInteresse.containsKey(area.getAreaid())) {
-            this.areeInteresse.put(area.getAreaid(), area);
-            return true;
-        }
-        return false;
-    }
-
-    //Only checks if centroID is the same
-    public boolean equals(Object obj){
-        if(obj.getClass() == CentroMonitoraggio.class){
-            return ((CentroMonitoraggio) obj).getCentroID().equals(this.centroID);
-        }
-        return false;
+        return Objects.hash(areeInteresseIdAssociate, centroID, denominazione, comune, country);
     }
 
     public String toString(){
         StringBuilder builder = new StringBuilder();
-        builder.append(centroID).append(generalSeparator)
-                .append(nomeCentro).append(generalSeparator)
-                .append(comune).append(generalSeparator)
-                .append(country).append(generalSeparator);
+        builder.append(centroID.get()).append(generalSeparator)
+                .append(denominazione.get()).append(generalSeparator)
+                .append(comune.get()).append(generalSeparator)
+                .append(country.get()).append(generalSeparator);
 
         if(areeInteresseIdAssociate.isEmpty()) builder.append(emptyAreeInteresse);
         else{
@@ -124,7 +105,4 @@ public class CentroMonitoraggio {
         return builder.toString();
     }
 
-    public void setCountry(String s) {
-        this.country = s;
-    }
 }
