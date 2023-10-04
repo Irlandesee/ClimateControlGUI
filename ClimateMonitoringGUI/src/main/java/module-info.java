@@ -39,4 +39,7 @@ module it.uninsubria.climatemonitoringgui {
     opens it.uninsubria.areaInteresse;
     exports it.uninsubria.areaInteresse to javafx.fxml;
 
+    opens it.uninsubria.centroMonitoraggio;
+    exports it.uninsubria.centroMonitoraggio to javafx.base;
+
 }

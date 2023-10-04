@@ -27,14 +27,12 @@ public class CentroMonitoraggio {
 
     public CentroMonitoraggio(String centroID, String denominazioneCentro,
                               String comune, String country){
-        this.centroID = new SimpleStringProperty();
-        this.denominazione = new SimpleStringProperty();
-        this.comune = new SimpleStringProperty();
-        this.country = new SimpleStringProperty();
-        this.centroID.set(centroID);
-        this.denominazione.set(denominazioneCentro);
-        this.comune.set(comune);
-        this.country.set(country);
+        this.centroID = new SimpleStringProperty(centroID);
+        this.denominazione = new SimpleStringProperty(denominazioneCentro);
+        this.comune = new SimpleStringProperty(comune);
+        this.country = new SimpleStringProperty(country);
+
+        areeInteresseIdAssociate = new LinkedList<String>();
     }
 
     public String getCentroID() {
