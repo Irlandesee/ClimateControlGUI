@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="400.0" prefWidth="600.0">
+    <top>
+        <Label>Dati relativi a: </Label>
+        <Label fx:id="nomeLabel"/>
+    </top>
+    <center>
+        <GridPane styleClass="content-section">
+            <Label
+                GridPane.rowIndex="0" GridPane.columnIndex="0">Denominazione</Label>
+            <Label fx:id="denominazioneLabel"
+                GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label
+                GridPane.rowIndex="1" GridPane.columnIndex="0">Stato</Label>
+            <Label fx:id="statoLabel"
+                GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label
+                GridPane.rowIndex="2" GridPane.columnIndex="0">latitudine</Label>
+            <Label
+                    fx:id="latitudineLabel"
+                GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label
+                GridPane.rowIndex="3" GridPane.columnIndex="0">Longitudine</Label>
+            <Label
+                fx:id="longitudineLabel"
+                GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <ListView fx:id="paramClimaticiList"
+                GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        </GridPane>
+    </center>
+    <bottom>
+        <Button fx:id="closeBtn" onAction="#close">Cancel</Button>
+    </bottom>
+
+    <stylesheets>
+        <URL value="@../stylesheets/ai-dialog.css"/>
+    </stylesheets>
+
+</BorderPane>

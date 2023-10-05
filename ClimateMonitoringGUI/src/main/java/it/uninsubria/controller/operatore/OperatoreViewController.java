@@ -95,7 +95,7 @@ public class OperatoreViewController {
         queryHandler = new QueryHandler(url, props);
 
         //show aree interesse presenti
-        //showAreeInserite();
+        showAreeInserite();
         //line chart
         contentBox.getChildren().add(
                 GraphBuilder.getBasicLineChart(
@@ -190,7 +190,6 @@ public class OperatoreViewController {
         List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
         centriPresenti.forEach(centro -> {
             tableView.getItems().add(centro);
-
         });
 
         //aree interesse?
@@ -199,8 +198,8 @@ public class OperatoreViewController {
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
-                    System.out.println(c);
-                    //TODO: show cm details
+                    System.out.println("Item double clicked: "+c);
+                    //show cm details
                     LinkedList<String> cmAree = c.getAreeInteresseIdAssociate();
                     LinkedList<String> nomiAree = new LinkedList<String>();
                     for(String id: cmAree){
@@ -208,7 +207,16 @@ public class OperatoreViewController {
                         String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", id).get(0);
                         nomiAree.add(denominazione);
                     }
-                    //Todo: create new window containing nomiAree
+                    //Create a new window containing the cms details
+                    try {
+                        Stage cmDialogStage = new Stage();
+                        CMDialog cmDialogController = new CMDialog(sceneController, nomiAree);
+                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                        fxmlLoader.setController(cmDialogController);
+                        Scene dialogScene = new Scene(fxmlLoader.load(), 400, 300);
+                        cmDialogStage.setScene(dialogScene);
+                        cmDialogStage.show();
+                    }catch(IOException ioe){ioe.printStackTrace();}
 
                 }
             });

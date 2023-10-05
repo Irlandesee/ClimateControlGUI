@@ -2,6 +2,7 @@ package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.controller.dialog.AIDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
@@ -204,8 +205,10 @@ public class MainWindowController{
     }
 
     private void prepTableAreaInteresse(){
+        /**
         TableColumn keyColumn = new TableColumn("areaID");
         keyColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
+         **/
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
         TableColumn countryColumn = new TableColumn("stato");
@@ -215,7 +218,30 @@ public class MainWindowController{
         TableColumn longColumn = new TableColumn("longitudine");
         longColumn.setCellValueFactory(new PropertyValueFactory<>("longitudine"));
 
-        tableView.getColumns().addAll(keyColumn, denomColumn, countryColumn, latColumn, longColumn);
+        tableView.getColumns().addAll(denomColumn, countryColumn, latColumn, longColumn);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    AreaInteresse a = (AreaInteresse) row.getItem();
+                    System.out.println("Item double Clicked: "+a);
+                    //get cp associated with this area interesse
+                    LinkedList<ClimateParameter> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
+                    try{
+                        Stage aiDialogStage = new Stage();
+                        AIDialog aiDialogController = new AIDialog(sceneController, a, params);
+                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
+                        fxmlLoader.setController(aiDialogController);
+                        Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
+                        aiDialogStage.setScene(dialogScene);
+                        aiDialogStage.show();
+                        
+                    }catch(IOException ioe){ioe.printStackTrace();}
+                }
+            });
+            return row;
+        });
     }
 
     private void showAreeInserite(){
@@ -295,8 +321,10 @@ public class MainWindowController{
     }
 
     private void prepTablePC(){
+        /**
         TableColumn keyColumn = new TableColumn("parameterId");
         keyColumn.setCellValueFactory(new PropertyValueFactory<>("parameterId"));;
+         **/
         TableColumn centroColumn = new TableColumn("idCentro");
         centroColumn.setCellValueFactory(new PropertyValueFactory<>("idCentro"));
         TableColumn areaColumn = new TableColumn("areaInteresse");
@@ -317,6 +345,8 @@ public class MainWindowController{
         altitudineColumn.setCellValueFactory(new PropertyValueFactory<>("altitudineValue"));
         TableColumn massaColumn = new TableColumn("massaValue");
         massaColumn.setCellValueFactory(new PropertyValueFactory<>("massaValue"));
+        tableView.getColumns().addAll(centroColumn, areaColumn, dateColumn, ventoColumn, umiditaColumn, pressioneColumn,
+                temperaturaColumn, precipitazioniColumn, altitudineColumn, massaColumn);
 
     }
 

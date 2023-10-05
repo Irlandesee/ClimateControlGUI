@@ -42,4 +42,7 @@ module it.uninsubria.climatemonitoringgui {
     opens it.uninsubria.centroMonitoraggio;
     exports it.uninsubria.centroMonitoraggio to javafx.base;
 
+    opens it.uninsubria.controller.dialog;
+    exports it.uninsubria.controller.dialog to javafx.fxml;
+
 }
