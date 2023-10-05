@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -199,7 +200,15 @@ public class OperatoreViewController {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
                     System.out.println(c);
-
+                    //TODO: show cm details
+                    LinkedList<String> cmAree = c.getAreeInteresseIdAssociate();
+                    LinkedList<String> nomiAree = new LinkedList<String>();
+                    for(String id: cmAree){
+                        //query the db to get the areas names
+                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", id).get(0);
+                        nomiAree.add(denominazione);
+                    }
+                    //Todo: create new window containing nomiAree
 
                 }
             });

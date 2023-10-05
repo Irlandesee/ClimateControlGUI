@@ -1,6 +1,7 @@
 package it.uninsubria.centroMonitoraggio;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.util.IDGenerator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -73,6 +74,10 @@ public class CentroMonitoraggio {
         else{
             System.out.println("CM contenente già id");
         }
+    }
+
+    public LinkedList<String> getAreeInteresseIdAssociate(){
+        return this.areeInteresseIdAssociate;
     }
 
     @Override
