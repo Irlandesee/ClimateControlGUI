@@ -2,7 +2,7 @@ package it.uninsubria.controller.dialog;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.parametroClimatico.ClimateParameter;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -16,7 +16,7 @@ public class AIDialog {
 
     private final SceneController sceneController;
     private final AreaInteresse ai;
-    private LinkedList<ClimateParameter> parameters;
+    private LinkedList<ParametroClimatico> parameters;
     public Label nomeLabel;
     public Label denominazioneLabel;
     public Label statoLabel;
@@ -25,7 +25,7 @@ public class AIDialog {
 
     public ListView paramClimaticiList;
 
-    public AIDialog(SceneController sceneController, AreaInteresse ai, LinkedList<ClimateParameter> parameters){
+    public AIDialog(SceneController sceneController, AreaInteresse ai, LinkedList<ParametroClimatico> parameters){
         this.sceneController = sceneController;
         this.ai = ai;
         this.parameters = parameters;
@@ -39,7 +39,7 @@ public class AIDialog {
         latitudineLabel.setText(String.valueOf(ai.getLatitudine()));
         longitudineLabel.setText(String.valueOf(ai.getLongitudine()));
         if(parameters.size() > 0){
-            for(ClimateParameter cp: parameters){
+            for(ParametroClimatico cp: parameters){
                 Label l = new Label(String.valueOf(cp.getPubDate()));
                 paramClimaticiList.getItems().add(l);
             }

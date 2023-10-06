@@ -10,7 +10,7 @@ import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.operatore.Operatore;
-import it.uninsubria.parametroClimatico.ClimateParameter;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -227,7 +227,7 @@ public class MainWindowController{
                     AreaInteresse a = (AreaInteresse) row.getItem();
                     System.out.println("Item double Clicked: "+a);
                     //get cp associated with this area interesse
-                    LinkedList<ClimateParameter> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
+                    LinkedList<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
                         AIDialog aiDialogController = new AIDialog(sceneController, a, params);
@@ -236,7 +236,7 @@ public class MainWindowController{
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
                         aiDialogStage.setScene(dialogScene);
                         aiDialogStage.show();
-                        
+
                     }catch(IOException ioe){ioe.printStackTrace();}
                 }
             });
@@ -326,13 +326,13 @@ public class MainWindowController{
         keyColumn.setCellValueFactory(new PropertyValueFactory<>("parameterId"));;
          **/
         TableColumn centroColumn = new TableColumn("idCentro");
-        centroColumn.setCellValueFactory(new PropertyValueFactory<>("idCentro"));
+        centroColumn.setCellValueFactory(new PropertyValueFactory<>("idcentro"));
         TableColumn areaColumn = new TableColumn("areaInteresse");
-        areaColumn.setCellValueFactory(new PropertyValueFactory<>("areaInteresse"));
+        areaColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
         TableColumn dateColumn = new TableColumn("pubDate");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("pubDate"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("pubdate"));
         TableColumn ventoColumn = new TableColumn("ventoValue");
-        ventoColumn.setCellValueFactory(new PropertyValueFactory<>("ventoValue"));
+        ventoColumn.setCellValueFactory(new PropertyValueFactory<>(""));
         TableColumn umiditaColumn = new TableColumn("umiditaValue");
         umiditaColumn.setCellValueFactory(new PropertyValueFactory<>("umiditaValue"));
         TableColumn pressioneColumn = new TableColumn("pressioneValue");
@@ -361,15 +361,22 @@ public class MainWindowController{
 
         if(areaInteresseCercata.isEmpty()){
             this.areaInteresseAlert.showAndWait();
+            return;
         }//TODO: add check dates != null
-        if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp) || startDate.isEqual(endDate))
+        if(startDate == null || endDate == null){
             this.invalidDateAlert.showAndWait();
+            return;
+        }
+        if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp) || startDate.isEqual(endDate)) {
+            this.invalidDateAlert.showAndWait();
+            return;
+        }
 
         LinkedList<CentroMonitoraggio> cms = new LinkedList<>();
         LinkedList<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
         areeInteresse = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", areaInteresseCercata);
         String areaID = areeInteresse.pop().getAreaid();
-        LinkedList<ClimateParameter> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaID);
+        LinkedList<ParametroClimatico> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaID);
         if(!centroMonitoraggioCercato.isEmpty()){
             if(!centroMonitoraggioCercato.equals("CentroMonitoraggio")){
                 cms = queryHandler.selectAllWithCond(QueryHandler.tables.CENTRO_MONITORAGGIO, "nomecentro", centroMonitoraggioCercato);

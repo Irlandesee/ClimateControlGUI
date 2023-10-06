@@ -3,7 +3,7 @@ package it.uninsubria.parametroClimatico;
 import java.util.*;
 import java.time.LocalDate;
 
-public class ClimateParameter {
+public class ParametroClimatico {
 
     private String parameterId;
     private String idCentro;
@@ -69,13 +69,13 @@ public class ClimateParameter {
     private HashMap<String, Short> paramValues;
     private HashMap<String, String> paramNotes;
 
-    public ClimateParameter(String parameterID){
+    public ParametroClimatico(String parameterID){
         this.parameterId = parameterID;
         this.paramValues = new HashMap<String, Short>();
         this.initParamValues();
     }
 
-    public ClimateParameter(String parameterID, String idCentro
+    public ParametroClimatico(String parameterID, String idCentro
             , String areaInteresse
             , LocalDate pubDate){
         this.parameterId = parameterID;
@@ -88,21 +88,21 @@ public class ClimateParameter {
     }
 
     private void initParamValues(){
-        this.paramValues.put(ClimateParameter.paramVento, ClimateParameter.defaultValue);
-        this.paramValues.put(ClimateParameter.paramUmidita, ClimateParameter.defaultValue);
-        this.paramValues.put(ClimateParameter.paramPressione, ClimateParameter.defaultValue);
-        this.paramValues.put(ClimateParameter.paramTemp, ClimateParameter.defaultValue);
-        this.paramValues.put(ClimateParameter.paramAltGhiacciai, ClimateParameter.defaultValue);
-        this.paramValues.put(ClimateParameter.paramMassaGhiacciai, ClimateParameter.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramVento, ParametroClimatico.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramUmidita, ParametroClimatico.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramPressione, ParametroClimatico.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramTemp, ParametroClimatico.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramAltGhiacciai, ParametroClimatico.defaultValue);
+        this.paramValues.put(ParametroClimatico.paramMassaGhiacciai, ParametroClimatico.defaultValue);
     }
 
     public boolean addParameter(String param, short value) {
         if(param == null || param.isBlank())
-            throw new IllegalArgumentException(ClimateParameter.ERROR_PARAM_KEY);
+            throw new IllegalArgumentException(ParametroClimatico.ERROR_PARAM_KEY);
         else if(value < minVal)
-            throw new IllegalArgumentException(ClimateParameter.ERROR_INVALID_MIN_VALUE);
+            throw new IllegalArgumentException(ParametroClimatico.ERROR_INVALID_MIN_VALUE);
         else if(value > maxVal)
-            throw new IllegalArgumentException(ClimateParameter.ERROR_INVALID_MAX_VALUE);
+            throw new IllegalArgumentException(ParametroClimatico.ERROR_INVALID_MAX_VALUE);
         if(paramValues.containsKey(param)){
             paramValues.replace(param, value);
             return true;
@@ -113,10 +113,10 @@ public class ClimateParameter {
 
     public boolean rmParameter(String param){
         if(param == null || param.isBlank())
-            throw new IllegalArgumentException(ClimateParameter.ERROR_PARAM_KEY);
+            throw new IllegalArgumentException(ParametroClimatico.ERROR_PARAM_KEY);
         if(!paramValues.isEmpty()){
             if(paramValues.containsKey(param)){
-                paramValues.replace(param, ClimateParameter.defaultValue);
+                paramValues.replace(param, ParametroClimatico.defaultValue);
                 return true;
             }
             else return false;
@@ -270,7 +270,7 @@ public class ClimateParameter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ClimateParameter that = (ClimateParameter) o;
+        ParametroClimatico that = (ParametroClimatico) o;
         return Objects.equals(parameterId, that.parameterId)
                 && Objects.equals(pubDate, that.pubDate);
     }
@@ -284,24 +284,24 @@ public class ClimateParameter {
     @Override
     public String toString(){
         StringBuilder builder = new StringBuilder();
-        builder.append(this.parameterId).append(ClimateParameter.generalSeparator)
-                .append(this.idCentro).append(ClimateParameter.generalSeparator)
-                .append(this.areaInteresse).append(ClimateParameter.generalSeparator)
-                .append(this.pubDate).append(ClimateParameter.generalSeparator)
-                .append(this.ventoValue).append(ClimateParameter.generalSeparator)
-                .append(this.umiditaValue).append(ClimateParameter.generalSeparator)
-                .append(this.pressioneValue).append(ClimateParameter.generalSeparator)
-                .append(this.temperaturaValue).append(ClimateParameter.generalSeparator)
-                .append(this.precipitazioniValue).append(ClimateParameter.generalSeparator)
-                .append(this.altitudineValue).append(ClimateParameter.generalSeparator)
-                .append(this.massaValue).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.notaVento).append(": ").append(this.getVentoNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.notaUmidita).append(": ").append(this.getUmiditaNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.notaPressione).append(": ").append(this.getPressioneNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.notaTemp).append(": ").append(this.getTempNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.notePrecipitazioni).append(": ").append(this.getPrecipitazioniNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.noteAltGhiacciai).append(": ").append(this.getAltGhicciaiNotes()).append(ClimateParameter.generalSeparator)
-                .append(ClimateParameter.noteMassaGhiacciai).append(": ").append(this.getMassaGhiacciaiNotes()).append(ClimateParameter.generalSeparator);
+        builder.append(this.parameterId).append(ParametroClimatico.generalSeparator)
+                .append(this.idCentro).append(ParametroClimatico.generalSeparator)
+                .append(this.areaInteresse).append(ParametroClimatico.generalSeparator)
+                .append(this.pubDate).append(ParametroClimatico.generalSeparator)
+                .append(this.ventoValue).append(ParametroClimatico.generalSeparator)
+                .append(this.umiditaValue).append(ParametroClimatico.generalSeparator)
+                .append(this.pressioneValue).append(ParametroClimatico.generalSeparator)
+                .append(this.temperaturaValue).append(ParametroClimatico.generalSeparator)
+                .append(this.precipitazioniValue).append(ParametroClimatico.generalSeparator)
+                .append(this.altitudineValue).append(ParametroClimatico.generalSeparator)
+                .append(this.massaValue).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.notaVento).append(": ").append(this.getVentoNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.notaUmidita).append(": ").append(this.getUmiditaNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.notaPressione).append(": ").append(this.getPressioneNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.notaTemp).append(": ").append(this.getTempNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.notePrecipitazioni).append(": ").append(this.getPrecipitazioniNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.noteAltGhiacciai).append(": ").append(this.getAltGhicciaiNotes()).append(ParametroClimatico.generalSeparator)
+                .append(ParametroClimatico.noteMassaGhiacciai).append(": ").append(this.getMassaGhiacciaiNotes()).append(ParametroClimatico.generalSeparator);
         return builder.toString();
     }
 }

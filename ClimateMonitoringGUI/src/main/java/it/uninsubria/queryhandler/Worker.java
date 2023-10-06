@@ -3,10 +3,9 @@ package it.uninsubria.queryhandler;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
-import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.ClimateParameter;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.util.IDGenerator;
 
 import java.sql.*;
@@ -132,13 +131,13 @@ public class Worker extends Thread{
         return null;
     }
 
-    public LinkedList<ClimateParameter> selectAllFromCPWithCond(String fieldCond, String cond){
+    public LinkedList<ParametroClimatico> selectAllFromCPWithCond(String fieldCond, String cond){
         String query = "select * from parametro_climatico where " + fieldCond + " = ?";
         System.out.println(query);
-        LinkedList<ClimateParameter> parametriClimatici = new LinkedList<ClimateParameter>();
+        LinkedList<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
-                ClimateParameter cp = new ClimateParameter(
+                ParametroClimatico cp = new ParametroClimatico(
                         res.getString("parameterid"),
                         res.getString("idcentro"),
                         res.getString("areaid"),
