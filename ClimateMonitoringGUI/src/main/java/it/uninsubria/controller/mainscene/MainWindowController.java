@@ -3,6 +3,7 @@ import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.AIDialog;
+import it.uninsubria.controller.dialog.PCDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
@@ -14,6 +15,7 @@ import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.security.PrivilegedAction;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,10 +75,6 @@ public class MainWindowController{
     private final String url = "jdbc:postgresql://localhost/postgres";
     private Properties props;
 
-    //set login status to false
-    //private boolean loggedIN = false;
-    private BooleanProperty loggedIN;
-
     private Stage mainWindowStage;
     private SceneController sceneController;
 
@@ -87,7 +86,6 @@ public class MainWindowController{
         sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
         sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
 
-        loggedIN = new SimpleBooleanProperty(false);
 
 
         //init the query handler
@@ -114,6 +112,17 @@ public class MainWindowController{
         //line chart
         contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
 
+    }
+
+    static TableView<String[]> createTable(String[] columnNames){
+        TableView<String[]> table = new TableView<String[]>();
+        for(int i = 0; i < columnNames.length; i++){
+            final int index = i;
+            TableColumn<String[], String> column = new TableColumn<String[], String>(columnNames[i]);
+            column.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue()[index]));
+            table.getColumns().add(column);
+        }
+        return table;
     }
 
     private void initAlerts(){
@@ -167,6 +176,9 @@ public class MainWindowController{
     }
 
     public void ricercaAreaInteresse(ActionEvent actionEvent) {
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        prepTableAreaInteresse();
         this.paramBox = new VBox(10);
         //denominazione, stato, latitudine, longitudine
         this.tDenominazione = new TextField("nome");
@@ -204,19 +216,79 @@ public class MainWindowController{
         this.borderPane.setRight(paramBox);
     }
 
+    private void prepTableParamClimatici(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+
+        TableColumn dateColumn = new TableColumn("Data");
+        dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
+
+        TableColumn ventoColumn = new TableColumn("Vento");
+        ventoColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("ventoValue"));
+        TableColumn umiditaColumn = new TableColumn("Umidita");
+        umiditaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("umiditaValue"));
+        TableColumn pressioneColumn = new TableColumn("Pressione");
+        pressioneColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("pressioneValue"));
+        TableColumn temperaturaColumn = new TableColumn("Temperatura");
+        temperaturaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("temperaturaValue"));
+        TableColumn precipitazioniColumn = new TableColumn("Precipitazioni");
+        precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("precipitazioniValue"));
+        TableColumn altitudineColumn = new TableColumn("Altitudine ghiacciai");
+        altitudineColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("altitudineValue"));
+        TableColumn massaColumn = new TableColumn("Massa ghiacciai");
+        massaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("massaValue"));
+
+        tableView.getColumns().addAll(dateColumn, ventoColumn, umiditaColumn,
+                pressioneColumn, temperaturaColumn, precipitazioniColumn, altitudineColumn, massaColumn);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow<>();
+            row.setOnMouseClicked(
+                    event -> {
+                        if(event.getClickCount() == 2 && (!row.isEmpty())){
+                            ParametroClimatico pc = (ParametroClimatico) row.getItem();
+                            System.out.println("item clicked" + pc.getPubDate());
+                            String nomeArea = queryHandler.selectObjectJoinWithCond("denominazione",
+                                    QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.AREA_INTERESSE,
+                                    "areaid", pc.getAreaInteresseId());
+                            String nomeCentro = queryHandler.selectObjectJoinWithCond(
+                                    "nomecentro",
+                                    QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.CENTRO_MONITORAGGIO,
+                                    "centroid", pc.getIdCentro());
+                            try{
+                               Stage pcDialogStage = new Stage();
+                               PCDialog pcDialogController = new PCDialog(sceneController, pc, nomeCentro, nomeArea);
+                               FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/pc-dialog.fxml"));
+                               fxmlLoader.setController(pcDialogController);
+                               Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
+                               pcDialogStage.setScene(dialogScene);
+                               pcDialogStage.show();
+                            }catch(IOException ioe){ioe.printStackTrace();}
+                        }
+                    }
+            );
+
+            return row;
+        });
+
+    }
+
     private void prepTableAreaInteresse(){
         /**
         TableColumn keyColumn = new TableColumn("areaID");
         keyColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
          **/
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+
         TableColumn denomColumn = new TableColumn("denominazione");
-        denomColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
+        denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
         TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<>("stato"));
+        countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
         TableColumn latColumn = new TableColumn("latitudine");
-        latColumn.setCellValueFactory(new PropertyValueFactory<>("latitudine"));
+        latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
         TableColumn longColumn = new TableColumn("longitudine");
-        longColumn.setCellValueFactory(new PropertyValueFactory<>("longitudine"));
+        longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
 
         tableView.getColumns().addAll(denomColumn, countryColumn, latColumn, longColumn);
 
@@ -245,14 +317,12 @@ public class MainWindowController{
     }
 
     private void showAreeInserite(){
-        prepTableAreaInteresse();
         List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
         res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
 
     private void ricercaAreaPerDenom(){
         String denom = this.tDenominazione.getText();
-        prepTableAreaInteresse();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
             LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
 
@@ -269,7 +339,6 @@ public class MainWindowController{
 
     private void ricercaAreaPerStato(){
         String stato = this.tStato.getText();
-        prepTableAreaInteresse();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
             LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
             res.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
@@ -298,6 +367,10 @@ public class MainWindowController{
     }
 
     public void visualizzaParametriClimatici(ActionEvent actionEvent) {
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        prepTableParamClimatici();
+
         this.paramBox = new VBox(10);
         this.tAreaInteresse = new TextField("AreaInteresse");
         this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
@@ -318,37 +391,9 @@ public class MainWindowController{
         addNodesToParamBox(notesToAdd);
         this.borderPane.setRight(paramBox);
 
-    }
-
-    private void prepTablePC(){
-        /**
-        TableColumn keyColumn = new TableColumn("parameterId");
-        keyColumn.setCellValueFactory(new PropertyValueFactory<>("parameterId"));;
-         **/
-        TableColumn centroColumn = new TableColumn("idCentro");
-        centroColumn.setCellValueFactory(new PropertyValueFactory<>("idcentro"));
-        TableColumn areaColumn = new TableColumn("areaInteresse");
-        areaColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
-        TableColumn dateColumn = new TableColumn("pubDate");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("pubdate"));
-        TableColumn ventoColumn = new TableColumn("ventoValue");
-        ventoColumn.setCellValueFactory(new PropertyValueFactory<>(""));
-        TableColumn umiditaColumn = new TableColumn("umiditaValue");
-        umiditaColumn.setCellValueFactory(new PropertyValueFactory<>("umiditaValue"));
-        TableColumn pressioneColumn = new TableColumn("pressioneValue");
-        pressioneColumn.setCellValueFactory(new PropertyValueFactory<>("pressioneValue"));
-        TableColumn temperaturaColumn = new TableColumn("temperaturaValue");
-        temperaturaColumn.setCellValueFactory(new PropertyValueFactory<>("temperaturaValue"));
-        TableColumn precipitazioniColumn = new TableColumn("precipitazioniValue");
-        precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<>("precipitazioniValue"));
-        TableColumn altitudineColumn = new TableColumn("altitudineValue");
-        altitudineColumn.setCellValueFactory(new PropertyValueFactory<>("altitudineValue"));
-        TableColumn massaColumn = new TableColumn("massaValue");
-        massaColumn.setCellValueFactory(new PropertyValueFactory<>("massaValue"));
-        tableView.getColumns().addAll(centroColumn, areaColumn, dateColumn, ventoColumn, umiditaColumn, pressioneColumn,
-                temperaturaColumn, precipitazioniColumn, altitudineColumn, massaColumn);
 
     }
+
 
     private void visualizzaPC(){
         String areaInteresseCercata = tAreaInteresse.getText();
@@ -357,7 +402,6 @@ public class MainWindowController{
         LocalDate endDateTmp = LocalDate.of(2100, 1, 1);
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
-        prepTablePC();
 
         if(areaInteresseCercata.isEmpty()){
             this.areaInteresseAlert.showAndWait();

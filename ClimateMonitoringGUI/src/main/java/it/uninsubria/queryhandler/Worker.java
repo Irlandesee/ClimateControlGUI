@@ -31,11 +31,54 @@ public class Worker extends Thread{
 
     public void run(){}
 
+
     public ResultSet prepAndExecuteStatement(String query, String arg) throws SQLException{
         PreparedStatement stat = conn.prepareStatement(query);
         System.out.println(stat);
         stat.setString(1, arg);
         return stat.executeQuery();
+    }
+
+    public String selectObjFromPCWithJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+        String query = "select %s" + oggetto + " from parametro_climatico pc join ";
+        switch(otherTable){
+            case CITY  ->{
+                //TODO
+                return null;
+            }
+            case AREA_INTERESSE -> {
+                query = query.formatted("ai.");
+                query += "area_interesse ai on pc.areaid = ai.areaid where pc." + fieldCond + " = '" + cond +"'";
+                System.out.println(query);
+            }
+            case OPERATORE -> {
+                //TODO
+                return null;
+            }
+            case OP_AUTORIZZATO -> {
+                //TODO
+                return null;
+            }
+            case CENTRO_MONITORAGGIO -> {
+                query = query.formatted("cm.");
+                query += "centro_monitoraggio cm on pc.centroid = cm.centroid where pc." +fieldCond + " = '" + cond + "'";
+                System.out.println(query);
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            default -> {return null;}
+        }
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet res = stat.executeQuery();
+            res.next();
+            return res.getString(oggetto);
+        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
     }
 
     public LinkedList<City> selectAllFromCityWithCond(String fieldCond, String cond){
@@ -74,7 +117,7 @@ public class Worker extends Thread{
     }
 
     public LinkedList<Operatore> selectAllFromOpWithCond(String fieldCond, String cond){
-        String query = "selct * from operatore where " + fieldCond + " = ?";
+        String query = "select * from operatore where " + fieldCond + " = ?";
         LinkedList<Operatore> operatori = new LinkedList<Operatore>();
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
@@ -139,7 +182,7 @@ public class Worker extends Thread{
             while(res.next()){
                 ParametroClimatico cp = new ParametroClimatico(
                         res.getString("parameterid"),
-                        res.getString("idcentro"),
+                        res.getString("centroid"),
                         res.getString("areaid"),
                         res.getDate("pubdate").toLocalDate()
                 );

@@ -31,6 +31,40 @@ public class QueryHandler{
         this.props = props;
     }
 
+    public String selectObjectJoinWithCond(String oggetto, tables table, tables otherTable, String fieldCond, String cond){
+        switch(table){
+            case CITY -> {
+                //TODO
+                return null;
+            }
+            case CENTRO_MONITORAGGIO -> {
+                //TODO
+                return null;
+            }
+            case OPERATORE -> {
+                //TODO
+                return null;
+            }
+            case OP_AUTORIZZATO -> {
+                //TODO
+                return null;
+            }
+            case AREA_INTERESSE -> {
+                //TODO
+                return null;
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case PARAM_CLIMATICO -> {
+                Worker w = new Worker(dbUrl, props, "workerPC");
+                return w.selectObjFromPCWithJoinCond(oggetto, otherTable, fieldCond, cond);
+            }
+            default -> {return null;}
+        }
+    }
+
     public List<String> selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
         switch(table){
             case CITY -> {
