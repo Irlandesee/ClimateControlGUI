@@ -27,8 +27,8 @@ module it.uninsubria.climatemonitoringgui {
     exports it.uninsubria.controller.scene;
     opens it.uninsubria.controller.scene to javafx.fxml;
 
-    exports it.uninsubria.controller.parametroclimatico;
     opens it.uninsubria.controller.parametroclimatico to javafx.fxml;
+    exports it.uninsubria.controller.parametroclimatico;
 
     exports it.uninsubria.controller.mainscene;
     opens it.uninsubria.controller.mainscene to javafx.fxml;
@@ -41,6 +41,9 @@ module it.uninsubria.climatemonitoringgui {
 
     opens it.uninsubria.centroMonitoraggio;
     exports it.uninsubria.centroMonitoraggio to javafx.base;
+
+    opens it.uninsubria.parametroClimatico;
+    exports it.uninsubria.parametroClimatico to javafx.base;
 
     opens it.uninsubria.controller.dialog;
     exports it.uninsubria.controller.dialog to javafx.fxml;
