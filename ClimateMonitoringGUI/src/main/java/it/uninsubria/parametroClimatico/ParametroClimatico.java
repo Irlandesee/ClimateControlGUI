@@ -66,62 +66,16 @@ public class ParametroClimatico {
     private String altGhicciaiNotes;
     private String massaGhiacciaiNotes;
 
-    private HashMap<String, Short> paramValues;
-    private HashMap<String, String> paramNotes;
-
     public ParametroClimatico(String parameterID){
         this.parameterId = parameterID;
-        this.paramValues = new HashMap<String, Short>();
-        this.initParamValues();
     }
 
-    public ParametroClimatico(String parameterID, String idCentro
-            , String areaInteresse
-            , LocalDate pubDate){
+    public ParametroClimatico(String parameterID, String idCentro, String areaInteresse, LocalDate pubDate){
         this.parameterId = parameterID;
         this.idCentro = idCentro;
         this.areaInteresse = areaInteresse;
         this.pubDate = pubDate;
 
-        this.paramValues = new HashMap<String, Short>();
-        this.initParamValues();
-    }
-
-    private void initParamValues(){
-        this.paramValues.put(ParametroClimatico.paramVento, ParametroClimatico.defaultValue);
-        this.paramValues.put(ParametroClimatico.paramUmidita, ParametroClimatico.defaultValue);
-        this.paramValues.put(ParametroClimatico.paramPressione, ParametroClimatico.defaultValue);
-        this.paramValues.put(ParametroClimatico.paramTemp, ParametroClimatico.defaultValue);
-        this.paramValues.put(ParametroClimatico.paramAltGhiacciai, ParametroClimatico.defaultValue);
-        this.paramValues.put(ParametroClimatico.paramMassaGhiacciai, ParametroClimatico.defaultValue);
-    }
-
-    public boolean addParameter(String param, short value) {
-        if(param == null || param.isBlank())
-            throw new IllegalArgumentException(ParametroClimatico.ERROR_PARAM_KEY);
-        else if(value < minVal)
-            throw new IllegalArgumentException(ParametroClimatico.ERROR_INVALID_MIN_VALUE);
-        else if(value > maxVal)
-            throw new IllegalArgumentException(ParametroClimatico.ERROR_INVALID_MAX_VALUE);
-        if(paramValues.containsKey(param)){
-            paramValues.replace(param, value);
-            return true;
-        }
-        return false;
-    }
-
-
-    public boolean rmParameter(String param){
-        if(param == null || param.isBlank())
-            throw new IllegalArgumentException(ParametroClimatico.ERROR_PARAM_KEY);
-        if(!paramValues.isEmpty()){
-            if(paramValues.containsKey(param)){
-                paramValues.replace(param, ParametroClimatico.defaultValue);
-                return true;
-            }
-            else return false;
-        }
-        return false;
     }
 
     public String getParameterId(){
@@ -264,20 +218,17 @@ public class ParametroClimatico {
         this.massaGhiacciaiNotes = massaGhiacciaiNotes;
     }
 
-    //params1,...,paramN;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParametroClimatico that = (ParametroClimatico) o;
-        return Objects.equals(parameterId, that.parameterId)
-                && Objects.equals(pubDate, that.pubDate);
+        return ventoValue == that.ventoValue && umiditaValue == that.umiditaValue && pressioneValue == that.pressioneValue && precipitazioniValue == that.precipitazioniValue && temperaturaValue == that.temperaturaValue && altitudineValue == that.altitudineValue && massaValue == that.massaValue && Objects.equals(parameterId, that.parameterId) && Objects.equals(idCentro, that.idCentro) && Objects.equals(areaInteresse, that.areaInteresse) && Objects.equals(pubDate, that.pubDate) && Objects.equals(notes, that.notes) && Objects.equals(ventoNotes, that.ventoNotes) && Objects.equals(umiditaNotes, that.umiditaNotes) && Objects.equals(pressioneNotes, that.pressioneNotes) && Objects.equals(precipitazioniNotes, that.precipitazioniNotes) && Objects.equals(tempNotes, that.tempNotes) && Objects.equals(altGhicciaiNotes, that.altGhicciaiNotes) && Objects.equals(massaGhiacciaiNotes, that.massaGhiacciaiNotes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parameterId, pubDate);
+        return Objects.hash(parameterId, idCentro, areaInteresse, pubDate, notes, ventoValue, umiditaValue, pressioneValue, precipitazioniValue, temperaturaValue, altitudineValue, massaValue, ventoNotes, umiditaNotes, pressioneNotes, precipitazioniNotes, tempNotes, altGhicciaiNotes, massaGhiacciaiNotes);
     }
 
     //centroID;areaInteresse;data;params1,paramN;note

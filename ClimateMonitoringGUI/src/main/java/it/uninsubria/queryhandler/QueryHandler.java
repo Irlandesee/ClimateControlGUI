@@ -4,14 +4,11 @@ import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.ClimateParameter;
-import it.uninsubria.util.Item;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 
-import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class QueryHandler{
 
@@ -148,7 +145,7 @@ public class QueryHandler{
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPM");
-                LinkedList<ClimateParameter> cps = w.selectAllFromCPWithCond(fieldCond, cond);
+                LinkedList<ParametroClimatico> cps = w.selectAllFromCPWithCond(fieldCond, cond);
                 //cps.forEach(System.out::println);
                 return (LinkedList<T>) cps;
             }
