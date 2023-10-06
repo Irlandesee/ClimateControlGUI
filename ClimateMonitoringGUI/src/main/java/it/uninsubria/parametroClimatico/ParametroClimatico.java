@@ -10,15 +10,7 @@ public class ParametroClimatico {
     private String areaInteresse;
     private LocalDate pubDate;
 
-    private String notes; //max 256 chars
-
-    private static final String ventoExp = "Velocità del vento (km/h), suddivisa in fasce";
-    private static final String umiditaExp = "% di Umidità, suddivisa in fasce";
-    private static final String pressioneExp = "In hPa, suddivisa in fasce";
-    private static final String tempExp = "In C°, suddivisa in fasce";
-    private static final String precipationiExp = "In mm di pioggia, suddivisa in fasce";
-    private static final String altiGhiacciaiExp = "In m, suddivisa in piogge";
-    private static final String massaGhiacciaiExp = "In kg, suddivisa in fasce";
+    public static final String generalSeparator = ",";
 
     public static final String notaVento = "Vento note";
     public static final String notaUmidita = "Umidita note";
@@ -27,28 +19,6 @@ public class ParametroClimatico {
     public static final String notePrecipitazioni = "Precip note";
     public static final String noteAltGhiacciai = "Alt ghiacciai note";
     public static final String noteMassaGhiacciai = "Massa ghiacciai note";
-
-    private static final short minVal = 1;
-    private static final short maxVal = 5;
-    private static final short maxNoteLength = 256;
-    public static final String generalSeparator = ";";
-    public static final String generalParamSeparator = ",";
-    public static final String paramKeySeparator = ":";
-    public static final String ERROR_STR_NOT_VALID = "param str must be a valid string!\n";
-    public static final String ERROR_PARAM_KEY= "param key must be valid a valid string!\n";
-    public static final String ERROR_TOO_MANY_CHARS = "note length must be under 256 chars!\n";
-    public static final String ERROR_INVALID_MIN_VALUE = "min value must be >= 1\n";
-    public static final String ERROR_INVALID_MAX_VALUE = "max value must be <= 5\n";
-    public static final String ERROR_INVALID_KEY = "invalid parameter key!\n";
-
-    public static final String paramVento = "vento";
-    public static final String paramUmidita = "umidita";
-    public static final String paramPressione = "pressione";
-    public static final String paramTemp = "temperature";
-    public static final String paramAltGhiacciai = "altGhiacciai";
-    public static final String paramMassaGhiacciai = "massaGhiacciai";
-
-    public static final short defaultValue = -1;
 
     private short ventoValue;
     private short umiditaValue;
@@ -104,10 +74,6 @@ public class ParametroClimatico {
 
     public void setPubDate(LocalDate pubDate) {
         this.pubDate = pubDate;
-    }
-
-    public String getNotes() {
-        return notes;
     }
 
     public short getVentoValue() {
@@ -223,12 +189,12 @@ public class ParametroClimatico {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParametroClimatico that = (ParametroClimatico) o;
-        return ventoValue == that.ventoValue && umiditaValue == that.umiditaValue && pressioneValue == that.pressioneValue && precipitazioniValue == that.precipitazioniValue && temperaturaValue == that.temperaturaValue && altitudineValue == that.altitudineValue && massaValue == that.massaValue && Objects.equals(parameterId, that.parameterId) && Objects.equals(idCentro, that.idCentro) && Objects.equals(areaInteresse, that.areaInteresse) && Objects.equals(pubDate, that.pubDate) && Objects.equals(notes, that.notes) && Objects.equals(ventoNotes, that.ventoNotes) && Objects.equals(umiditaNotes, that.umiditaNotes) && Objects.equals(pressioneNotes, that.pressioneNotes) && Objects.equals(precipitazioniNotes, that.precipitazioniNotes) && Objects.equals(tempNotes, that.tempNotes) && Objects.equals(altGhicciaiNotes, that.altGhicciaiNotes) && Objects.equals(massaGhiacciaiNotes, that.massaGhiacciaiNotes);
+        return ventoValue == that.ventoValue && umiditaValue == that.umiditaValue && pressioneValue == that.pressioneValue && precipitazioniValue == that.precipitazioniValue && temperaturaValue == that.temperaturaValue && altitudineValue == that.altitudineValue && massaValue == that.massaValue && Objects.equals(parameterId, that.parameterId) && Objects.equals(idCentro, that.idCentro) && Objects.equals(areaInteresse, that.areaInteresse) && Objects.equals(pubDate, that.pubDate) && Objects.equals(ventoNotes, that.ventoNotes) && Objects.equals(umiditaNotes, that.umiditaNotes) && Objects.equals(pressioneNotes, that.pressioneNotes) && Objects.equals(precipitazioniNotes, that.precipitazioniNotes) && Objects.equals(tempNotes, that.tempNotes) && Objects.equals(altGhicciaiNotes, that.altGhicciaiNotes) && Objects.equals(massaGhiacciaiNotes, that.massaGhiacciaiNotes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parameterId, idCentro, areaInteresse, pubDate, notes, ventoValue, umiditaValue, pressioneValue, precipitazioniValue, temperaturaValue, altitudineValue, massaValue, ventoNotes, umiditaNotes, pressioneNotes, precipitazioniNotes, tempNotes, altGhicciaiNotes, massaGhiacciaiNotes);
+        return Objects.hash(parameterId, idCentro, areaInteresse, pubDate, ventoValue, umiditaValue, pressioneValue, precipitazioniValue, temperaturaValue, altitudineValue, massaValue, ventoNotes, umiditaNotes, pressioneNotes, precipitazioniNotes, tempNotes, altGhicciaiNotes, massaGhiacciaiNotes);
     }
 
     //centroID;areaInteresse;data;params1,paramN;note
