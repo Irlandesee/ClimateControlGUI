@@ -81,6 +81,14 @@ public class Worker extends Thread{
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
     }
 
+    public <T> List<T> selectAllFromPcJoin(QueryHandler.tables otherTable){
+        String query = "select * from parametro_climatico pc join %s";
+        switch(otherTable){
+            //TODO
+        }
+
+    }
+
     public LinkedList<City> selectAllFromCityWithCond(String fieldCond, String cond){
         String query = "select * from city where " + fieldCond + " = ?";
         LinkedList<City> cities = new LinkedList<City>();

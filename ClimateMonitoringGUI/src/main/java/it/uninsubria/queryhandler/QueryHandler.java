@@ -13,13 +13,19 @@ import java.util.Properties;
 public class QueryHandler{
 
     public enum tables{
-        AREA_INTERESSE,
-        CENTRO_MONITORAGGIO,
-        CITY,
-        NOTA_PARAM_CLIMATICO,
-        OPERATORE,
-        OP_AUTORIZZATO,
-        PARAM_CLIMATICO
+        AREA_INTERESSE("area_interesse"),
+        CENTRO_MONITORAGGIO("centro_monitoraggio"),
+        CITY("city"),
+        NOTA_PARAM_CLIMATICO("nota_parametro_climatico"),
+        OPERATORE("operatore"),
+        OP_AUTORIZZATO("operatore_autorizzati"),
+        PARAM_CLIMATICO("parametro_climatico");
+
+        public final String label;
+
+        private tables(String label){
+            this.label = label;
+        }
     };
 
     private String dbUrl;
@@ -29,6 +35,65 @@ public class QueryHandler{
     public QueryHandler(String url, Properties props){
         this.dbUrl = url;
         this.props = props;
+    }
+
+    public <T> List<T> selectAllJoin(tables table, tables otherTable){
+        switch(table){
+            case CITY -> {
+                //TODO
+                Worker w = new Worker(dbUrl, props, "workerCity");
+                /**
+                w.selectAllFromCityJoin(otherTable, fieldCond, cond);
+                 **/
+                return null;
+            }
+            case CENTRO_MONITORAGGIO -> {
+                //TODO
+                Worker w = new Worker(dbUrl, props, "workerAuthOp");
+                /**
+                w.selectAllFromCmJoin(otherTable, fieldCond, cond);
+                 **/
+                return null;
+            }
+            case OPERATORE -> {
+                //TODO
+                Worker w = new Worker(dbUrl, props, "workerOp");
+                /**
+                w.selectAllFromOpJoin(otherTable, fieldCond, cond);
+                 **/
+                return null;
+            }
+            case OP_AUTORIZZATO -> {
+                //TODO
+                Worker w = new Worker(dbUrl, props, "workerAuthOp");
+                /**
+                w.selectAllFromAuthOpJoin(otherTable, fieldCond, cond);
+                 **/
+                return null;
+            }
+            case AREA_INTERESSE -> {
+                //TODO
+                Worker w = new Worker(dbUrl, props, "workerAi");
+                /**
+                w.selectAllFromAiJoin(otherTable, fieldCond, cond);
+                 **/
+                return null;
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                //TODO
+                return null;
+            }
+            case PARAM_CLIMATICO -> {
+                Worker w = new Worker(dbUrl, props, "workerPc");
+                return w.selectAllFromPcJoin(otherTable);
+            }
+            default -> {return null;}
+        }
+    }
+
+    public <T> List<T> selectAllJoinCond(tables table, tables otherTable, String fieldCond, String cond){
+        //TODO
+        return null;
     }
 
     public String selectObjectJoinWithCond(String oggetto, tables table, tables otherTable, String fieldCond, String cond){

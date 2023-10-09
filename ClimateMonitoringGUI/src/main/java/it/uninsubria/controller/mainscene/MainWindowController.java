@@ -59,7 +59,10 @@ public class MainWindowController{
     private TextField tCentroMonitoraggio;
     private DatePicker startDatePicker;
     private DatePicker endDatePicker;
-    private Button btnRicercaPC;
+    private Button btnRicercaPcArea;
+    private Button btnRicercaPcCm;
+    private ToggleButton tglDatePicker;
+    private ToggleButton tglRicercaAreaCm;
 
     //alerts
     private Alert coordAlert;
@@ -67,6 +70,7 @@ public class MainWindowController{
     private Alert statoAlert;
     private Alert pcAlert;
     private Alert areaInteresseAlert;
+    private Alert centroMonitoraggioAlert;
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
@@ -146,6 +150,10 @@ public class MainWindowController{
         this.areaInteresseAlert = new Alert(Alert.AlertType.ERROR);
         this.areaInteresseAlert.setHeaderText("Area interesse non valida");
         this.areaInteresseAlert.setContentText("Input non valido");
+
+        this.centroMonitoraggioAlert = new Alert(Alert.AlertType.ERROR);
+        this.centroMonitoraggioAlert.setHeaderText("Centro Monitoraggio non valido");
+        this.centroMonitoraggioAlert.setContentText("Input non valido");
 
         this.invalidDateAlert = new Alert(Alert.AlertType.ERROR);
         this.invalidDateAlert.setHeaderText("Invalid date");
@@ -376,68 +384,98 @@ public class MainWindowController{
         this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
         this.tCentroMonitoraggio = new TextField("CentroMonitoraggio");
         this.tCentroMonitoraggio.setOnMouseClicked((event) -> this.tCentroMonitoraggio.clear());
+        this.tglDatePicker = new ToggleButton("Ricerca con data");
         this.startDatePicker = new DatePicker();
         this.endDatePicker = new DatePicker();
-        this.btnRicercaPC = new Button("Ricerca");
-        this.btnRicercaPC.setOnAction((event) -> {visualizzaPC();});
+        this.tglRicercaAreaCm = new ToggleButton("Ricerca entrambi");
+        this.btnRicercaPcArea = new Button("Ricerca per area");
+        this.btnRicercaPcArea.setOnAction(this::visualizzaPC);
+        this.btnRicercaPcCm = new Button("Ricerca Per Cm");
+        this.btnRicercaPcCm.setOnAction(this::visualizzaPC);
 
-        LinkedList<Node> notesToAdd = new LinkedList<Node>();
-        notesToAdd.add(tAreaInteresse);
-        notesToAdd.add(tCentroMonitoraggio);
-        notesToAdd.add(startDatePicker);
-        notesToAdd.add(endDatePicker);
-        notesToAdd.add(btnRicercaPC);
-
-        addNodesToParamBox(notesToAdd);
+        LinkedList<Node> nodesToAdd = new LinkedList<Node>();
+        nodesToAdd.add(tAreaInteresse);
+        nodesToAdd.add(tCentroMonitoraggio);
+        nodesToAdd.add(tglDatePicker);
+        nodesToAdd.add(startDatePicker);
+        nodesToAdd.add(endDatePicker);
+        nodesToAdd.add(tglRicercaAreaCm);
+        nodesToAdd.add(btnRicercaPcArea);
+        nodesToAdd.add(btnRicercaPcCm);
+        addNodesToParamBox(nodesToAdd);
         this.borderPane.setRight(paramBox);
-
 
     }
 
 
-    private void visualizzaPC(){
-        String areaInteresseCercata = tAreaInteresse.getText();
-        String centroMonitoraggioCercato = tCentroMonitoraggio.getText();
-        LocalDate startDateTmp = LocalDate.of(1900, 1, 1);
-        LocalDate endDateTmp = LocalDate.of(2100, 1, 1);
-        LocalDate startDate = startDatePicker.getValue();
-        LocalDate endDate = endDatePicker.getValue();
+    private void visualizzaPC(ActionEvent event){
+        String denomAiCercata = tAreaInteresse.getText();
+        String denomCmCercato = tCentroMonitoraggio.getText();
+        LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
+        LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
+        boolean ricercaPerData = false;
+        LocalDate startDate = canonicalStartDate;
+        LocalDate endDate = canonicalEndDate;
 
-        if(areaInteresseCercata.isEmpty()){
-            this.areaInteresseAlert.showAndWait();
-            return;
-        }//TODO: add check dates != null
-        if(startDate == null || endDate == null){
-            this.invalidDateAlert.showAndWait();
-            return;
-        }
-        if(startDate.isBefore(startDateTmp) || endDate.isAfter(endDateTmp) || startDate.isEqual(endDate)) {
-            this.invalidDateAlert.showAndWait();
-            return;
+        if(tglDatePicker.isSelected()){
+            if(startDatePicker.getValue() == null && endDatePicker.getValue() == null){
+                invalidDateAlert.show();
+            }
+            startDate = startDatePicker.getValue();
+            endDate = endDatePicker.getValue();
+            if(startDate.isBefore(canonicalStartDate)
+                    || endDate.isAfter(canonicalEndDate)
+                    || startDate.isEqual(endDate)){
+                invalidDateAlert.show();
+            }
+            ricercaPerData = true;
         }
 
-        LinkedList<CentroMonitoraggio> cms = new LinkedList<>();
-        LinkedList<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
-        areeInteresse = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", areaInteresseCercata);
-        String areaID = areeInteresse.pop().getAreaid();
-        LinkedList<ParametroClimatico> parametriClimatici = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaID);
-        if(!centroMonitoraggioCercato.isEmpty()){
-            if(!centroMonitoraggioCercato.equals("CentroMonitoraggio")){
-                cms = queryHandler.selectAllWithCond(QueryHandler.tables.CENTRO_MONITORAGGIO, "nomecentro", centroMonitoraggioCercato);
-                String centroCercatoId = cms.pop().getCentroID();
-                //filtro via i risultati non appertenti al cm cercato
+        //ricerca area
+        if(event.getSource().equals(btnRicercaPcArea)){
+            if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
+                this.areaInteresseAlert.showAndWait();
+            }else{
+                String areaInteresseId = queryHandler
+                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata)
+                        .get(0);
+                LinkedList<ParametroClimatico> parametriClimatici = queryHandler
+                        .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
                 tableView.getItems().clear();
-                parametriClimatici.forEach((pc) -> {
-                    parametriClimatici.removeIf((id) -> !pc.getIdCentro().equals(centroCercatoId));
-                    tableView.getItems().add(pc);
-                });
-            }else{//Formulo query senza centromonitoraggio
-                tableView.getItems().clear();
-                parametriClimatici.forEach((pc) -> {
-                    tableView.getItems().add(pc);
-                });
+                if(ricercaPerData){
+                    LocalDate finalStartDate = startDate;
+                    LocalDate finalEndDate = endDate;
+                    parametriClimatici.forEach((param) -> {
+                        parametriClimatici.removeIf((pc) -> {
+                            return isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
+                        });
+                    });
+                }
+                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
         }
+        //ricerca cm
+        else if(event.getSource().equals(btnRicercaPcCm)){
+            if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
+                this.centroMonitoraggioAlert.showAndWait();
+            }else{
+                LinkedList<ParametroClimatico> paramClimatici
+                        queryHandler.selectObjectJoin("");
+                tableView.getItems().clear();
+                if(ricercaPerData){
+                    LocalDate finalStartDate = startDate;
+                    LocalDate finalEndDate = endDate;
+
+
+                }
+            }
+        }
+
+
+    }
+
+    public boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
+        return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
     }
 
     public boolean onExecuteLoginQuery(String userID, String password){
