@@ -7,8 +7,10 @@ import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.util.IDGenerator;
+import javafx.util.Pair;
 
 import java.sql.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -39,25 +41,180 @@ public class Worker extends Thread{
         return stat.executeQuery();
     }
 
-    public String selectObjFromPCWithJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+    public <T> List<Pair<City, T>> selectAllFromCityJoin(QueryHandler.tables otherTable){
+        String query = "select * from city c join";
+        switch(otherTable){
+            case AREA_INTERESSE -> {
+                query += "area_interesse ai on c.ascii_name = ai.denominazione";
+                List<Pair<City, T>> resultList = new LinkedList<Pair<City, T>>();
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        City c = new City(
+                                rSet.getString("geoname_id"),
+                                rSet.getString("ascii_name"),
+                                rSet.getString("country"),
+                                rSet.getString("country_code"),
+                                rSet.getFloat("latitude"),
+                                rSet.getFloat("longitude")
+                        );
+                        AreaInteresse ai = new AreaInteresse(
+                                rSet.getString("areaid"),
+                                rSet.getString("denominazione"),
+                                rSet.getString("stato"),
+                                rSet.getFloat("latitude"),
+                                rSet.getFloat("longitude")
+                        );
+                        resultList.add((Pair<City, T>) new Pair<City, AreaInteresse>(c, ai));
+                    }
+                    return resultList;
+                }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+            }
+            case CENTRO_MONITORAGGIO -> {
+                query += "centro_monitoraggio cm on c.ascii_name = cm.comune";
+                List<Pair<City, T>> resultList = new LinkedList<Pair<City, T>>();
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        City c = new City(
+                                rSet.getString("geoname_id"),
+                                rSet.getString("ascii_name"),
+                                rSet.getString("country"),
+                                rSet.getString("country_code"),
+                                rSet.getFloat("latitude"),
+                                rSet.getFloat("longitude")
+                        );
+                        CentroMonitoraggio cm = new CentroMonitoraggio(
+                                rSet.getString("centroid"),
+                                rSet.getString("nomecentro"),
+                                rSet.getString("comune"),
+                                rSet.getString("country")
+                        );
+                        Array areeIds = rSet.getArray("aree_interesse_ids");
+                        String[] ids = (String[]) areeIds.getArray();
+                        for(String s : ids) cm.putAreaId(s);
+                        resultList.add((Pair<City, T>) new Pair<City, CentroMonitoraggio>(c, cm));
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+            }
+            default -> {return null;}
+        }
+        return null;
+    }
+
+    public <T> List<T> selectAllFromCmJoin(QueryHandler.tables otherTable){
+
+    }
+
+    public <T> List<T> selectAllFromAiJoin(QueryHandler.tables otherTable){
+
+    }
+
+    public <T> List<T> selectAllFromNotaJoin(QueryHandler.tables otherTable){
+        //only parametro_climatico
+    }
+
+    public <T> List<T> selectAllFromPcJoin(QueryHandler.tables otherTable){
+        String query = "select * from parametro_climatico pc join";
+        switch(otherTable){
+            case AREA_INTERESSE -> {
+                query += "area_interesse ai on pc.areaid = ai.areaid";
+                System.out.println(query);
+                List<AreaInteresse> result = new LinkedList<AreaInteresse>();
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        result.add(new AreaInteresse(
+                                rSet.getString("areaid"),
+                                rSet.getString("denominazione"),
+                                rSet.getString("stato"),
+                                rSet.getFloat("latitudine"),
+                                rSet.getFloat("longitudine")
+                                ));
+                    }
+                    return (List<T>) result;
+                }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+            }
+            case CENTRO_MONITORAGGIO -> {
+                query += "centro_monitoraggio cm on pc.centroid = cm.centroid";
+                System.out.println(query);
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    ResultSet rSet = stat.executeQuery();
+                    List<CentroMonitoraggio> resultList = new LinkedList<CentroMonitoraggio>();
+                    while(rSet.next()){
+                        CentroMonitoraggio cm = new CentroMonitoraggio(
+                                rSet.getString("centroid"),
+                                rSet.getString("nomecentro"),
+                                rSet.getString("comune"),
+                                rSet.getString("country")
+                        );
+                        Array a = rSet.getArray("aree_interesse_ids");
+                        String[] areeIds = (String[])a.getArray();
+                        for(String id : areeIds) cm.putAreaId(id);
+                        resultList.add(cm);
+                    }
+                    return (List<T>) resultList;
+                }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                query += "nota_parametro_climatico npc on pc.notaid = npc.notaid";
+                System.out.println(query);
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    ResultSet rSet = stat.executeQuery();
+                    while(rSet.next()){
+                        //TODO
+                        return null;
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+            }
+            default -> {return null;}
+        }
+        return null;
+    }
+
+    public <T> List<T> selectAllFromCmJoinCond(QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public <T> List<T> selectAllFromAiJoinCond(QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public <T> List<T> selectAllFromCityJoinCond(QueryHandler.tables otherTable, String field, String cond){
+
+    }
+
+    public <T> List<T> selectAllFromPcJoinCond(QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public <T> List<T> selectAllFromNotaJoinCond(String fieldCond, String cond){
+
+    }
+
+    public String selectObjFromCityJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public String selectObjFromCmJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public String selectObjFromAiJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public String selectObjFromNotaJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
+
+    }
+
+    public String selectObjFromPcJoinCond(String oggetto, QueryHandler.tables otherTable, String fieldCond, String cond){
         String query = "select %s" + oggetto + " from parametro_climatico pc join ";
         switch(otherTable){
-            case CITY  ->{
-                //TODO
-                return null;
-            }
             case AREA_INTERESSE -> {
                 query = query.formatted("ai.");
                 query += "area_interesse ai on pc.areaid = ai.areaid where pc." + fieldCond + " = '" + cond +"'";
                 System.out.println(query);
-            }
-            case OPERATORE -> {
-                //TODO
-                return null;
-            }
-            case OP_AUTORIZZATO -> {
-                //TODO
-                return null;
             }
             case CENTRO_MONITORAGGIO -> {
                 query = query.formatted("cm.");
@@ -68,10 +225,6 @@ public class Worker extends Thread{
                 //TODO
                 return null;
             }
-            case PARAM_CLIMATICO -> {
-                //TODO
-                return null;
-            }
             default -> {return null;}
         }
         try(PreparedStatement stat = conn.prepareStatement(query)){
@@ -79,14 +232,6 @@ public class Worker extends Thread{
             res.next();
             return res.getString(oggetto);
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-    }
-
-    public <T> List<T> selectAllFromPcJoin(QueryHandler.tables otherTable){
-        String query = "select * from parametro_climatico pc join %s";
-        switch(otherTable){
-            //TODO
-        }
-
     }
 
     public LinkedList<City> selectAllFromCityWithCond(String fieldCond, String cond){
@@ -218,37 +363,37 @@ public class Worker extends Thread{
         return objs;
     }
 
-    public List<String> selectObjFromCityWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromCityCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from city where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromCMWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromCmCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from centro_monitoraggio where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromOPWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromOperatoreCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from operatore where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromAuthOPWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromAuthOpCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from operatore_autorizzati where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromAIWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromAiCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from area_interesse where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromNotaWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromNotaCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from nota_parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
 
-    public List<String> selectObjFromPCWithCond(String oggetto, String fieldCond, String cond){
+    public String selectObjFromPcCond(String oggetto, String fieldCond, String cond){
         String query = "select " +oggetto+ " from parametro_climatico where "+ fieldCond + " = ?";
         return getQueryResult(query, oggetto, cond);
     }
