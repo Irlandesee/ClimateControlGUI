@@ -437,8 +437,7 @@ public class MainWindowController{
                 this.areaInteresseAlert.showAndWait();
             }else{
                 String areaInteresseId = queryHandler
-                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata)
-                        .get(0);
+                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata);
                 LinkedList<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
                 tableView.getItems().clear();
@@ -459,15 +458,28 @@ public class MainWindowController{
             if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
                 this.centroMonitoraggioAlert.showAndWait();
             }else{
-                LinkedList<ParametroClimatico> paramClimatici
-                        queryHandler.selectObjectJoin("");
+                String centroId = queryHandler
+                        .selectObjectJoinWithCond("centroid",
+                                QueryHandler.tables.PARAM_CLIMATICO,
+                                QueryHandler.tables.CENTRO_MONITORAGGIO,
+                                "nomecentro",
+                                denomCmCercato);
+                List<ParametroClimatico> parametriClimatici = queryHandler
+                        .selectAllWithCond(
+                                QueryHandler.tables.PARAM_CLIMATICO,
+                                "centroid",
+                                centroId);
                 tableView.getItems().clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-
-
+                    parametriClimatici.forEach((param) -> {
+                        parametriClimatici.removeIf((pc) -> {
+                            return isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
+                        });
+                    });
                 }
+                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
         }
 
@@ -493,7 +505,7 @@ public class MainWindowController{
             System.out.println("Operatore inesistente");
             return false;
         }else{//
-            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza).get(0);
+            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza);
             return queryHandler.executeSignUp(nomeOp, cognomeOp, codFisc, userID, email, password, centroID);
         }
     }
