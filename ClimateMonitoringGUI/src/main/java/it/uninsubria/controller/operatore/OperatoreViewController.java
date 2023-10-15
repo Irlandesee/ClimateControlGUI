@@ -204,7 +204,8 @@ public class OperatoreViewController {
                     LinkedList<String> nomiAree = new LinkedList<String>();
                     for(String id: cmAree){
                         //query the db to get the areas names
-                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", id);
+                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", id)
+                                .get(0);
                         nomiAree.add(denominazione);
                     }
                     //Create a new window containing the cms details

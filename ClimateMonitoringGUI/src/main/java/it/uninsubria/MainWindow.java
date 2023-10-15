@@ -29,6 +29,13 @@ public class MainWindow extends Application {
 
     public static void main(String[] args) {
 
-        launch();
+        //launch();
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "qwerty");
+        QueryHandler qHandler = new QueryHandler("jdbc:postgresql://localhost/postgres", props);
+
+
+
     }
 }

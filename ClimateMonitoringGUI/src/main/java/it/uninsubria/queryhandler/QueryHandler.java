@@ -5,6 +5,7 @@ import it.uninsubria.city.City;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
+import javafx.util.Pair;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,11 +37,12 @@ public class QueryHandler{
         this.props = props;
     }
 
-    public <T> List<T> selectAllJoin(tables table, tables otherTable){
+    /**
+    public <T, V> List<Pair<T, V>> selectAllJoin(tables table, tables otherTable){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
-                return w.selectAllFromCityJoin();
+                return w.selectAllFromCityJoin(otherTable);
             }
             case CENTRO_MONITORAGGIO -> {
                 //TODO
@@ -53,9 +55,8 @@ public class QueryHandler{
                 return w.selectAllFromAiJoin(otherTable);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                //TODo
                 Worker w = new Worker(dbUrl, props, "workerNota");
-                return w.selectAllFromNotaJoin(otherTable);
+                return w.selectAllFromNotaJoin();
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPc");
@@ -64,7 +65,9 @@ public class QueryHandler{
             default -> {return null;}
         }
     }
+     **/
 
+    /**
     public <T> List<T> selectAllJoinCond(tables table, tables otherTable, String fieldCond, String cond){
         switch(table){
             case CENTRO_MONITORAGGIO -> {
@@ -90,6 +93,7 @@ public class QueryHandler{
             default -> {return null;}
         }
     }
+     **/
 
     public String selectObjectJoinWithCond(String oggetto, tables table, tables otherTable, String fieldCond, String cond){
         switch(table){
@@ -121,7 +125,7 @@ public class QueryHandler{
         }
     }
 
-    public String selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
+    public List<String> selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
@@ -261,7 +265,7 @@ public class QueryHandler{
         Worker workerIDs = new Worker(dbUrl, props, "workerAreeIDs");
         List<String> areeIds = new LinkedList<String>();
         for(String area : areeInteresseAssociate)
-            areeIds.add(workerIDs.selectObjFromAiCond("areaid", "denominazione", area));
+            areeIds.add(workerIDs.selectObjFromAiCond("areaid", "denominazione", area).get(0));
         try{
             workerIDs.join();
         }catch(InterruptedException ie){ie.printStackTrace();}

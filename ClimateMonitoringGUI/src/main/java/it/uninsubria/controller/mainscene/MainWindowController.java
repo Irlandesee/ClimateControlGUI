@@ -437,7 +437,7 @@ public class MainWindowController{
                 this.areaInteresseAlert.showAndWait();
             }else{
                 String areaInteresseId = queryHandler
-                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata);
+                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata).get(0);
                 LinkedList<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
                 tableView.getItems().clear();
@@ -505,7 +505,8 @@ public class MainWindowController{
             System.out.println("Operatore inesistente");
             return false;
         }else{//
-            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza);
+            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza)
+                    .get(0);
             return queryHandler.executeSignUp(nomeOp, cognomeOp, codFisc, userID, email, password, centroID);
         }
     }
