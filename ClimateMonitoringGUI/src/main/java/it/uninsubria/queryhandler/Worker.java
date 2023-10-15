@@ -52,6 +52,18 @@ public class Worker extends Thread{
         return objs;
     }
 
+    private List<String> getQueryResultList(String oggetto, String fieldCond, String cond, String query) {
+        query = query.formatted(oggetto, fieldCond, cond);
+        List<String> resultList = new LinkedList<String>();
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
+            while(rSet.next()){
+                resultList.add(rSet.getString(oggetto));
+            }
+        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+        return resultList;
+    }
+
 
     private ParametroClimatico extractParametroClimatico(ResultSet rSet) throws SQLException{
         ParametroClimatico pc = new ParametroClimatico(
@@ -234,46 +246,34 @@ public class Worker extends Thread{
     //CentroMonitoraggio
     public List<String> selectObjectsCmJoinAiCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from centro_monitoraggio cm join area_interesse ai on ai.areaid = any(cm.aree_interesse_ids) where %s = '%s'";
-        return getResultList(oggetto, fieldCond, cond, query);
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     public List<String> selectObjectsCmJoinPcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from centro_monitoraggio cm join parametro_climatico pc using(centroid) where %s = '%s'";
-        return getResultList(oggetto, fieldCond, cond, query);
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     //AreaInteresse
     public List<String> selectObjectsAiJoinPcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from area_interesse ai join parametro_climatico pc using(areaid) where %s = '%s'";
-        return getResultList(oggetto, fieldCond, cond, query);
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     public List<String> selectObjectsAiJoinCmCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from area_interesse ai join centro_monitoraggio cm on ai.areaid = any(aree_interesse_ids) where %s = '%s'";
-        return getResultList(oggetto, fieldCond, cond, query);
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     public List<String> selectObjectsAiJoinCityCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from area_interesse ai join city c on ai.denominazione = c.ascii_name where %s = '%s'" ;
-        return getResultList(oggetto, fieldCond, cond, query);
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     //npc
     public List<String> selectObjectsNotaJoinPcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from nota_parametro_climatico npc join parametro_climatico pc using(notaid) where %s = '%s'";
-        return getResultList(oggetto, fieldCond, cond, query);
-    }
-
-    private List<String> getResultList(String oggetto, String fieldCond, String cond, String query) {
-        query = query.formatted(oggetto, fieldCond, cond);
-        List<String> resultList = new LinkedList<String>();
-        try(PreparedStatement stat = conn.prepareStatement(query)){
-            ResultSet rSet = stat.executeQuery();
-            while(rSet.next()){
-                resultList.add(rSet.getString(oggetto));
-            }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return resultList;
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     public LinkedList<City> selectAllCityCond(String fieldCond, String cond){
