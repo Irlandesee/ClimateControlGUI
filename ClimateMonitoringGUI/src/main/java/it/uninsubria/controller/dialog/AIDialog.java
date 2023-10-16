@@ -11,12 +11,13 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class AIDialog {
 
     private final SceneController sceneController;
     private final AreaInteresse ai;
-    private LinkedList<ParametroClimatico> parameters;
+    private List<ParametroClimatico> parameters;
     public Label nomeLabel;
     public Label denominazioneLabel;
     public Label statoLabel;
@@ -24,8 +25,7 @@ public class AIDialog {
     public Label longitudineLabel;
 
     public ListView paramClimaticiList;
-
-    public AIDialog(SceneController sceneController, AreaInteresse ai, LinkedList<ParametroClimatico> parameters){
+    public AIDialog(SceneController sceneController, AreaInteresse ai, List<ParametroClimatico> parameters){
         this.sceneController = sceneController;
         this.ai = ai;
         this.parameters = parameters;
