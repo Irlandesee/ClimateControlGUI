@@ -37,13 +37,14 @@ public class Worker extends Thread{
 
     public ResultSet prepAndExecuteStatement(String query, String arg) throws SQLException{
         PreparedStatement stat = conn.prepareStatement(query);
-        System.out.println(stat);
+        System.out.println(workerID + ":"+ stat);
         stat.setString(1, arg);
         return stat.executeQuery();
     }
 
     private List<String> getQueryResult(String query, String oggetto, String cond){
         List<String> objs = new LinkedList<String>();
+        System.out.println(workerID + ":" + query);
         try(ResultSet res = prepAndExecuteStatement(query, cond)){
             while(res.next()){
                 objs.add(res.getString(oggetto));
@@ -55,6 +56,7 @@ public class Worker extends Thread{
     private List<String> getQueryResultList(String oggetto, String fieldCond, String cond, String query) {
         query = query.formatted(oggetto, fieldCond, cond);
         List<String> resultList = new LinkedList<String>();
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
@@ -155,6 +157,7 @@ public class Worker extends Thread{
     public List<Pair<City, AreaInteresse>> selectAllCityJoinAi(){
         String query = "select * from city c join area_interesse ai on c.ascii_name = ai.denominazione";
         List<Pair<City, AreaInteresse>> resultList = new LinkedList<Pair<City, AreaInteresse>>();
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
@@ -169,6 +172,7 @@ public class Worker extends Thread{
     public List<Pair<City, CentroMonitoraggio>> selectAllCityJoinCm(){
         String query = "select * from city c join centro_monitoraggio cm on c.ascii_name = cm.comune";
         List<Pair<City, CentroMonitoraggio>> resultList = new LinkedList<Pair<City, CentroMonitoraggio>>();
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
@@ -182,6 +186,7 @@ public class Worker extends Thread{
 
     public List<Pair<NotaParametro, ParametroClimatico>> selectAllFromNotaJoin(){
         String query = "select * from nota_parametro_climatico npc join public.parametro_climatico pc using(notaid)";
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             List<Pair<NotaParametro, ParametroClimatico>> resultList = new LinkedList<Pair<NotaParametro, ParametroClimatico>>();
             ResultSet rSet = stat.executeQuery();
@@ -198,7 +203,7 @@ public class Worker extends Thread{
         String query = "select * from parametro_climatico pc join centro_monitoraggio cm using(centroid)";
         List<Pair<ParametroClimatico, CentroMonitoraggio>> resultList
                 = new LinkedList<Pair<ParametroClimatico, CentroMonitoraggio>>();
-        System.out.println(query);
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
@@ -212,7 +217,7 @@ public class Worker extends Thread{
 
     public List<Pair<ParametroClimatico, AreaInteresse>> selectAllPcJoinAi(){
         String query = "select * from parametro_climatico pc join area_interesse ai using(areaid)";
-        System.out.println(query);
+        System.out.println(workerID + ":" + query);
         List<Pair<ParametroClimatico, AreaInteresse>> resultList =
                 new LinkedList<Pair<ParametroClimatico, AreaInteresse>>();
         try(PreparedStatement stat = conn.prepareStatement(query)){
@@ -229,9 +234,9 @@ public class Worker extends Thread{
 
     public List<Pair<ParametroClimatico, NotaParametro>> selectAllPcJoinNpc(){
         String query = "select * from parametro_climatico pc join nota_parametro_climatico npc using(notaid)";
-        System.out.println(query);
         List<Pair<ParametroClimatico, NotaParametro>> resultList =
                 new LinkedList<Pair<ParametroClimatico, NotaParametro>>();
+        System.out.println(workerID + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
@@ -241,6 +246,18 @@ public class Worker extends Thread{
             }
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
         return resultList;
+    }
+
+
+    //city
+    public List<String> selectObjectsCityJoinAiCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from city c join area_interesse ai on c.ascii_name = ai.denominazione where %s = '%s'";
+        return getQueryResultList(oggetto, fieldCond, cond, query);
+    }
+
+    public List<String> selectObjectsCityJoinCmCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from city c join centro_monitoraggio cm on c.ascii_name = cm.nomecentro where %s = '%s'";
+        return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
     //CentroMonitoraggio
@@ -276,7 +293,23 @@ public class Worker extends Thread{
         return getQueryResultList(oggetto, fieldCond, cond, query);
     }
 
-    public LinkedList<City> selectAllCityCond(String fieldCond, String cond){
+    //parametro climatco
+    public List<String> selectObjectsPcJoinAiCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from parametro_climatico pc join area_interesse ai using(areaid) where %s = '%s'";
+        return getQueryResultList(oggetto, fieldCond, cond, query);
+    }
+
+    public List<String> selectObjectsPcJoinCmCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from parametro_climatico pc join centro_monitoraggio using(centroid) where %s = '%s'";
+        return getQueryResultList(oggetto, fieldCond, cond, query);
+    }
+
+    public List<String> selectObjectsPcJoinNpcCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from parametro_climatico pc join nota_parametro_climatico using(notaid) where %s = '%s'";
+        return getQueryResultList(oggetto, fieldCond, cond, query);
+    }
+
+    public List<City> selectAllCityCond(String fieldCond, String cond){
         String query = "select * from city where " + fieldCond + " = ?";
         LinkedList<City> cities = new LinkedList<City>();
         try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
@@ -288,7 +321,7 @@ public class Worker extends Thread{
         return cities;
     }
 
-    public LinkedList<CentroMonitoraggio> selectAllCmCond(String fieldCond, String cond){
+    public List<CentroMonitoraggio> selectAllCmCond(String fieldCond, String cond){
         String query = "select * from centro_monitoraggio where " + fieldCond + " = ?";
         LinkedList<CentroMonitoraggio> cms = new LinkedList<CentroMonitoraggio>();
         try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
@@ -336,7 +369,7 @@ public class Worker extends Thread{
         return areeInteresse;
     }
 
-    public List<NotaParametro> selectAllFromNotaWithCond(String fieldCond, String cond){
+    public List<NotaParametro> selectAllNotaCond(String fieldCond, String cond){
         String query = "select * from nota_parametro_climatico where %s = '%s'";
         query = query.formatted(fieldCond, cond);
         List<NotaParametro> resultList = new LinkedList<NotaParametro>();
@@ -402,6 +435,7 @@ public class Worker extends Thread{
             case CITY -> {
                 List<City> res = new LinkedList<City>();
                 String query = "select * from city";
+                System.out.println(workerID + ":" + query);
                 try{
                     PreparedStatement stat = conn.prepareStatement(query);
                     ResultSet rSet = stat.executeQuery();
@@ -415,6 +449,7 @@ public class Worker extends Thread{
             case CENTRO_MONITORAGGIO -> {
                 List<CentroMonitoraggio> res = new LinkedList<CentroMonitoraggio>();
                 String query = "select * from centro_monitoraggio";
+                System.out.println(workerID + ":" + query);
                 try{
                     PreparedStatement stat = conn.prepareStatement(query);
                     ResultSet rSet = stat.executeQuery();
@@ -428,6 +463,7 @@ public class Worker extends Thread{
             case OPERATORE -> {
                 List<Operatore> res = new LinkedList<Operatore>();
                 String query = "select * from operatore";
+                System.out.println(workerID + ":" + query);
                 try{
                     PreparedStatement stat = conn.prepareStatement(query);
                     ResultSet rSet = stat.executeQuery();
@@ -442,6 +478,7 @@ public class Worker extends Thread{
             case OP_AUTORIZZATO -> {
                 List<OperatoreAutorizzato> operatoriAutorizzati = new LinkedList<OperatoreAutorizzato>();
                 String query = "select * from operatore_autorizzati";
+                System.out.println(workerID + ":" + query);
                 try{
                     PreparedStatement stat = conn.prepareStatement(query);
                     ResultSet rSet = stat.executeQuery();
@@ -456,6 +493,7 @@ public class Worker extends Thread{
             case PARAM_CLIMATICO -> {
                 List<ParametroClimatico> res = new LinkedList<ParametroClimatico>();
                 String query = "select * from parametro_climatico";
+                System.out.println(workerID + ":" + query);
                 try(PreparedStatement stat = conn.prepareStatement(query)){
                     ResultSet rSet = stat.executeQuery();
                     while(rSet.next()){
@@ -477,6 +515,7 @@ public class Worker extends Thread{
             case NOTA_PARAM_CLIMATICO -> {
                 List<NotaParametro> res = new LinkedList<NotaParametro>();
                 String query = "select * from nota_parametro_climatico";
+                System.out.println(workerID + ":" + query);
                 try(PreparedStatement stat = conn.prepareStatement(query)){
                     ResultSet rSet = stat.executeQuery();
                     while(rSet.next()){
@@ -489,6 +528,7 @@ public class Worker extends Thread{
             case AREA_INTERESSE -> {
                 List<AreaInteresse> res = new LinkedList<AreaInteresse>();
                 String query = "select * from area_interesse";
+                System.out.println(workerID + ":" + query);
                 try {
                     PreparedStatement stat = conn.prepareStatement(query);
                     ResultSet rSet = stat.executeQuery();
@@ -506,7 +546,7 @@ public class Worker extends Thread{
 
     public Operatore executeLogin(String userID, String password){
         String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userID, password);
-        System.out.println(query);
+        System.out.println(workerID + ":" + query);
         try{
             PreparedStatement stat = conn.prepareStatement(query);
             ResultSet rSet = stat.executeQuery();
@@ -523,7 +563,7 @@ public class Worker extends Thread{
     public boolean insertOperatore(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
         String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
                 .formatted(nomeOp, cognomeOp, codFisc, userID, email, password, centroAfferenza);
-        System.out.println(query);
+        System.out.println(workerID + ":" + query);
         try{
             PreparedStatement stat = conn.prepareStatement(query);
             int res = stat.executeUpdate();
@@ -543,7 +583,7 @@ public class Worker extends Thread{
         }
         String query = "insert into centro_monitoraggio(centroid, nomecentro, comune, country, aree_interesse_ids) values ('%s', '%s', '%s', '%s', '{%s}')"
                 .formatted(centroid, nomeCentro, comune, stato, arrayIDS.toString());
-        System.out.println(query);
+        System.out.println(workerID + ":" + query);
         try{
             PreparedStatement stat = conn.prepareStatement(query);
             int res = stat.executeUpdate();
@@ -551,5 +591,4 @@ public class Worker extends Thread{
             return res == 1;
         }catch(SQLException sqle){sqle.printStackTrace(); return false;}
     }
-
 }

@@ -37,12 +37,20 @@ public class QueryHandler{
         this.props = props;
     }
 
+    //TODO
     /**
     public <T, V> List<Pair<T, V>> selectAllJoin(tables table, tables otherTable){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
-                return w.selectAllFromCityJoin(otherTable);
+                switch(otherTable){
+                    case AREA_INTERESSE -> {
+                        return (List<Pair<T, V>>) w.selectAllCityJoinAi();
+                    }
+                    case CENTRO_MONITORAGGIO -> {
+
+                    }
+                }
             }
             case CENTRO_MONITORAGGIO -> {
                 //TODO
@@ -67,62 +75,66 @@ public class QueryHandler{
     }
      **/
 
-    /**
-    public <T> List<T> selectAllJoinCond(tables table, tables otherTable, String fieldCond, String cond){
-        switch(table){
-            case CENTRO_MONITORAGGIO -> {
-                Worker w = new Worker(dbUrl, props, "workerCM");
-                return w.selectAllFromCmJoinCond(otherTable, fieldCond, cond);
-            }
-            case AREA_INTERESSE -> {
-                Worker w = new Worker(dbUrl, props, "workerAi");
-                return w.selectAllFromAiJoinCond(otherTable, fieldCond, cond);
-            }
-            case CITY -> {
-                Worker w = new Worker(dbUrl, props, "workerCity");
-                return w.selectAllFromCityJoinCond(otherTable, fieldCond, cond);
-            }
-            case PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerPC");
-                return w.selectAllFromPcJoinCond(otherTable, fieldCond, cond);
-            }
-            case NOTA_PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerNota");
-                return w.selectAllFromNotaJoinCond(fieldCond, cond);
-            }
-            default -> {return null;}
-        }
-    }
-     **/
 
-    public String selectObjectJoinWithCond(String oggetto, tables table, tables otherTable, String fieldCond, String cond){
+    public List<String> selectObjectJoinWithCond(String oggetto, tables table, tables otherTable, String fieldCond, String cond){
         switch(table){
             case CITY -> {
-                //TODO
                 Worker w = new Worker(dbUrl, props, "workerCity");
-                return w.selectObjFromCityJoinCond(oggetto, otherTable, fieldCond, cond);
+                switch(otherTable){
+                    case AREA_INTERESSE -> {
+                        return w.selectObjectsCityJoinAiCond(oggetto, fieldCond, cond);
+                    }
+                    case CENTRO_MONITORAGGIO -> {
+                        return w.selectObjectsCityJoinCmCond(oggetto, fieldCond, cond);
+                    }
+                }
             }
             case CENTRO_MONITORAGGIO -> {
-                //TODO
                 Worker w = new Worker(dbUrl, props, "workerCM");
-                return w.selectObjFromCmJoinCond(oggetto, otherTable, fieldCond, cond);
+                switch(otherTable){
+                    case AREA_INTERESSE -> {
+                        return w.selectObjectsCmJoinAiCond(oggetto, fieldCond, cond);
+                    }
+                    case PARAM_CLIMATICO -> {
+                        return w.selectObjectsCmJoinPcCond(oggetto, fieldCond, cond);
+                    }
+                }
             }
             case AREA_INTERESSE -> {
                 //TODO
                 Worker w = new Worker(dbUrl, props, "workerAI");
-                return w.selectObjFromAiJoinCond(oggetto, otherTable, fieldCond, cond);
+                switch(otherTable){
+                    case CENTRO_MONITORAGGIO -> {
+                        return w.selectObjectsAiJoinCmCond(oggetto, fieldCond, cond);
+                    }
+                    case PARAM_CLIMATICO -> {
+                        return w.selectObjectsAiJoinPcCond(oggetto, fieldCond, cond);
+                    }
+                    case CITY -> {
+                        return w.selectObjectsAiJoinCityCond(oggetto, fieldCond, cond);
+                    }
+                }
             }
             case NOTA_PARAM_CLIMATICO -> {
-                //TODO
                 Worker w = new Worker(dbUrl, props, "workerNota");
-                return w.selectObjFromNotaJoinCond(oggetto, otherTable, fieldCond, cond);
+                return w.selectObjectsNotaJoinPcCond(oggetto, fieldCond, cond);
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPC");
-                return w.selectObjFromPcJoinCond(oggetto, otherTable, fieldCond, cond);
+                switch(otherTable){
+                    case AREA_INTERESSE -> {
+                        return w.selectObjectsPcJoinAiCond(oggetto, fieldCond, cond);
+                    }
+                    case CENTRO_MONITORAGGIO -> {
+                        return w.selectObjectsPcJoinCmCond(oggetto, fieldCond, cond);
+                    }
+                    case NOTA_PARAM_CLIMATICO -> {
+                        return w.selectObjectsPcJoinNpcCond(oggetto, fieldCond, cond);
+                    }
+                }
             }
-            default -> {return null;}
         }
+        return null;
     }
 
     public List<String> selectObjectWithCond(String oggetto, tables table, String fieldCond, String cond){
@@ -194,48 +206,35 @@ public class QueryHandler{
         }
     }
 
-    public <T> LinkedList<T> selectAllWithCond(tables table, String fieldCond, String cond){
+    public <T> List<T> selectAllWithCond(tables table, String fieldCond, String cond){
         switch(table){
             case CITY -> {
                 Worker w = new Worker(dbUrl, props, "workerCity");
-                LinkedList<City> cities = w.selectAllFromCityWithCond(fieldCond, cond);
-                //cities.forEach(System.out::println);
-                return (LinkedList<T>) cities;
+                return (List<T>) w.selectAllCityCond(fieldCond, cond);
             }
             case CENTRO_MONITORAGGIO -> {
                 Worker w = new Worker(dbUrl, props, "workerCM");
-                LinkedList<CentroMonitoraggio> cms = w.selectAllFromCMWithCond(fieldCond, cond);
-                //cms.forEach(System.out::println);
-                return (LinkedList<T>) cms;
+                return (List<T>) w.selectAllCmCond(fieldCond, cond);
             }
             case OPERATORE -> {
                 Worker w = new Worker(dbUrl, props, "workerOperatore");
-                LinkedList<Operatore> operatori = w.selectAllFromOpWithCond(fieldCond, cond);
-                //operatori.forEach(System.out::println);
-                return (LinkedList<T>) operatori;
+                return (List<T>) w.selectAllOpCond(fieldCond, cond);
             }
             case OP_AUTORIZZATO -> {
                 Worker w = new Worker(dbUrl, props, "workerAuthOP");
-                LinkedList<OperatoreAutorizzato> operatoriAutorizzati = w.selectAllFromAuthOpWithCond(fieldCond, cond);
-                //operatoriAutorizzati.forEach(System.out::println);
-                return (LinkedList<T>) operatoriAutorizzati;
+                return (List<T>) w.selectAllAuthOpCond(fieldCond, cond);
             }
             case AREA_INTERESSE -> {
                 Worker w = new Worker(dbUrl, props, "workerAI");
-                LinkedList<AreaInteresse> areeInteresse = w.selectAllFromAIWithCond(fieldCond, cond);
-                //areeInteresse.forEach(System.out::println);
-                return (LinkedList<T>) areeInteresse;
+                return (List<T>) w.selectAllAiCond(fieldCond, cond);
             }
             case NOTA_PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerNota");
-                //TODO
-                return null;
+                return (List<T>) w.selectAllNotaCond(fieldCond, cond);
             }
             case PARAM_CLIMATICO -> {
                 Worker w = new Worker(dbUrl, props, "workerPM");
-                LinkedList<ParametroClimatico> cps = w.selectAllFromCPWithCond(fieldCond, cond);
-                //cps.forEach(System.out::println);
-                return (LinkedList<T>) cps;
+                return (List<T>) w.selectAllPcCond(fieldCond, cond);
             }
             default -> {return null;}
         }
