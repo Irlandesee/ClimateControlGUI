@@ -258,11 +258,11 @@ public class MainWindowController{
                             System.out.println("item clicked" + pc.getPubDate());
                             String nomeArea = queryHandler.selectObjectJoinWithCond("denominazione",
                                     QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.AREA_INTERESSE,
-                                    "areaid", pc.getAreaInteresseId());
+                                    "areaid", pc.getAreaInteresseId()).get(0);
                             String nomeCentro = queryHandler.selectObjectJoinWithCond(
                                     "nomecentro",
                                     QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.CENTRO_MONITORAGGIO,
-                                    "centroid", pc.getIdCentro());
+                                    "centroid", pc.getIdCentro()).get(0);
                             try{
                                Stage pcDialogStage = new Stage();
                                PCDialog pcDialogController = new PCDialog(sceneController, pc, nomeCentro, nomeArea);
@@ -307,7 +307,7 @@ public class MainWindowController{
                     AreaInteresse a = (AreaInteresse) row.getItem();
                     System.out.println("Item double Clicked: "+a);
                     //get cp associated with this area interesse
-                    LinkedList<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
+                    List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
                         AIDialog aiDialogController = new AIDialog(sceneController, a, params);
@@ -332,8 +332,7 @@ public class MainWindowController{
     private void ricercaAreaPerDenom(){
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
-
+            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
             //res.forEach(System.out::println);
             tableView.getItems().clear();
             res.forEach((areaInteresse -> {
@@ -348,7 +347,7 @@ public class MainWindowController{
     private void ricercaAreaPerStato(){
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            LinkedList<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
+            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
             res.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
             res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
         }else{
@@ -438,7 +437,7 @@ public class MainWindowController{
             }else{
                 String areaInteresseId = queryHandler
                         .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata).get(0);
-                LinkedList<ParametroClimatico> parametriClimatici = queryHandler
+                List<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
                 tableView.getItems().clear();
                 if(ricercaPerData){
@@ -463,7 +462,8 @@ public class MainWindowController{
                                 QueryHandler.tables.PARAM_CLIMATICO,
                                 QueryHandler.tables.CENTRO_MONITORAGGIO,
                                 "nomecentro",
-                                denomCmCercato);
+                                denomCmCercato)
+                        .get(0);
                 List<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(
                                 QueryHandler.tables.PARAM_CLIMATICO,
