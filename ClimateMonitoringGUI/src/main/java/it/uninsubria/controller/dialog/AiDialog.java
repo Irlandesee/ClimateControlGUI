@@ -71,7 +71,7 @@ public class AiDialog {
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
         if(s != null)
             s.close();
-    }
+        }
 
 
 }
