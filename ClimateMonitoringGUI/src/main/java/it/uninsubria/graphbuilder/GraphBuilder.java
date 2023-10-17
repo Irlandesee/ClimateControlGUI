@@ -1,10 +1,14 @@
 package it.uninsubria.graphbuilder;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
 import javafx.scene.chart.*;
 
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GraphBuilder {
 
@@ -95,4 +99,52 @@ public class GraphBuilder {
         }
     }
 
+    public XYChart.Series<LocalDate, Short> getSeries(Resource r, List<ParametroClimatico> params){
+        XYChart.Series<LocalDate, Short> resultSeries = new XYChart.Series<LocalDate, Short>();
+        switch(r){
+            case wind -> {
+                resultSeries.setName("Vento");
+                params.forEach(param -> resultSeries
+                            .getData()
+                            .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getVentoValue())));
+            }
+            case umidity -> {
+                resultSeries.setName("Umidita");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getUmiditaValue())));
+            }
+            case atmPressure -> {
+                resultSeries.setName("Pressione");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getPressioneValue())));
+            }
+            case rainfall -> {
+                resultSeries.setName("Precipitazioni");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getPrecipitazioniValue())));
+            }
+            case temperature -> {
+                resultSeries.setName("Temperatura");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getTemperaturaValue())));
+            }
+            case glacierAlt -> {
+                resultSeries.setName("Altitudine ghiacciai");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getAltitudineValue())));
+            }
+            case glacierMass -> {
+                resultSeries.setName("Massa ghiacciai");
+                params.forEach(param -> resultSeries
+                        .getData()
+                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getMassaValue())));
+            }
+        }
+        return resultSeries;
+    }
 }

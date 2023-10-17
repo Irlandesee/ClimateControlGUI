@@ -1,32 +1,32 @@
-package it.uninsubria.controller.operatore;
+package it.uninsubria.controller.dialog;
 
 import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
-public class CMDialog {
+public class GraphDialog {
 
-    private final SceneController sceneController;
-    private final LinkedList<String> nomiAree;
-    //public VBox areeBox;
-    public ListView listAree;
-    public CMDialog(SceneController sceneController, LinkedList<String> nomiAree){
+    public Label graphName;
+    public VBox contentBox;
+    public Button closeButton;
+    public SceneController sceneController;
+    private ArrayList<ParametroClimatico> params;
+    public GraphDialog(SceneController sceneController){
         this.sceneController = sceneController;
-        this.nomiAree = nomiAree;
+        params = new ArrayList<ParametroClimatico>();
     }
 
     @FXML
     public void initialize(){
-        for(String nome: nomiAree){
-            listAree.getItems().add(new Label(nome));
-        }
+
     }
 
     public void close(ActionEvent actionEvent){

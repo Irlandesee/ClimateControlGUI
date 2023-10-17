@@ -10,10 +10,7 @@ module it.uninsubria.climatemonitoringgui {
     requires org.kordamp.bootstrapfx.core;
     requires org.postgresql.jdbc;
     requires java.sql;
-    requires junit;
     requires javafx.graphics;
-    requires testfx.core;
-    requires testfx.junit5;
 
     opens it.uninsubria to javafx.fxml;
     exports it.uninsubria;
@@ -46,6 +43,6 @@ module it.uninsubria.climatemonitoringgui {
     exports it.uninsubria.parametroClimatico to javafx.base;
 
     opens it.uninsubria.controller.dialog;
-    exports it.uninsubria.controller.dialog to javafx.fxml;
+    exports it.uninsubria.controller.dialog;
 
 }
