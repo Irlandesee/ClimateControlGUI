@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          prefHeight="400.0" prefWidth="600.0">
+    <Label text="Nome area"
+        GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <TextField
+        fx:id="areaInteresseField"
+        GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+    <Label text="centro monitoraggio"
+        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField
+        fx:id="cmField"
+        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <Label text="Data rilevamento"
+        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <DatePicker fx:id="pubDate"
+        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <Label text="Valore vento"
+           GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <TextField fx:id="ventoField"
+               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    <TextField fx:id="notaVentoField"
+               GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+    <Label text="valore umidita"
+           GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <TextField fx:id="umiditaField"
+               GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+    <TextField fx:id="notaUmiditaField"
+               GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+    <Label text="valore pressione"
+           GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+    <TextField fx:id="pressioneField"
+               GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    <TextField fx:id="notaPressioneField"
+               GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+    <Label text="valore precipitazioni"
+           GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+    <TextField fx:id="precipitazioniField"
+               GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+    <TextField fx:id="notaPrecipitazioniField"
+               GridPane.columnIndex="2" GridPane.rowIndex="6"/>
+    <Label text="valore temperatura"
+           GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+    <TextField fx:id="temperaturaField"
+               GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+    <TextField fx:id="notaTemperaturaField"
+               GridPane.columnIndex="2" GridPane.rowIndex="7"/>
+    <Label text="valore altitudine ghiacciai"
+           GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+    <TextField fx:id="altGhiacciaiField"
+               GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+    <TextField fx:id="notaAltGhiacciaiField"
+               GridPane.columnIndex="2" GridPane.rowIndex="8"/>
+    <Label text="valore massa ghiacciai"
+           GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+    <TextField fx:id="massaField"
+               GridPane.columnIndex="1" GridPane.rowIndex="9"/>
+    <TextField fx:id="notaMassaField"
+               GridPane.columnIndex="2" GridPane.rowIndex="9"/>
+    <Button fx:id="cancelButton"  text="annulla"
+            GridPane.columnIndex="0" GridPane.rowIndex="10"
+        onAction="#cancel"/>
+    <Button fx:id="InserisciPC" text="inserisci"
+            GridPane.columnIndex="1" GridPane.rowIndex="10"
+        onAction="#insericiPC"/>
+    <Button fx:id="clearButton" text="pulisci"
+            GridPane.columnIndex="2" GridPane.rowIndex="10"
+        onAction="#clearAllFields"/>
+
+    <stylesheets>
+        <URL value="@../stylesheets/parametro-climatico.css"/>
+    </stylesheets>
+</GridPane>

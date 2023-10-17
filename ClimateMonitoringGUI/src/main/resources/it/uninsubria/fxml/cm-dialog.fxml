@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<BorderPane xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        prefHeight="300" prefWidth="400">
+    <top>
+        <Label>Aree interesse del centro monitoraggio</Label>
+    </top>
+    <center>
+        <ListView fx:id="listAree"/>
+    </center>
+    <bottom>
+        <Button fx:id="btnClose" onAction="#close"
+                >Chiudi</Button>
+    </bottom>
+
+    <stylesheets>
+        <URL value="@../stylesheets/cm-dialog.css"/>
+    </stylesheets>
+</BorderPane>

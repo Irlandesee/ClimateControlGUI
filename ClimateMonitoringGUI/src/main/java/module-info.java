@@ -8,18 +8,41 @@ module it.uninsubria.climatemonitoringgui {
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
+    requires org.postgresql.jdbc;
+    requires java.sql;
+    requires javafx.graphics;
 
-    opens it.uninsubria.climatemonitoringgui to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui;
-    exports it.uninsubria.climatemonitoringgui.controller.loginview;
-    opens it.uninsubria.climatemonitoringgui.controller.loginview to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.registrazione;
-    opens it.uninsubria.climatemonitoringgui.controller.registrazione to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.scene;
-    opens it.uninsubria.climatemonitoringgui.controller.scene to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.parametroclimatico;
-    opens it.uninsubria.climatemonitoringgui.controller.parametroclimatico to javafx.fxml;
-    exports it.uninsubria.climatemonitoringgui.controller.mainscene;
-    opens it.uninsubria.climatemonitoringgui.controller.mainscene to javafx.fxml;
+    opens it.uninsubria to javafx.fxml;
+    exports it.uninsubria;
+
+    exports it.uninsubria.controller.loginview;
+    opens it.uninsubria.controller.loginview to javafx.fxml;
+
+    exports it.uninsubria.controller.registrazione;
+    opens it.uninsubria.controller.registrazione to javafx.fxml;
+
+    exports it.uninsubria.controller.scene;
+    opens it.uninsubria.controller.scene to javafx.fxml;
+
+    opens it.uninsubria.controller.parametroclimatico to javafx.fxml;
+    exports it.uninsubria.controller.parametroclimatico;
+
+    exports it.uninsubria.controller.mainscene;
+    opens it.uninsubria.controller.mainscene to javafx.fxml;
+
+    exports it.uninsubria.controller.operatore;
+    opens it.uninsubria.controller.operatore to javafx.fxml;
+
+    opens it.uninsubria.areaInteresse;
+    exports it.uninsubria.areaInteresse to javafx.fxml;
+
+    opens it.uninsubria.centroMonitoraggio;
+    exports it.uninsubria.centroMonitoraggio to javafx.base;
+
+    opens it.uninsubria.parametroClimatico;
+    exports it.uninsubria.parametroClimatico to javafx.base;
+
+    opens it.uninsubria.controller.dialog;
+    exports it.uninsubria.controller.dialog;
+
 }
