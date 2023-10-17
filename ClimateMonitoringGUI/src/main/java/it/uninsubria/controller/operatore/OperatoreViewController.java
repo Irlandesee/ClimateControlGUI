@@ -2,6 +2,7 @@ package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.queryhandler.QueryHandler;
@@ -15,13 +16,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -211,7 +209,7 @@ public class OperatoreViewController {
                     //Create a new window containing the cms details
                     try {
                         Stage cmDialogStage = new Stage();
-                        CMDialog cmDialogController = new CMDialog(sceneController, nomiAree);
+                        CmDialog cmDialogController = new CmDialog(sceneController, nomiAree);
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
                         fxmlLoader.setController(cmDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 300);

@@ -34,7 +34,7 @@
             <Label
                 fx:id="longitudineLabel"
                 GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-            <ListView fx:id="paramClimaticiList"
+            <TableView fx:id="paramClimaticiTableView"
                 GridPane.rowIndex="4" GridPane.columnIndex="0"/>
         </GridPane>
     </center>

@@ -1,20 +1,16 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.controller.dialog.AIDialog;
-import it.uninsubria.controller.dialog.PCDialog;
+import it.uninsubria.controller.dialog.AiDialog;
+import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +24,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.security.PrivilegedAction;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,23 +85,13 @@ public class MainWindowController{
         sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
         sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
 
-
-
         //init the query handler
         props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
         queryHandler = new QueryHandler(url, props);
 
-
-        /**
-        loggedIN.addListener((listener, oldValue, newValue) -> sceneController
-                .getLoginViewController().setLoggedIn(newValue));
-         **/
-
         initAlerts();
-
-
     }
 
     @FXML
@@ -114,8 +99,7 @@ public class MainWindowController{
         //table view
         showAreeInserite();
         //line chart
-        contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
-
+        //contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
     }
 
     static TableView<String[]> createTable(String[] columnNames){
@@ -230,7 +214,6 @@ public class MainWindowController{
 
         TableColumn dateColumn = new TableColumn("Data");
         dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
-
         TableColumn ventoColumn = new TableColumn("Vento");
         ventoColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("ventoValue"));
         TableColumn umiditaColumn = new TableColumn("Umidita");
@@ -265,7 +248,7 @@ public class MainWindowController{
                                     "centroid", pc.getIdCentro()).get(0);
                             try{
                                Stage pcDialogStage = new Stage();
-                               PCDialog pcDialogController = new PCDialog(sceneController, pc, nomeCentro, nomeArea);
+                               PcDialog pcDialogController = new PcDialog(sceneController, pc, nomeCentro, nomeArea);
                                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/pc-dialog.fxml"));
                                fxmlLoader.setController(pcDialogController);
                                Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
@@ -310,7 +293,7 @@ public class MainWindowController{
                     List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
-                        AIDialog aiDialogController = new AIDialog(sceneController, a, params);
+                        AiDialog aiDialogController = new AiDialog(sceneController, a, params);
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
                         fxmlLoader.setController(aiDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
@@ -326,6 +309,7 @@ public class MainWindowController{
 
     private void showAreeInserite(){
         List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+        prepTableAreaInteresse();
         res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
 
@@ -436,10 +420,13 @@ public class MainWindowController{
                 this.areaInteresseAlert.showAndWait();
             }else{
                 String areaInteresseId = queryHandler
-                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata).get(0);
+                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata)
+                        .get(0);
                 List<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
-                tableView.getItems().clear();
+                tableView
+                        .getItems()
+                        .clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
@@ -469,7 +456,9 @@ public class MainWindowController{
                                 QueryHandler.tables.PARAM_CLIMATICO,
                                 "centroid",
                                 centroId);
-                tableView.getItems().clear();
+                tableView
+                        .getItems()
+                        .clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
@@ -482,8 +471,6 @@ public class MainWindowController{
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
         }
-
-
     }
 
     public boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){

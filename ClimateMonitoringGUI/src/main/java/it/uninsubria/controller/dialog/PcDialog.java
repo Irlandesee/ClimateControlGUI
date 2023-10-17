@@ -9,9 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
-import java.util.LinkedList;
-
-public class PCDialog {
+public class PcDialog {
 
     private final SceneController sceneController;
     private final ParametroClimatico pc;
@@ -23,7 +21,7 @@ public class PCDialog {
     public Label nomeAreaLabel;
     public Label nomeCentroLabel;
     public ListView<Label> valoriList;
-    public PCDialog(SceneController sceneController, ParametroClimatico pc, String nomeCentro, String nomeArea){
+    public PcDialog(SceneController sceneController, ParametroClimatico pc, String nomeCentro, String nomeArea){
         this.sceneController = sceneController;
         this.pc = pc;
         this.nomeCentro = nomeCentro;

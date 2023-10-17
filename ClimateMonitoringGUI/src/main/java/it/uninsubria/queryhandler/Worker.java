@@ -18,6 +18,7 @@ import java.util.Properties;
 
 public class Worker extends Thread{
 
+    private static int workerCount = 0;
     private String workerID;
     private final String dbUrl;
     private final Properties props;
@@ -26,7 +27,8 @@ public class Worker extends Thread{
     public Worker(String url, Properties props, String workerID){
         this.dbUrl = url;
         this.props = props;
-        this.workerID = workerID;
+        workerCount++;
+        this.workerID = workerID + workerCount;
         try {
             this.conn = DriverManager.getConnection(url, props);
         }catch(SQLException sqle){sqle.printStackTrace(); }
