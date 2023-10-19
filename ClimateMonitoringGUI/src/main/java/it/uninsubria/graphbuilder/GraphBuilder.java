@@ -22,7 +22,7 @@ public class GraphBuilder {
         glacierMass
     }
 
-    private static String[] months = {"Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio",
+    public static String[] months = {"Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio",
             "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"};
 
     public GraphBuilder() {
