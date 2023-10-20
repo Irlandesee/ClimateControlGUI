@@ -84,5 +84,17 @@ public class NotaParametro {
         this.notaMassaGhiacciai = notaMassaGhiacciai;
     }
 
-
+    @Override
+    public String toString() {
+        return "NotaParametro{" +
+                "notaId='" + notaId + '\'' +
+                ", notaVento='" + notaVento + '\'' +
+                ", notaUmidita='" + notaUmidita + '\'' +
+                ", notaPressione='" + notaPressione + '\'' +
+                ", notaTemperatura='" + notaTemperatura + '\'' +
+                ", notaPrecipitazioni='" + notaPrecipitazioni + '\'' +
+                ", notaAltGhiacciai='" + notaAltGhiacciai + '\'' +
+                ", notaMassaGhiacciai='" + notaMassaGhiacciai + '\'' +
+                '}';
+    }
 }
