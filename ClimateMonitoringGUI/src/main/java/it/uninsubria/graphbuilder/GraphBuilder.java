@@ -29,18 +29,10 @@ public class GraphBuilder {
 
     }
 
-    public static LineChart<String, Number> getBasicExample() {
-        //Defining thet axes
-        final CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setCategories(FXCollections.observableList(Arrays.asList(months)));
-        final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Mese");
-        //creating chart
-        final LineChart<String, Number> lineChart =
-                new LineChart<String, Number>(xAxis, yAxis);
-        lineChart.setTitle("Basic Example Chart");
-        return lineChart;
+    public static String getLocaleMonth(int month){
+        return months[month - 1];
     }
+
 
     public static LineChart<String, Number> getBasicLineChart(Resource r) {
         final CategoryAxis xAxis = new CategoryAxis();

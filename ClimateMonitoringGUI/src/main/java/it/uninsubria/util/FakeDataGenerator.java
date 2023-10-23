@@ -135,6 +135,17 @@ public class FakeDataGenerator{
         return result;
     }
 
+    //Genera parametri climatici relativi a un anno specifico
+    public List<ParametroClimatico> generateParamClimaticiGivenYear(int year){
+
+    }
+
+
+    //Genera parametri climatici relativi a un mese specifico
+    public List<ParametroClimatico> generateParamClimaticiGivenMonth(int month){
+
+    }
+
     public List<AreaInteresse> generateAreeInteressse(int numberOfItems){
         List<AreaInteresse> result = new LinkedList<AreaInteresse>();
         List<City> cities = queryHandler.selectAll(QueryHandler.tables.CITY);

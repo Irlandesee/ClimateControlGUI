@@ -4,6 +4,7 @@ import it.uninsubria.city.City;
 import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.parametroClimatico.NotaParametro;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
 import it.uninsubria.util.FakeDataGenerator;
@@ -36,10 +37,18 @@ public class MainWindow extends Application {
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(
                 QueryHandler.tables.PARAM_CLIMATICO,
                 "areaid",
-                "372be289572b5a6408c39baacd66758e");
+                "1a4957fdc6382209d4d59bc2469722e5");
         FakeDataGenerator fakeDataGenerator = new FakeDataGenerator(queryHandler);
-        List<ParametroClimatico> randomParams = fakeDataGenerator.generateParamClimatici(100);
-        randomParams.forEach(System.out::println);
+        String api_key = "b1579b15-ecb5-47c3-bcb8-9548ee05f230";
+        //List<String> randomStrings = fakeDataGenerator.getRandomStrings(10, 32, api_key);
+        //randomStrings.forEach(System.out::println);
+
+        //List<ParametroClimatico> randomParams = fakeDataGenerator.generateParamClimatici(100);
+        //queryHandler.executeInsertParametroClimatico(randomParams);
+        //randomParams.forEach(System.out::println);
+        //List<NotaParametro> randomNote = fakeDataGenerator.generateNotaParametro(1);
+        //randomNote.forEach(System.out::println);
+
         GraphDialog graphDialog = new GraphDialog(queryHandler, params);
         fxmlLoader.setController(graphDialog);
         Scene scene = new Scene(fxmlLoader.load(),800, 480);

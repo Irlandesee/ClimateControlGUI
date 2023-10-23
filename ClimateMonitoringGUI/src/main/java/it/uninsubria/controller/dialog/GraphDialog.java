@@ -11,14 +11,21 @@ import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
+import java.text.DateFormatSymbols;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class GraphDialog {
 
@@ -43,11 +50,11 @@ public class GraphDialog {
     private LineChart<String, Number> altitudineChart;
     private LineChart<String, Number> massaChart;
 
-    private LinkedList<ParametroClimatico> params;
+    private List<ParametroClimatico> params;
     public GraphDialog(QueryHandler queryHandler, List<ParametroClimatico> params){
         //this.sceneController = sceneController;
         this.queryHandler = queryHandler;
-        this.params = (LinkedList<ParametroClimatico>) params;
+        this.params = params;
     }
 
     @FXML
@@ -64,8 +71,59 @@ public class GraphDialog {
         contentBox
                 .getChildren()
                 .addAll(temperaturaChart); //Default chart?
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        String denomArea = queryHandler.selectObjectWithCond(
+                "denominazione",
+                QueryHandler.tables.AREA_INTERESSE,
+                "areaid",
+                params.get(0).getAreaInteresseId()).get(0);
+        series.setName(denomArea);
+
+        /**
+         * Note to self:
+         * Si assume che venga passata una lista che rappresenta l'interita
+         * dei parametri climatici registrati per quell'area e verranno
+         * rappresentati sul grafico.
+         */
+        List<Pair<Number, String>> data = getAverageTemp(params);
+        data.forEach(coppia -> {
+            String month = coppia.getValue();
+            Number avgTemp = coppia.getKey();
+            System.out.println(month + " -> " + avgTemp);
+            series.getData().add(
+                    new XYChart.Data<>(month, avgTemp));
+        });
+
+
+        temperaturaChart.getData().add(series);
+
 
     }
+
+    private List<Pair<Number, String>> getAverageTemp(List<ParametroClimatico> params){
+        List<Pair<Number, String>> res = new LinkedList<Pair<Number, String>>();
+        for(ParametroClimatico p : params){
+            int month = p.getPubDate().getMonth().getValue();
+            List<ParametroClimatico> monthParameters = params
+                    .stream()
+                    .filter(param -> param.getPubDate().getMonth().getValue() == month)
+                    .toList();
+            res.add(new Pair<Number, String>(
+                    getMonthAverageTemp(monthParameters), GraphBuilder.getLocaleMonth(month)));
+
+        }
+        return res;
+    }
+
+    private Number getMonthAverageTemp(List<ParametroClimatico> monthParameters){
+        int averageTemperature = 0;
+        for(ParametroClimatico p : monthParameters){
+            averageTemperature += p.getTemperaturaValue();
+        }
+        return averageTemperature / monthParameters.size();
+    }
+
+
 
     @FXML
     public void addVento(){
@@ -113,14 +171,14 @@ public class GraphDialog {
 
     @FXML
     public void addPrecipitazioni(){
-        boolean isPresent = contentBox.getChildren().contains(temperaturaChart);
+        boolean isPresent = contentBox.getChildren().contains(precipitazioniChart);
         if(isPresent) {
             System.out.println("Removing temperature chart");
-            contentBox.getChildren().remove(temperaturaChart);
+            contentBox.getChildren().remove(precipitazioniChart);
         }
         else {
             System.out.println("Adding temperature chart");
-            contentBox.getChildren().add(temperaturaChart);
+            contentBox.getChildren().add(precipitazioniChart);
         }
     }
 

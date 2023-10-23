@@ -207,20 +207,21 @@ public class ParametroClimatico {
     }
 
     //centroID;areaInteresse;data;params1,paramN;note
+
     @Override
-    public String toString(){
-        StringBuilder builder = new StringBuilder();
-        builder.append(this.parameterId).append(ParametroClimatico.generalSeparator)
-                .append(this.idCentro).append(ParametroClimatico.generalSeparator)
-                .append(this.areaInteresseId).append(ParametroClimatico.generalSeparator)
-                .append(this.pubDate).append(ParametroClimatico.generalSeparator)
-                .append(this.ventoValue).append(ParametroClimatico.generalSeparator)
-                .append(this.umiditaValue).append(ParametroClimatico.generalSeparator)
-                .append(this.pressioneValue).append(ParametroClimatico.generalSeparator)
-                .append(this.temperaturaValue).append(ParametroClimatico.generalSeparator)
-                .append(this.precipitazioniValue).append(ParametroClimatico.generalSeparator)
-                .append(this.altitudineValue).append(ParametroClimatico.generalSeparator)
-                .append(this.massaValue).append(ParametroClimatico.generalSeparator);
-        return builder.toString();
+    public String toString() {
+        return "ParametroClimatico{" +
+                "parameterId='" + parameterId + '\'' +
+                ", idCentro='" + idCentro + '\'' +
+                ", areaInteresseId='" + areaInteresseId + '\'' +
+                ", pubDate=" + pubDate +
+                ", notaId='" + notaId + '\'' +
+                ", ventoValue=" + ventoValue +
+                ", umiditaValue=" + umiditaValue +
+                ", pressioneValue=" + pressioneValue +
+                ", precipitazioniValue=" + precipitazioniValue +
+                ", temperaturaValue=" + temperaturaValue +
+                ", altitudineValue=" + altitudineValue +
+                '}';
     }
 }

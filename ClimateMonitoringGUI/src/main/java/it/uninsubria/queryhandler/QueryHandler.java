@@ -7,6 +7,7 @@ import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.util.Pair;
 
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -267,6 +268,11 @@ public class QueryHandler{
         }catch(InterruptedException ie){ie.printStackTrace();}
         Worker w = new Worker(dbUrl, props, "workerInsertCM_");
         return w.insertCentroMonitoraggio(nomeCentro, comune, stato, areeIds);
+    }
+
+    public void executeInsertParametroClimatico(List<ParametroClimatico> params){
+        Worker workerParametroClimatico = new Worker(dbUrl, props, "workerPC_");
+        params.forEach(workerParametroClimatico::insertParametroClimatico);
     }
 
 
