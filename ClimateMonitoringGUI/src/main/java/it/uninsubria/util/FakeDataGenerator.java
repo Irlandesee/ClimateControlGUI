@@ -108,41 +108,89 @@ public class FakeDataGenerator{
         return values[ThreadLocalRandom.current().nextInt(0, values.length)];
     }
 
+
+    private ParametroClimatico setParamValues(ParametroClimatico pc){
+        pc.setNotaId(IDGenerator.generateID());
+        pc.setVentoValue(getParamValue());
+        pc.setUmiditaValue(getParamValue());
+        pc.setPressioneValue(getParamValue());
+        pc.setTemperaturaValue(getParamValue());
+        pc.setPrecipitazioniValue(getParamValue());
+        pc.setAltitudineValue(getParamValue());
+        pc.setMassaValue(getParamValue());
+        return pc;
+    }
+    private ParametroClimatico generateParametroClimatico(String areaId, String centroId){
+        ParametroClimatico pc = new ParametroClimatico(
+                IDGenerator.generateID(),
+                centroId,
+                areaId,
+                getRandomPubDate(canonicalStartDate, canonicalEndDate));
+        return setParamValues(pc);
+    }
+
+    private ParametroClimatico generateParametroClimaticoGivenYear(String areaId, String centroId, int year){
+        ParametroClimatico pc = new ParametroClimatico(
+                IDGenerator.generateID(),
+                centroId,
+                areaId,
+                getRandomPubDate(canonicalStartDate, canonicalEndDate).withYear(year));
+        return setParamValues(pc);
+    }
+
     public List<ParametroClimatico> generateParamClimatici(int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
         List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
         List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
         Random rand = new Random();
         for(int i = 0; i < numberOfItems; i++){
-            String areaid = areeInteresseInDb
+            String areaId = areeInteresseInDb
                     .get(rand.nextInt(areeInteresseInDb.size())).getAreaid();
-            String centroid = centroMonitoraggioInDb
+            String centroId = centroMonitoraggioInDb
                     .get(rand.nextInt(centroMonitoraggioInDb.size())).getCentroID();
-            String parameterId = IDGenerator.generateID();
-            String notaId = IDGenerator.generateID();
-            LocalDate pubDate = getRandomPubDate(canonicalStartDate, endDate);
-            ParametroClimatico pc = new ParametroClimatico(parameterId, centroid, areaid, pubDate);
-            pc.setVentoValue(getParamValue());
-            pc.setUmiditaValue(getParamValue());
-            pc.setPressioneValue(getParamValue());
-            pc.setTemperaturaValue(getParamValue());
-            pc.setPrecipitazioniValue(getParamValue());
-            pc.setAltitudineValue(getParamValue());
-            pc.setMassaValue(getParamValue());
-            pc.setNotaId(notaId);
-            result.add(pc);
+            result.add(generateParametroClimatico(areaId, centroId));
         }
         return result;
     }
 
     //Genera parametri climatici relativi a un anno specifico
-    public List<ParametroClimatico> generateParamClimaticiGivenYear(int year){
+    public List<ParametroClimatico> generateParamClimaticiGivenYear(int year, int numberOfItems){
+        List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
+        List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        for(int i = 0; i < numberOfItems; i++){
+            String areaId = areeInteresseInDb
+                    .get(
+                            ThreadLocalRandom.current().nextInt(areeInteresseInDb.size()))
+                    .getAreaid();
+            String centroId = centroMonitoraggioInDb
+                    .get(
+                            ThreadLocalRandom.current().nextInt(centroMonitoraggioInDb.size()))
+                    .getCentroID();
+            result.add(generateParametroClimaticoGivenYear(areaId, centroId, year));
+        }
 
+        return result;
+    }
+
+    public List<ParametroClimatico> generateParamClimaticiGivenYearArea(int year, String areaId, int numberOfItems){
+        List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
+        List<CentroMonitoraggio> centroMonitoraggiInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+
+        for(int i = 0; i < numberOfItems; i++){
+            String centroId = centroMonitoraggiInDb
+                    .get(ThreadLocalRandom.current().nextInt(centroMonitoraggiInDb.size()))
+                    .getCentroID();
+            result.add(generateParametroClimaticoGivenYear(areaId, centroId, year));
+        }
+        return result;
     }
 
 
     //Genera parametri climatici relativi a un mese specifico
     public List<ParametroClimatico> generateParamClimaticiGivenMonth(int month){
+        //TODO
+        return null;
 
     }
 
