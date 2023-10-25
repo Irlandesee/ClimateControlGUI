@@ -1,16 +1,12 @@
 package it.uninsubria.controller.dialog;
 
-import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,14 +14,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.text.DateFormatSymbols;
-import java.time.LocalDate;
 import java.time.Month;
-import java.time.format.TextStyle;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class GraphDialog {
 
@@ -85,7 +75,7 @@ public class GraphDialog {
          * dei parametri climatici registrati per quell'area e verranno
          * rappresentati sul grafico.
          */
-        List<Pair<Number, String>> data = getAverageTemp(params);
+        List<Pair<Number, String>> data = calculateAverageTemp(params);
         data.forEach(coppia -> {
             String month = coppia.getValue();
             Number avgTemp = coppia.getKey();
@@ -100,18 +90,31 @@ public class GraphDialog {
 
     }
 
-    private List<Pair<Number, String>> getAverageTemp(List<ParametroClimatico> params){
+    private List<Pair<Number, String>> calculateAverageTemp(List<ParametroClimatico> params){
         List<Pair<Number, String>> res = new LinkedList<Pair<Number, String>>();
-        for(ParametroClimatico p : params){
-            int month = p.getPubDate().getMonth().getValue();
-            List<ParametroClimatico> monthParameters = params
-                    .stream()
-                    .filter(param -> param.getPubDate().getMonth().getValue() == month)
-                    .toList();
-            res.add(new Pair<Number, String>(
-                    getMonthAverageTemp(monthParameters), GraphBuilder.getLocaleMonth(month)));
+        List<Pair<Month, List<ParametroClimatico>>> filteredParams = new LinkedList<Pair<Month, List<ParametroClimatico>>>();
+        List<Month> months = Arrays.stream(Month.values()).toList();
 
+        for(Month m : months){
+            System.out.println("filtering month: " + m);
+            List<ParametroClimatico> monthParameters = params.stream()
+                    .filter(param -> param.getPubDate().getMonth().equals(m))
+                    .toList();
+            filteredParams.add(new Pair<Month, List<ParametroClimatico>>(m, monthParameters));
+            params.removeAll(monthParameters);
         }
+
+        for(Pair<Month, List<ParametroClimatico>> pair : filteredParams){
+            System.out.println("printing list that corresponds to: " + pair.getKey());
+            List<ParametroClimatico> values = pair.getValue();
+            values.forEach(System.out::println);
+
+            res.add(new Pair<Number, String>(
+                    getMonthAverageTemp(values), GraphBuilder.getLocaleMonth(pair.getKey().getValue())));
+        }
+
+
+
         return res;
     }
 
