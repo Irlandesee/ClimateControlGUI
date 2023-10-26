@@ -27,6 +27,14 @@
     <center>
         <VBox fx:id="contentBox"/>
     </center>
+    <right>
+        <VBox styleClass="filter-section">
+            <TextField fx:id="tfYearFilter">Inserisci anno</TextField>
+            <TextField fx:id="tfMonthFilter">Inserisci mese</TextField>
+            <Button fx:id="btnFilterYear" onAction="#filterYear">Filtra anno</Button>
+            <Button fx:id="btnFilterMonth" onAction="#filterMonth">Filtra mese</Button>
+        </VBox>
+    </right>
     <bottom>
         <Label>Copyright 2023 Mattia Mauro Lunardi</Label>
     </bottom>

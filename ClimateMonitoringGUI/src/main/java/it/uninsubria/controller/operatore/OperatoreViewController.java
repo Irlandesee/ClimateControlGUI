@@ -96,7 +96,7 @@ public class OperatoreViewController {
         showAreeInserite();
         //line chart
         contentBox.getChildren().add(
-                GraphBuilder.getBasicLineChart(
+                GraphBuilder.getBasicMonthLineChart(
                         GraphBuilder.Resource.wind
                 )
         );

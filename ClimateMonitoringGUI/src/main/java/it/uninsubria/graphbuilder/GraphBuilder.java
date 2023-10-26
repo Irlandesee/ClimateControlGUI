@@ -1,14 +1,13 @@
 package it.uninsubria.graphbuilder;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableListBase;
 import javafx.scene.chart.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class GraphBuilder {
 
@@ -25,16 +24,12 @@ public class GraphBuilder {
     public static String[] months = {"Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio",
             "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"};
 
-    public GraphBuilder() {
-
-    }
-
     public static String getLocaleMonth(int month){
         return months[month - 1];
     }
 
 
-    public static LineChart<String, Number> getBasicLineChart(Resource r) {
+    public static LineChart<String, Number> getBasicMonthLineChart(Resource r) {
         final CategoryAxis xAxis = new CategoryAxis();
         xAxis.setCategories(FXCollections.observableList(Arrays.asList(months)));
         final NumberAxis yAxis = new NumberAxis();
@@ -44,15 +39,34 @@ public class GraphBuilder {
         yAxis.setTickUnit(1);
         xAxis.setLabel("Mese");
         yAxis.setLabel("Valore");
-        final LineChart<String, Number> lineChart =
-                new LineChart<String, Number>(xAxis, yAxis);
+        return prepareLineChart(r, xAxis, yAxis);
+    }
 
+    public static LineChart<String, Number> getBasicDayLineChart(Resource r, int year, int month){
+        final CategoryAxis xAxis = new CategoryAxis();
+        int monthLength = YearMonth.of(year, month).lengthOfMonth();
+        final int[] numbers = IntStream.rangeClosed(1, monthLength).toArray();
+        String[] days = new String[numbers.length];
+        for(int i = 0; i < numbers.length; i++) days[i] = String.valueOf(numbers[i]);
+        xAxis.setCategories(FXCollections.observableList(List.of(days)));
+        final NumberAxis yAxis = new NumberAxis();
+        yAxis.setAutoRanging(false);
+        yAxis.setLowerBound(1);
+        yAxis.setUpperBound(5);
+        yAxis.setTickUnit(1);
+
+        xAxis.setLabel("Giorno");
+        yAxis.setLabel("valore");
+        return prepareLineChart(r, xAxis, yAxis);
+    }
+
+    private static LineChart<String, Number> prepareLineChart(Resource r, Axis<String> xAxis, Axis<Number> yAxis){
+        LineChart<String, Number> lineChart = new LineChart<String, Number>(xAxis, yAxis);
         XYChart.Series series = new XYChart.Series();
         switch (r) {
             case wind -> {
                 series.setName("Vento");
                 lineChart.getData().add(series);
-                return lineChart;
             }
             case umidity -> {
                 series.setName("Umidita");
@@ -84,59 +98,7 @@ public class GraphBuilder {
                 lineChart.getData().add(series);
                 return lineChart;
             }
-            default -> {
-                //TODO: throw exception maybe?
-                return null;
-            }
         }
-    }
-
-    public XYChart.Series<LocalDate, Short> getSeries(Resource r, List<ParametroClimatico> params){
-        XYChart.Series<LocalDate, Short> resultSeries = new XYChart.Series<LocalDate, Short>();
-        switch(r){
-            case wind -> {
-                resultSeries.setName("Vento");
-                params.forEach(param -> resultSeries
-                            .getData()
-                            .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getVentoValue())));
-            }
-            case umidity -> {
-                resultSeries.setName("Umidita");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getUmiditaValue())));
-            }
-            case atmPressure -> {
-                resultSeries.setName("Pressione");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getPressioneValue())));
-            }
-            case rainfall -> {
-                resultSeries.setName("Precipitazioni");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getPrecipitazioniValue())));
-            }
-            case temperature -> {
-                resultSeries.setName("Temperatura");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getTemperaturaValue())));
-            }
-            case glacierAlt -> {
-                resultSeries.setName("Altitudine ghiacciai");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getAltitudineValue())));
-            }
-            case glacierMass -> {
-                resultSeries.setName("Massa ghiacciai");
-                params.forEach(param -> resultSeries
-                        .getData()
-                        .add(new XYChart.Data<LocalDate, Short>(param.getPubDate(), param.getMassaValue())));
-            }
-        }
-        return resultSeries;
+        return null;
     }
 }

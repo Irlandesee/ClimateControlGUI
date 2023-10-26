@@ -108,6 +108,13 @@ public class FakeDataGenerator{
         return values[ThreadLocalRandom.current().nextInt(0, values.length)];
     }
 
+    //end not included
+    public Short getParamValueBetween(short start, short end){
+        List<Short> values = new LinkedList<Short>();
+        for(short i = start; i < end; i++) values.add(i);
+        return values.get(ThreadLocalRandom.current().nextInt(start, end));
+    }
+
 
     private ParametroClimatico setParamValues(ParametroClimatico pc){
         pc.setNotaId(IDGenerator.generateID());
@@ -135,6 +142,15 @@ public class FakeDataGenerator{
                 centroId,
                 areaId,
                 getRandomPubDate(canonicalStartDate, canonicalEndDate).withYear(year));
+        return setParamValues(pc);
+    }
+
+    private ParametroClimatico generateParametroClimaticoGivenYearAndMonth(String areaId, String centroId, int year, int month){
+        ParametroClimatico pc = new ParametroClimatico(
+                IDGenerator.generateID(),
+                centroId,
+                areaId,
+                getRandomPubDate(canonicalStartDate, canonicalEndDate).withYear(year).withMonth(month));
         return setParamValues(pc);
     }
 
@@ -188,10 +204,17 @@ public class FakeDataGenerator{
 
 
     //Genera parametri climatici relativi a un mese specifico
-    public List<ParametroClimatico> generateParamClimaticiGivenMonth(int month){
-        //TODO
-        return null;
-
+    public List<ParametroClimatico> genPcAreaGivenMonthYear(String areaId, int month, int year, int numberOfItems){
+        List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
+        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        for(int i = 0; i < numberOfItems; i++){
+            String centroId =
+                    centroMonitoraggioInDb
+                            .get(ThreadLocalRandom.current().nextInt(centroMonitoraggioInDb.size()))
+                            .getCentroID();
+            result.add(generateParametroClimaticoGivenYearAndMonth(areaId, centroId, year, month));
+        }
+        return result;
     }
 
     public List<AreaInteresse> generateAreeInteressse(int numberOfItems){
