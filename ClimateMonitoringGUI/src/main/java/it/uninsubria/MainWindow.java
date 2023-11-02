@@ -34,22 +34,18 @@ public class MainWindow extends Application {
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
         QueryHandler queryHandler = new QueryHandler(url, props);
+        String idHunterTown = "1a4957fdc6382209d4d59bc2469722e5";
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(
                 QueryHandler.tables.PARAM_CLIMATICO,
                 "areaid",
-                "1a4957fdc6382209d4d59bc2469722e5");
+                idHunterTown);
+        int year = 2008;
+        int july = 7;
+        int october = 10;
         FakeDataGenerator fakeDataGenerator = new FakeDataGenerator(queryHandler);
         String api_key = "b1579b15-ecb5-47c3-bcb8-9548ee05f230";
-        //List<String> randomStrings = fakeDataGenerator.getRandomStrings(10, 32, api_key);
-        //randomStrings.forEach(System.out::println);
 
-        //List<ParametroClimatico> randomParams = fakeDataGenerator.generateParamClimatici(100);
-        //queryHandler.executeInsertParametroClimatico(randomParams);
-        //randomParams.forEach(System.out::println);
-        //List<NotaParametro> randomNote = fakeDataGenerator.generateNotaParametro(1);
-        //randomNote.forEach(System.out::println);
-
-        GraphDialog graphDialog = new GraphDialog(queryHandler, params);
+        GraphDialog graphDialog = new GraphDialog(queryHandler, idHunterTown, params);
         fxmlLoader.setController(graphDialog);
         Scene scene = new Scene(fxmlLoader.load(),800, 480);
         stage.setTitle("ClimateMonitoringApp!");

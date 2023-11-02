@@ -15,7 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 import java.util.*;
 
 public class GraphDialog {
@@ -58,6 +60,8 @@ public class GraphDialog {
     private LineChart<String, Number> altitudineChart;
     private LineChart<String, Number> massaChart;
 
+    private LineChart<String, Number> dailyTemperatureChart;
+
     private List<ParametroClimatico> params;
     private String areaId;
     public GraphDialog(QueryHandler queryHandler, String areaId,  List<ParametroClimatico> params){
@@ -76,6 +80,7 @@ public class GraphDialog {
         precipitazioniChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.rainfall);
         altitudineChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierAlt);
         massaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierMass);
+
 
         contentBox
                 .getChildren()
@@ -149,24 +154,44 @@ public class GraphDialog {
 
     }
 
+    private int getNumOccurrences(List<ParametroClimatico> params, int day){
+        return (int)params.stream().filter(p -> p.getPubDate().getDayOfMonth() == day).count();
+    }
+
     @FXML
     public void filterMonth(){
         int month = Integer.parseInt(tfMonthFilter.getText());
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+        int year = params.get(0).getPubDate().getYear();
         Month m = Month.of(month);
-        System.out.println("Filtering for: "+m);
         List<ParametroClimatico> filteredParams = params
                 .stream()
                 .filter(pc -> pc.getPubDate().getMonth().equals(m))
                 .toList();
-        filteredParams.forEach(System.out::println);
-        // Number octoberAverageTemp =  getMonthAverageTemp(filteredParams);
+        //filteredParams.forEach(System.out::println);
+        //get the number of reports per day --- TODO
+        System.out.println("Counting occurrences");
+        List<Pair<Integer, ParametroClimatico>> paramOccurrences = new LinkedList<Pair<Integer, ParametroClimatico>>();
+        filteredParams.forEach(param -> {
+            paramOccurrences.add(new Pair<Integer, ParametroClimatico>(getNumOccurrences(filteredParams, param.getPubDate().getDayOfMonth()), param));
+        });
+
+        paramOccurrences.forEach(pair -> {
+            System.out.println(pair.getKey() + "->" + pair.getValue());
+        });
 
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         filteredParams.forEach(pc -> {
-            series.getData().add(new XYChart.Data<>(pc.getPubDate().getDayOfMonth(), pc.getTemperaturaValue()));
-
+            Number n = pc.getTemperaturaValue();
+            String day = String.valueOf(pc.getPubDate().getDayOfMonth());
+            series.getData().add(new XYChart.Data<>(day, n));
         });
+
+        dailyTemperatureChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.temperature, year, month);
+        dailyTemperatureChart.getData().add(series);
+        contentBox.getChildren().remove(temperaturaChart);
+        contentBox.getChildren().add(dailyTemperatureChart);
+
 
 
         /**
