@@ -22,6 +22,37 @@ import java.util.*;
 
 public class GraphDialog {
 
+    private enum ParameterType{
+        vento,
+        temperatura,
+        umidita,
+        pressione,
+        precipitazioni,
+        alt_ghiacciai,
+        massa_ghiacciai
+
+    };
+
+    private enum monthlyChart{
+        monthlyWindChart,
+        monthlyUmidityChart,
+        monthlyTemperatureChart,
+        monthlyPressureChart,
+        monthlyRainfallChart,
+        monthlyAltChart,
+        monthlyMassChart,
+    };
+
+    private enum dailyChart{
+        dailyWindChart,
+        dailyUmidityChart,
+        dailyTemperatureChart,
+        dailyPressureChart,
+        dailyRainfallChart,
+        dailyAltChart,
+        dailyMassChart,
+    }
+
     public Label graphName;
     public VBox contentBox;
     @FXML
@@ -61,6 +92,12 @@ public class GraphDialog {
     private LineChart<String, Number> massaChart;
 
     private LineChart<String, Number> dailyTemperatureChart;
+    private LineChart<String, Number> dailyUmiditaChart;
+    private LineChart<String, Number> dailyPressioneChart;
+    private LineChart<String, Number> dailyPrecipitazioniChart;
+    private LineChart<String, Number> dailyVentoChart;
+    private LineChart<String, Number> dailyAltitudineChart;
+    private LineChart<String, Number> dailyMassaChart;
 
     private List<ParametroClimatico> params;
     private String areaId;
@@ -74,12 +111,30 @@ public class GraphDialog {
     public void initialize(){
         //init the graphs
         ventoChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.wind);
+        ventoChart.setUserData(monthlyChart.monthlyWindChart);
         umiditaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.umidity);
+        umiditaChart.setUserData(monthlyChart.monthlyUmidityChart);
         temperaturaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.temperature);
+        temperaturaChart.setUserData(monthlyChart.monthlyTemperatureChart);
         pressioneChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.atmPressure);
+        pressioneChart.setUserData(monthlyChart.monthlyPressureChart);
         precipitazioniChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.rainfall);
+        precipitazioniChart.setUserData(monthlyChart.monthlyRainfallChart);
         altitudineChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierAlt);
+        altitudineChart.setUserData(monthlyChart.monthlyAltChart);
         massaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierMass);
+        massaChart.setUserData(monthlyChart.monthlyMassChart);
+
+        dailyTemperatureChart.setUserData(dailyChart.dailyTemperatureChart);
+        dailyVentoChart.setUserData(dailyChart.dailyWindChart);
+        dailyUmiditaChart.setUserData(dailyChart.dailyUmidityChart);
+        dailyPressioneChart.setUserData(dailyChart.dailyPressureChart);
+        dailyPrecipitazioniChart.setUserData(dailyChart.dailyRainfallChart);
+        dailyAltitudineChart.setUserData(dailyChart.dailyAltChart);
+        dailyMassaChart.setUserData(dailyChart.dailyMassChart);
+
+        tfMonthFilter.setOnMouseClicked(e -> tfMonthFilter.setText(""));
+        tfYearFilter.setOnMouseClicked(e -> tfYearFilter.setText(""));
 
 
         contentBox
@@ -135,23 +190,53 @@ public class GraphDialog {
             //values.forEach(System.out::println);
 
             res.add(new Pair<Number, String>(
-                    getMonthAverageTemp(values), GraphBuilder.getLocaleMonth(pair.getKey().getValue())));
+                    getAverrageTemp(values), GraphBuilder.getLocaleMonth(pair.getKey().getValue())));
         }
 
         return res;
     }
 
-    private Number getMonthAverageTemp(List<ParametroClimatico> monthParameters){
-        int averageTemperature = 0;
-        for(ParametroClimatico p : monthParameters){
-            averageTemperature += p.getTemperaturaValue();
+    private Number getAverageValue(List<ParametroClimatico> params, ParameterType parameterType){
+        int averageValue = 0;
+        switch(parameterType){
+            case vento -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getVentoValue();
+            }
+            case umidita -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getUmiditaValue();
+            }
+            case temperatura -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getTemperaturaValue();
+            }
+            case pressione -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getPressioneValue();
+            }
+            case precipitazioni -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getPrecipitazioniValue();
+            }
+            case alt_ghiacciai -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getAltitudineValue();
+            }
+            case massa_ghiacciai -> {
+                for(ParametroClimatico p : params)
+                    averageValue += p.getMassaValue();
+            }
         }
-        return averageTemperature / monthParameters.size();
+        return averageValue/params.size();
     }
 
-    @FXML
-    public void filterYear(){
-
+    private Number getAverrageTemp(List<ParametroClimatico> params){
+        int averageTemperature = 0;
+        for(ParametroClimatico p : params){
+            averageTemperature += p.getTemperaturaValue();
+        }
+        return averageTemperature / params.size();
     }
 
     private int getNumOccurrences(List<ParametroClimatico> params, int day){
@@ -159,7 +244,13 @@ public class GraphDialog {
     }
 
     @FXML
+    public void filterYear(){
+
+    }
+
+    @FXML
     public void filterMonth(){
+        tfMonthFilter.clear();
         int month = Integer.parseInt(tfMonthFilter.getText());
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
         int year = params.get(0).getPubDate().getYear();
@@ -168,47 +259,66 @@ public class GraphDialog {
                 .stream()
                 .filter(pc -> pc.getPubDate().getMonth().equals(m))
                 .toList();
-        //filteredParams.forEach(System.out::println);
-        System.out.println("Counting occurrences");
-        List<Pair<Integer, LocalDate>> paramOccurrences = new LinkedList<Pair<Integer, LocalDate>>();
-        filteredParams.forEach(param -> {
+        List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
+        List<ParameterType> shownResources = new LinkedList<ParameterType>();
+
+        for(Node child : contentBox.getChildren()){
+            Object childUserData = child.getUserData();
+            if(childUserData.equals(monthlyChart.monthlyWindChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyTemperatureChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyUmidityChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyRainfallChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyAltChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyMassChart)){
+
+            }else if(childUserData.equals(monthlyChart.monthlyPressureChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyTemperatureChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyWindChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyUmidityChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyRainfallChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyAltChart)){
+
+            }else if(childUserData.equals(dailyChart.dailyMassChart)){
+
+            }
+        }
+
+
+        for(ParametroClimatico param : filteredParams){
             LocalDate pubDate = param.getPubDate();
-            int count = getNumOccurrences(filteredParams, pubDate.getDayOfMonth());
-            Pair<Integer, LocalDate> res = new Pair<Integer, LocalDate>(count, pubDate);
-            if(!paramOccurrences.contains(res))
-                paramOccurrences.add(res);
-        });
-
-
-        paramOccurrences.forEach(pair -> System.out.println(pair.getKey() + "->" + pair.getValue()));
-
-
+            if(getNumOccurrences(filteredParams, pubDate.getDayOfMonth()) > 1){
+                List<ParametroClimatico> paramSameDate = filteredParams.stream().filter(pc -> pc.getPubDate().equals(param.getPubDate())).toList();
+                Number avgTemp = getAverrageTemp(paramSameDate);
+                data.add(new Pair<LocalDate, Number>(param.getPubDate(), avgTemp));
+            }
+            else{
+                data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getTemperaturaValue()));
+            }
+        }
 
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        filteredParams.forEach(pc -> {
-            Number n = pc.getTemperaturaValue();
-            String day = String.valueOf(pc.getPubDate().getDayOfMonth());
-            series.getData().add(new XYChart.Data<>(day, n));
-        });
+
+        data.forEach(pair -> series
+                .getData()
+                .add(new XYChart.Data<>(String.valueOf(pair.getKey().getDayOfMonth()), pair.getValue())));
+
+
 
         dailyTemperatureChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.temperature, year, month);
         dailyTemperatureChart.getData().add(series);
         contentBox.getChildren().remove(temperaturaChart);
         contentBox.getChildren().add(dailyTemperatureChart);
-
-
-
-        /**
-        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        data.forEach(coppia -> {
-            Number avgTemp = coppia.getKey();
-            System.out.println(m + " -> " + avgTemp);
-            series.getData().add(
-                    new XYChart.Data<>(GraphBuilder.getLocaleMonth(month), avgTemp));
-        });
-        temperaturaChart.getData().add(series);
-         **/
-
+        tfMonthFilter.setText("Filtra Mese");
     }
 
 
