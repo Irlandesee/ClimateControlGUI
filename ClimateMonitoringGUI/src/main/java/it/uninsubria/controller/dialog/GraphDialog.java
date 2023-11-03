@@ -130,9 +130,9 @@ public class GraphDialog {
         }
 
         for(Pair<Month, List<ParametroClimatico>> pair : filteredParams){
-            System.out.println("printing list that corresponds to: " + pair.getKey());
+            //System.out.println("printing list that corresponds to: " + pair.getKey());
             List<ParametroClimatico> values = pair.getValue();
-            values.forEach(System.out::println);
+            //values.forEach(System.out::println);
 
             res.add(new Pair<Number, String>(
                     getMonthAverageTemp(values), GraphBuilder.getLocaleMonth(pair.getKey().getValue())));
@@ -169,16 +169,20 @@ public class GraphDialog {
                 .filter(pc -> pc.getPubDate().getMonth().equals(m))
                 .toList();
         //filteredParams.forEach(System.out::println);
-        //get the number of reports per day --- TODO
         System.out.println("Counting occurrences");
-        List<Pair<Integer, ParametroClimatico>> paramOccurrences = new LinkedList<Pair<Integer, ParametroClimatico>>();
+        List<Pair<Integer, LocalDate>> paramOccurrences = new LinkedList<Pair<Integer, LocalDate>>();
         filteredParams.forEach(param -> {
-            paramOccurrences.add(new Pair<Integer, ParametroClimatico>(getNumOccurrences(filteredParams, param.getPubDate().getDayOfMonth()), param));
+            LocalDate pubDate = param.getPubDate();
+            int count = getNumOccurrences(filteredParams, pubDate.getDayOfMonth());
+            Pair<Integer, LocalDate> res = new Pair<Integer, LocalDate>(count, pubDate);
+            if(!paramOccurrences.contains(res))
+                paramOccurrences.add(res);
         });
 
-        paramOccurrences.forEach(pair -> {
-            System.out.println(pair.getKey() + "->" + pair.getValue());
-        });
+
+        paramOccurrences.forEach(pair -> System.out.println(pair.getKey() + "->" + pair.getValue()));
+
+
 
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         filteredParams.forEach(pc -> {

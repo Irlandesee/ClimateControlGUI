@@ -29,7 +29,7 @@ public class MainWindow extends Application {
         fxmlLoader.setController(mainWindowController);
          **/
         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
-        final String url = "jdbc:postgresql://localhost/postgres";
+        final String url = "jdbc:postgresql://192.168.1.26/postgres";
         final Properties props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
