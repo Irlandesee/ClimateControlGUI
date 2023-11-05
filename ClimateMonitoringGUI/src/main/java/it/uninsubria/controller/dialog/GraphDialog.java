@@ -34,7 +34,7 @@ public class GraphDialog {
 
     };
 
-    private enum monthlyChart{
+    private enum MonthlyChart{
         monthlyWindChart,
         monthlyUmidityChart,
         monthlyTemperatureChart,
@@ -44,7 +44,7 @@ public class GraphDialog {
         monthlyMassChart,
     };
 
-    private enum dailyChart{
+    private enum DailyChart{
         dailyWindChart,
         dailyUmidityChart,
         dailyTemperatureChart,
@@ -122,27 +122,27 @@ public class GraphDialog {
     public void initialize(){
         //init the graphs
         ventoChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.wind);
-        ventoChart.setUserData(monthlyChart.monthlyWindChart);
+        ventoChart.setUserData(MonthlyChart.monthlyWindChart);
         umiditaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.umidity);
-        umiditaChart.setUserData(monthlyChart.monthlyUmidityChart);
+        umiditaChart.setUserData(MonthlyChart.monthlyUmidityChart);
         temperaturaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.temperature);
-        temperaturaChart.setUserData(monthlyChart.monthlyTemperatureChart);
+        temperaturaChart.setUserData(MonthlyChart.monthlyTemperatureChart);
         pressioneChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.atmPressure);
-        pressioneChart.setUserData(monthlyChart.monthlyPressureChart);
+        pressioneChart.setUserData(MonthlyChart.monthlyPressureChart);
         precipitazioniChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.rainfall);
-        precipitazioniChart.setUserData(monthlyChart.monthlyRainfallChart);
+        precipitazioniChart.setUserData(MonthlyChart.monthlyRainfallChart);
         altitudineChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierAlt);
-        altitudineChart.setUserData(monthlyChart.monthlyAltChart);
+        altitudineChart.setUserData(MonthlyChart.monthlyAltChart);
         massaChart = GraphBuilder.getBasicMonthLineChart(GraphBuilder.Resource.glacierMass);
-        massaChart.setUserData(monthlyChart.monthlyMassChart);
+        massaChart.setUserData(MonthlyChart.monthlyMassChart);
 
-        dailyTemperatureChart.setUserData(dailyChart.dailyTemperatureChart);
-        dailyVentoChart.setUserData(dailyChart.dailyWindChart);
-        dailyUmiditaChart.setUserData(dailyChart.dailyUmidityChart);
-        dailyPressioneChart.setUserData(dailyChart.dailyPressureChart);
-        dailyPrecipitazioniChart.setUserData(dailyChart.dailyRainfallChart);
-        dailyAltitudineChart.setUserData(dailyChart.dailyAltChart);
-        dailyMassaChart.setUserData(dailyChart.dailyMassChart);
+        dailyTemperatureChart.setUserData(DailyChart.dailyTemperatureChart);
+        dailyVentoChart.setUserData(DailyChart.dailyWindChart);
+        dailyUmiditaChart.setUserData(DailyChart.dailyUmidityChart);
+        dailyPressioneChart.setUserData(DailyChart.dailyPressureChart);
+        dailyPrecipitazioniChart.setUserData(DailyChart.dailyRainfallChart);
+        dailyAltitudineChart.setUserData(DailyChart.dailyAltChart);
+        dailyMassaChart.setUserData(DailyChart.dailyMassChart);
 
         tfMonthFilter.setOnMouseClicked(e -> tfMonthFilter.setText(""));
         tfYearFilter.setOnMouseClicked(e -> tfYearFilter.setText(""));
@@ -247,13 +247,13 @@ public class GraphDialog {
         //if there are monthly charts, remove them
         for(Node child : contentBox.getChildren()){
             Object childUserData = child.getUserData();
-            if(childUserData.equals(monthlyChart.monthlyWindChart)
-                    || childUserData.equals(monthlyChart.monthlyUmidityChart)
-                    || childUserData.equals(monthlyChart.monthlyTemperatureChart)
-                    || childUserData.equals(monthlyChart.monthlyPressureChart)
-                    || childUserData.equals(monthlyChart.monthlyRainfallChart)
-                    || childUserData.equals(monthlyChart.monthlyAltChart)
-                    || childUserData.equals(monthlyChart.monthlyMassChart)){
+            if(childUserData.equals(MonthlyChart.monthlyWindChart)
+                    || childUserData.equals(MonthlyChart.monthlyUmidityChart)
+                    || childUserData.equals(MonthlyChart.monthlyTemperatureChart)
+                    || childUserData.equals(MonthlyChart.monthlyPressureChart)
+                    || childUserData.equals(MonthlyChart.monthlyRainfallChart)
+                    || childUserData.equals(MonthlyChart.monthlyAltChart)
+                    || childUserData.equals(MonthlyChart.monthlyMassChart)){
                 contentBox.getChildren().remove(child);
                 System.out.println("Removed child");
             }
@@ -269,19 +269,96 @@ public class GraphDialog {
                 .toList();
 
 
-        List<Pair<LocalDate, Number>> data = calcData(filteredParams, );
-
+        List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+        for(Node child : contentBox.getChildren()){
+            switch((DailyChart) child.getUserData()){
+                case dailyWindChart -> {
+                    System.out.println("Calcolando dati mensili vento");
+                    data = calcData(filteredParams, ParameterType.vento);
+                    dailyVentoChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.wind, year, month);
+                    contentBox.getChildren().add(dailyVentoChart);
+                }
+                case dailyUmidityChart -> {
+                    System.out.println("Calcolando dati mensili umidita");
+                    data = calcData(filteredParams, ParameterType.umidita);
+                    dailyUmiditaChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.umidity, year, month);
+                    contentBox.getChildren().add(dailyUmiditaChart);
+                }
+                case dailyTemperatureChart -> {
+                    System.out.println("Calcolando dati mensili temperatura");
+                    data = calcData(filteredParams, ParameterType.temperatura);
+                    dailyTemperatureChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.temperature, year, month);
+                    contentBox.getChildren().add(dailyTemperatureChart);
+                }
+                case dailyRainfallChart -> {
+                    System.out.println("Calcolando dati mensili precipitazioni");
+                    data = calcData(filteredParams, ParameterType.precipitazioni);
+                    dailyPrecipitazioniChart= GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.rainfall, year, month);
+                    contentBox.getChildren().add(dailyPrecipitazioniChart);
+                }
+                case dailyPressureChart -> {
+                    System.out.println("Calcolando dati mensili pressione");
+                    data = calcData(filteredParams, ParameterType.pressione);
+                    dailyPressioneChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.atmPressure, year, month);
+                    contentBox.getChildren().add(dailyPressioneChart);
+                }
+                case dailyAltChart -> {
+                    System.out.println("Calcolando dati mensili altitudine altitudine");
+                    data = calcData(filteredParams, ParameterType.alt_ghiacciai);
+                    dailyAltitudineChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.glacierAlt, year, month);
+                    contentBox.getChildren().add(dailyAltitudineChart);
+                }
+                case dailyMassChart -> {
+                    System.out.println("Calcolando dati mensili massa ghiacciai");
+                    data = calcData(filteredParams, ParameterType.massa_ghiacciai);
+                    dailyMassaChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.glacierMass, year, month);
+                    contentBox.getChildren().add(dailyMassaChart);
+                }
+            }
+            data.forEach(pair -> series
+                    .getData()
+                    .add(new XYChart.Data<>(String.valueOf(pair.getKey().getDayOfMonth()), pair.getValue())));
+            //add the data to the chart
+            switch((DailyChart) child.getUserData()){
+                case dailyWindChart -> {
+                    System.out.println("Aggiungo dati a daily wind chart");
+                    dailyVentoChart.getData().add(series);
+                    contentBox.getChildren().add(dailyVentoChart);
+                }
+                case dailyUmidityChart -> {
+                    System.out.println("Aggiungo dati a daily umidity chart");
+                    dailyUmiditaChart.getData().add(series);
+                    contentBox.getChildren().add(dailyUmiditaChart);
+                }
+                case dailyTemperatureChart -> {
+                    System.out.println("Aggiungo dati a daily temperature chart");
+                    dailyTemperatureChart.getData().add(series);
+                    contentBox.getChildren().add(dailyTemperatureChart);
+                }
+                case dailyRainfallChart -> {
+                    System.out.println("Aggiungo dati a daily precipitazioni chart");
+                    dailyPrecipitazioniChart.getData().add(series);
+                    contentBox.getChildren().add(dailyPrecipitazioniChart);
+                }
+                case dailyPressureChart -> {
+                    System.out.println("Aggiungo dati a daily pressure chart");
+                    dailyPressioneChart.getData().add(series);
+                    contentBox.getChildren().add(dailyPressioneChart);
+                }
+                case dailyAltChart -> {
+                    System.out.println("Aggiungo dati a daily altitude chart");
+                    dailyAltitudineChart.getData().add(series);
+                    contentBox.getChildren().add(dailyAltitudineChart);
+                }
+                case dailyMassChart -> {
+                    System.out.println("Aggiungo dati a daily mass chart");
+                    dailyMassaChart.getData().add(series);
+                    contentBox.getChildren().add(dailyMassaChart);
+                }
+            }
+        }
 
-
-        data.forEach(pair -> series
-                .getData()
-                .add(new XYChart.Data<>(String.valueOf(pair.getKey().getDayOfMonth()), pair.getValue())));
-
-
-        dailyTemperatureChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.temperature, year, month);
-        dailyTemperatureChart.getData().add(series);
-        contentBox.getChildren().add(dailyTemperatureChart);
         tfMonthFilter.setText("Filtra Mese");
     }
 
@@ -335,14 +412,16 @@ public class GraphDialog {
         boolean mode = switchMode.isSelected();
         boolean isMonthlyWindChartPresent = contentBox.getChildren().contains(ventoChart);
         boolean isDailyWindChartPresent = contentBox.getChildren().contains(dailyVentoChart);
-        if(mode && isMonthlyWindChartPresent && !isDailyWindChartPresent){
-            //vista giornaliera , grafico mensile presente, grafico giornaliero non presente
-            contentBox.getChildren().remove(ventoChart);
-            contentBox.getChildren().add(dailyVentoChart);
-        }else if(!mode && isDailyWindChartPresent && !isMonthlyWindChartPresent){
-            //vista mensile, grafico giornaliero presente, grafico mensile non presente
-            contentBox.getChildren().remove(dailyVentoChart);
-            contentBox.getChildren().add(ventoChart);
+        if(mode){ //vista giorno per giorno
+            if(isMonthlyWindChartPresent && !isDailyWindChartPresent){
+                contentBox.getChildren().remove(ventoChart);
+                contentBox.getChildren().add(dailyVentoChart);
+            }
+        }else{ //vista mese per mese
+            if(!isMonthlyWindChartPresent && isDailyWindChartPresent){
+                contentBox.getChildren().remove(dailyVentoChart);
+                contentBox.getChildren().add(ventoChart);
+            }
         }
     }
 
@@ -351,13 +430,16 @@ public class GraphDialog {
         boolean mode = switchMode.isSelected();
         boolean isMonthlyTempChartPresent = contentBox.getChildren().contains(temperaturaChart);
         boolean isDailyTempChartPresent = contentBox.getChildren().contains(dailyTemperatureChart);
-        if(mode && isMonthlyTempChartPresent && !isDailyTempChartPresent){
-            //vista giornaliera, grafico mensile presente, grafico gioraliero non presente
-            contentBox.getChildren().remove(temperaturaChart);
-            contentBox.getChildren().add(dailyTemperatureChart);
-        }else if(!mode && isDailyTempChartPresent && isMonthlyTempChartPresent){
-            contentBox.getChildren().remove(dailyTemperatureChart);
-            contentBox.getChildren().add(temperaturaChart);
+        if(mode){
+            if(isMonthlyTempChartPresent && !isDailyTempChartPresent){
+                contentBox.getChildren().remove(temperaturaChart);
+                contentBox.getChildren().add(dailyTemperatureChart);
+            }
+        }else{
+            if(isDailyTempChartPresent && !isMonthlyTempChartPresent){
+                contentBox.getChildren().remove(dailyTemperatureChart);
+                contentBox.getChildren().add(temperaturaChart);
+            }
         }
     }
 
