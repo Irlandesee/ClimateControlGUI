@@ -319,6 +319,11 @@ public class GraphDialog {
                 || childUserData.equals(MonthlyChart.monthlyMassChart);
     }
 
+    /**
+     * TODO:
+     * BUGGED TO INF and beyond
+     * right chart does not appear...
+     */
     @FXML
     public void filterMonth(){
         String monthFilterText = tfMonthFilter.getText();
@@ -384,8 +389,7 @@ public class GraphDialog {
                         data = calcData(filteredParams, ParameterType.massa_ghiacciai);
                         dailyMassaChart = GraphBuilder.getBasicDailyLineChart(GraphBuilder.Resource.glacierMass, year, month);
                     }
-            }
-
+                }
             }
             data.forEach(pair -> series
                     .getData()
