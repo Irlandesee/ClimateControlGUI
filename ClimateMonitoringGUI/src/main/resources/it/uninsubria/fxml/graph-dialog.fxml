@@ -27,7 +27,15 @@
         </HBox>
     </top>
     <center>
-        <VBox fx:id="contentBox"/>
+        <VBox fx:id="contentBox">
+            <VBox fx:id="tempBox"/>
+            <VBox fx:id="windBox"/>
+            <VBox fx:id="umidityBox"/>
+            <VBox fx:id="pressureBox"/>
+            <VBox fx:id="rainfallBox"/>
+            <VBox fx:id="altBox"/>
+            <VBox fx:id="massBox"/>
+        </VBox>
     </center>
     <right>
         <VBox styleClass="filter-section">
