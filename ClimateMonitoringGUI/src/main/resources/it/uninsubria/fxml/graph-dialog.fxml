@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <?import org.controlsfx.control.ToggleSwitch?>
+<?import javafx.scene.shape.Box?>
 <BorderPane
         xmlns="http://javafx.com/javafx"
         xmlns:fx="http://javafx.com/fxml"
@@ -14,28 +15,56 @@
     <top>
         <Label>Graph</Label>
         <Label fx:id="graphName"/>
-        <HBox fx:id="buttonSection" styleClass="button-section">
+        <HBox fx:id="menuSection" styleClass="menu-section">
             <Button fx:id="closeBtn" onAction="#close">Cancel</Button>
-            <ToggleSwitch fx:id="switchMode" />
-            <Button fx:id="temperaturaBubtton" onAction="#addTemperatura">Temperatura</Button>
-            <Button fx:id="ventoButton" onAction="#addVento">Vento</Button>
-            <Button fx:id="umiditaButton" onAction="#addUmidita">Umidita</Button>
-            <Button fx:id="pressioneButton" onAction="#addPressione">Pressione</Button>
-            <Button fx:id="precipitazioniButton" onAction="#addPrecipitazioni">Precipitazioni</Button>
-            <Button fx:id="altitudineButton" onAction="#addAltitudine">Altitudine</Button>
-            <Button fx:id="massaButton" onAction="#addMassa">Massa</Button>
+            <MenuBar>
+                <Menu text="temperatura">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyTemp"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyTemp"/>
+                    </items>
+                </Menu>
+                <Menu text="vento">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyWind"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyWind"/>
+                    </items>
+                </Menu>
+                <Menu text="umidita">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyUmidity"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyUmidity"/>
+                    </items>
+                </Menu>
+                <Menu text="pressione">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyPressure"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyPressure"/>
+                    </items>
+                </Menu>
+                <Menu text="precipitazini">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyRainfall"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyRainfall"/>
+                    </items>
+                </Menu>
+                <Menu text="altitudine">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyAlt"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyAlt"/>
+                    </items>
+                </Menu>
+                <Menu text="massa">
+                    <items>
+                        <MenuItem text="Mensile" onAction="#monthlyMass"/>
+                        <MenuItem text="Giornaliero" onAction="#dailyMass"/>
+                    </items>
+                </Menu>
+            </MenuBar>
         </HBox>
     </top>
     <center>
-        <VBox fx:id="contentBox">
-            <VBox fx:id="tempBox"/>
-            <VBox fx:id="windBox"/>
-            <VBox fx:id="umidityBox"/>
-            <VBox fx:id="pressureBox"/>
-            <VBox fx:id="rainfallBox"/>
-            <VBox fx:id="altBox"/>
-            <VBox fx:id="massBox"/>
-        </VBox>
+        <VBox fx:id="contentBox" styleClass="graph-box"/>
     </center>
     <right>
         <VBox styleClass="filter-section">
