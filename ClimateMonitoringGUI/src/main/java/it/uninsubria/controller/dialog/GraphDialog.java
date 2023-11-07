@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -16,6 +17,8 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.controlsfx.control.ToggleSwitch;
 
+import java.nio.channels.AlreadyBoundException;
+import java.security.PrivilegedAction;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -31,7 +34,6 @@ public class GraphDialog {
         precipitazioni,
         alt_ghiacciai,
         massa_ghiacciai
-
     };
 
     @FXML
@@ -129,45 +131,6 @@ public class GraphDialog {
 
         monthlyTempLineChart.getData().add(series);
         contentBox.getChildren().add(monthlyTempLineChart);
-        /**
-        if(switchMode.isSelected()){
-
-            //the default month is January
-            List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
-            List<Pair<LocalDate, Number>> data = calcData(filteredParams, ParameterType.temperatura);
-            data.forEach(pair -> series
-                    .getData()
-                    .add(new XYChart.Data<>(String.valueOf(pair.getKey().getDayOfMonth()), pair.getValue())));
-        }else{
-
-
-            List<Pair<Month, List<ParametroClimatico>>> filteredParamsMonth = new LinkedList<Pair<Month, List<ParametroClimatico>>>();
-            for(Month m : Month.values()){
-                System.out.println("filtering month: " + m);
-                List<ParametroClimatico> monthParameters = params
-                        .stream()
-                        .filter(pc -> pc.getPubDate().getMonth().equals(m))
-                        .toList();
-                filteredParamsMonth.add(new Pair<Month, List<ParametroClimatico>>(m, monthParameters));
-                params.removeAll(monthParameters);
-            }
-
-            List<Pair<Number, String>> data = new LinkedList<Pair<Number, String>>();
-            for(Pair<Month, List<ParametroClimatico>> pair : filteredParamsMonth){
-                //System.out.println("printing list that corresponds to: " + pair.getKey());
-                List<ParametroClimatico> values = pair.getValue();
-                //values.forEach(System.out::println);
-                data.add(new Pair<Number, String>(
-                    getAverageValue(values, ParameterType.temperatura), GraphBuilder.getLocaleMonth(pair.getKey().getValue())));
-            }
-
-            //add the values to the graph
-            data.forEach(pair -> {
-                series.getData().add(new XYChart.Data<>(pair.getValue(), pair.getKey()));
-            });
-        }
-         **/
-
     }
 
     private Number getAverageValue(List<ParametroClimatico> params, ParameterType parameterType){
@@ -214,15 +177,27 @@ public class GraphDialog {
 
     }
 
+    private XYChart.Series<String, Number> addMonthlyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
+        data.forEach(param -> series
+                .getData()
+                .add(new XYChart.Data<String, Number>(String.valueOf(param.getKey().getMonth()), param.getValue())));
+        return series;
+    }
+
+    private XYChart.Series<String, Number> addDailyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
+        data.forEach(param -> series
+                .getData()
+                .add(new XYChart.Data<String, Number>(String.valueOf(param.getKey().getDayOfMonth()), param.getValue())));
+        return series;
+    }
+
     @FXML
     public void filterMonth(){
         String monthFilterText = tfMonthFilter.getText();
         if(monthFilterText.isEmpty())
-            return;
+            new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
 
         int month = Integer.parseInt(monthFilterText);
-
-        //if there are monthly charts, remove them
 
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
         int year = params.get(0).getPubDate().getYear();
@@ -232,14 +207,66 @@ public class GraphDialog {
                 .filter(pc -> pc.getPubDate().getMonth().equals(m))
                 .toList();
 
-
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
-
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        data.forEach(pair -> series
-                .getData()
-                .add(new XYChart.Data<>(String.valueOf(pair.getKey().getDayOfMonth()), pair.getValue())));
-        //add the data to the chart
+        for(Node n : contentBox.getChildren()){
+            if(n.equals(monthlyTempLineChart) && monthlyTempLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.temperatura);
+                monthlyTempLineChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyTempLineChart) && dailyTempLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.temperatura);
+                dailyTempLineChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyWindLineChart) && monthlyWindLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.vento);
+                monthlyWindLineChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyWindLineChart) && dailyWindLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.vento);
+                dailyWindLineChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyUmidityLineChart) && monthlyUmidityLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.umidita);
+                monthlyUmidityLineChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyUmidityLineChart) && dailyUmidityLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.umidita);
+                dailyUmidityLineChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyPressureChart) && monthlyPressureChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.pressione);
+                monthlyPressureChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyPressureChart) && dailyPressureChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.pressione);
+                dailyPressureChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyRainfallChart) && monthlyRainfallChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.precipitazioni);
+                monthlyRainfallChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyRainfallLineChart) && dailyRainfallLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.precipitazioni);
+                dailyRainfallLineChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyAltLineChart) && monthlyAltLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.alt_ghiacciai);
+                monthlyAltLineChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyAltLineChart) && dailyAltLineChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.alt_ghiacciai);
+                dailyAltLineChart.getData().add(addDailyDataToSeries(data, series));
+            }
+            else if(n.equals(monthlyMassChart) && monthlyMassChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.massa_ghiacciai);
+                monthlyMassChart.getData().add(addMonthlyDataToSeries(data, series));
+            }
+            else if(n.equals(dailyMassChart) && dailyMassChart.isVisible()){
+                data = calcData(filteredParams, ParameterType.massa_ghiacciai);
+                dailyMassChart.getData().add(addDailyDataToSeries(data, series));
+            }
+        }
 
         tfMonthFilter.setText("Filtra Mese");
     }
@@ -515,6 +542,7 @@ public class GraphDialog {
 
         }
 
+        @FXML
         public void close (ActionEvent actionEvent){
             Stage s = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             if (s != null)
