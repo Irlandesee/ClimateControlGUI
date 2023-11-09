@@ -82,7 +82,7 @@ public class GraphBuilder {
 
     private static LineChart<String, Number> prepareLineChart(Resource r, Axis<String> xAxis, Axis<Number> yAxis){
         LineChart<String, Number> lineChart = new LineChart<String, Number>(xAxis, yAxis);
-        XYChart.Series series = new XYChart.Series();
+        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         switch (r) {
             case wind -> {
                 series.setName("Vento");

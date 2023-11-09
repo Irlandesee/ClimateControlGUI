@@ -47,7 +47,7 @@ public class MainWindow extends Application {
 
         GraphDialog graphDialog = new GraphDialog(queryHandler, idHunterTown, params);
         fxmlLoader.setController(graphDialog);
-        Scene scene = new Scene(fxmlLoader.load(),800, 480);
+        Scene scene = new Scene(fxmlLoader.load(),800, 800);
         stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();
