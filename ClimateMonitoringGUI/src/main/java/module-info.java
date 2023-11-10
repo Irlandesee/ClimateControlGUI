@@ -11,6 +11,9 @@ module it.uninsubria.climatemonitoringgui {
     requires org.postgresql.jdbc;
     requires java.sql;
     requires javafx.graphics;
+    requires org.json;
+    requires org.apache.httpcomponents.httpcore;
+    requires org.apache.httpcomponents.httpclient;
 
     opens it.uninsubria to javafx.fxml;
     exports it.uninsubria;

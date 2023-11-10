@@ -21,51 +21,51 @@ public class CentroMonitoraggio {
     public static final String generalSeparator = ";";
     public static final String areeSeparator = ",";
 
-    private final StringProperty centroID;
-    private final StringProperty denominazione;
-    private final StringProperty comune;
-    private final StringProperty country;
+    private String centroID;
+    private String denominazione;
+    private String comune;
+    private String country;
 
     public CentroMonitoraggio(String centroID, String denominazioneCentro,
                               String comune, String country){
-        this.centroID = new SimpleStringProperty(centroID);
-        this.denominazione = new SimpleStringProperty(denominazioneCentro);
-        this.comune = new SimpleStringProperty(comune);
-        this.country = new SimpleStringProperty(country);
+        this.centroID = centroID;
+        this.denominazione = denominazioneCentro;
+        this.comune = comune;
+        this.country = country;
 
         areeInteresseIdAssociate = new LinkedList<String>();
     }
 
     public String getCentroID() {
-        return centroID.get();
+        return centroID;
     }
 
     public void setCentroID(String centroID) {
-        this.centroID.set(centroID);
+        this.centroID = centroID;
     }
 
     public String getDenominazione() {
-        return this.denominazione.get();
+        return this.denominazione;
     }
 
     public void setDenominazione(String denominazioneCentro) {
-        this.denominazione.set(denominazioneCentro);
+        this.denominazione = denominazioneCentro;
     }
 
     public String getComune() {
-        return this.comune.get();
+        return this.comune;
     }
 
     public void setComune(String comune) {
-        this.comune.set(comune);
+        this.comune = comune;
     }
 
     public String getCountry(){
-        return this.country.get();
+        return this.country;
     }
 
     public void setCountry(String country){
-        this.country.set(country);
+        this.country = country;
     }
 
     public void putAreaId(String areaID){
@@ -95,10 +95,10 @@ public class CentroMonitoraggio {
 
     public String toString(){
         StringBuilder builder = new StringBuilder();
-        builder.append(centroID.get()).append(generalSeparator)
-                .append(denominazione.get()).append(generalSeparator)
-                .append(comune.get()).append(generalSeparator)
-                .append(country.get()).append(generalSeparator);
+        builder.append(centroID).append(generalSeparator)
+                .append(denominazione).append(generalSeparator)
+                .append(comune).append(generalSeparator)
+                .append(country).append(generalSeparator);
 
         if(areeInteresseIdAssociate.isEmpty()) builder.append(emptyAreeInteresse);
         else{

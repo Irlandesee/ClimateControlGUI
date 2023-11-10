@@ -31,32 +31,13 @@ public class AreaInteresse {
 
     public String getAreaid(){return this.areaid;}
 
-    public final ObjectProperty<String> getAreaIdProperty(){
-        return new SimpleObjectProperty<String>(areaid);
-    }
-
     public String getDenominazione(){return this.denominazione;}
-
-    public final ObjectProperty<String> getDenominazioneProperty(){
-        return new SimpleObjectProperty<String>(denominazione);
-    }
 
     public String getStato(){return this.stato;}
 
-    public final ObjectProperty<String> getStatoProperty(){
-        return new SimpleObjectProperty<String>(stato);
-    }
-
     public float getLatitudine(){return this.latitude;}
 
-    public final ObjectProperty<Float> getLatitudineProperty(){
-        return new SimpleObjectProperty<Float>(latitude);
-    }
     public float getLongitudine(){return this.longitude;}
-
-    public final ObjectProperty<Float> getLongitudineProperty(){
-        return new SimpleObjectProperty<Float>(longitude);
-    }
 
     public void setAreaid(String areaid) {
         this.areaid = areaid;

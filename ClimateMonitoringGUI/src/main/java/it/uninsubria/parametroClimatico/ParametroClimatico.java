@@ -22,6 +22,8 @@ public class ParametroClimatico {
     private String idCentro;
     private String areaInteresseId; //id
     private LocalDate pubDate;
+    private String notaId;
+
     private short ventoValue;
     private short umiditaValue;
     private short pressioneValue;
@@ -29,7 +31,6 @@ public class ParametroClimatico {
     private short temperaturaValue;
     private short altitudineValue;
     private short massaValue;
-
     private String ventoNotes;
     private String umiditaNotes;
     private String pressioneNotes;
@@ -47,15 +48,10 @@ public class ParametroClimatico {
         this.idCentro = idCentro;
         this.areaInteresseId= areaInteresse;
         this.pubDate = pubDate;
-
     }
 
     public String getParameterId(){
         return this.parameterId;
-    }
-
-    public final ObjectProperty<String> getParameterIdProperty(){
-        return new SimpleObjectProperty<String>(parameterId);
     }
 
     public String getIdCentro() {
@@ -66,20 +62,12 @@ public class ParametroClimatico {
         this.idCentro = idCentro;
     }
 
-    public final ObjectProperty<String> getCentroIdProperty(){
-        return new SimpleObjectProperty<String>(idCentro);
-    }
-
     public String getAreaInteresseId() {
         return areaInteresseId;
     }
 
     public void setAreaInteresseId(String areaInteresse) {
         this.areaInteresseId = areaInteresse;
-    }
-
-    public final ObjectProperty<String> getAreaIdProperty(){
-        return new SimpleObjectProperty<String>(areaInteresseId);
     }
 
     public LocalDate getPubDate() {
@@ -90,8 +78,12 @@ public class ParametroClimatico {
         this.pubDate = pubDate;
     }
 
-    public final ObjectProperty<LocalDate> getPubDateProperty(){
-        return new SimpleObjectProperty<LocalDate>(pubDate);
+    public String getNotaId(){
+        return this.notaId;
+    }
+
+    public void setNotaId(String notaId){
+        this.notaId = notaId;
     }
 
     public short getVentoValue() {
@@ -102,20 +94,12 @@ public class ParametroClimatico {
         this.ventoValue = ventoValue;
     }
 
-    public final ObjectProperty<Short> getVentoProperty(){
-        return new SimpleObjectProperty<Short>(ventoValue);
-    }
-
     public short getUmiditaValue() {
         return umiditaValue;
     }
 
     public void setUmiditaValue(short umiditaValue) {
         this.umiditaValue = umiditaValue;
-    }
-
-    public final ObjectProperty<Short> getUmiditaProperty(){
-        return new SimpleObjectProperty<Short>(umiditaValue);
     }
 
     public short getPressioneValue() {
@@ -126,20 +110,12 @@ public class ParametroClimatico {
         this.pressioneValue = pressioneValue;
     }
 
-    public final ObjectProperty<Short> getPressioneProperty(){
-        return new SimpleObjectProperty<Short>(pressioneValue);
-    }
-
     public short getTemperaturaValue() {
         return temperaturaValue;
     }
 
     public void setTemperaturaValue(short temperaturaValue) {
         this.temperaturaValue = temperaturaValue;
-    }
-
-    public final ObjectProperty<Short> getTemperaturaProperty(){
-        return new SimpleObjectProperty<Short>(temperaturaValue);
     }
 
     public short getPrecipitazioniValue() {
@@ -150,21 +126,12 @@ public class ParametroClimatico {
         this.precipitazioniValue = precipitazioniValue;
     }
 
-    public final ObjectProperty<Short> getPrecipitazioniProperty(){
-        return new SimpleObjectProperty<Short>(precipitazioniValue);
-    }
-
-
     public short getAltitudineValue() {
         return altitudineValue;
     }
 
     public void setAltitudineValue(short altitudineValue) {
         this.altitudineValue = altitudineValue;
-    }
-
-    public final ObjectProperty<Short> getAltitudineProperty(){
-        return new SimpleObjectProperty<Short>(altitudineValue);
     }
 
     public short getMassaValue() {
@@ -174,11 +141,6 @@ public class ParametroClimatico {
     public void setMassaValue(short massaValue) {
         this.massaValue = massaValue;
     }
-
-    public final ObjectProperty<Short> getMassaProperty(){
-        return new SimpleObjectProperty<Short>(massaValue);
-    }
-
 
     public String getVentoNotes() {
         return ventoNotes;
@@ -245,27 +207,21 @@ public class ParametroClimatico {
     }
 
     //centroID;areaInteresse;data;params1,paramN;note
+
     @Override
-    public String toString(){
-        StringBuilder builder = new StringBuilder();
-        builder.append(this.parameterId).append(ParametroClimatico.generalSeparator)
-                .append(this.idCentro).append(ParametroClimatico.generalSeparator)
-                .append(this.areaInteresseId).append(ParametroClimatico.generalSeparator)
-                .append(this.pubDate).append(ParametroClimatico.generalSeparator)
-                .append(this.ventoValue).append(ParametroClimatico.generalSeparator)
-                .append(this.umiditaValue).append(ParametroClimatico.generalSeparator)
-                .append(this.pressioneValue).append(ParametroClimatico.generalSeparator)
-                .append(this.temperaturaValue).append(ParametroClimatico.generalSeparator)
-                .append(this.precipitazioniValue).append(ParametroClimatico.generalSeparator)
-                .append(this.altitudineValue).append(ParametroClimatico.generalSeparator)
-                .append(this.massaValue).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.notaVento).append(": ").append(this.getVentoNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.notaUmidita).append(": ").append(this.getUmiditaNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.notaPressione).append(": ").append(this.getPressioneNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.notaTemp).append(": ").append(this.getTempNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.notePrecipitazioni).append(": ").append(this.getPrecipitazioniNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.noteAltGhiacciai).append(": ").append(this.getAltGhicciaiNotes()).append(ParametroClimatico.generalSeparator)
-                .append(ParametroClimatico.noteMassaGhiacciai).append(": ").append(this.getMassaGhiacciaiNotes()).append(ParametroClimatico.generalSeparator);
-        return builder.toString();
+    public String toString() {
+        return "ParametroClimatico{" +
+                "parameterId='" + parameterId + '\'' +
+                ", idCentro='" + idCentro + '\'' +
+                ", areaInteresseId='" + areaInteresseId + '\'' +
+                ", pubDate=" + pubDate +
+                ", notaId='" + notaId + '\'' +
+                ", ventoValue=" + ventoValue +
+                ", umiditaValue=" + umiditaValue +
+                ", pressioneValue=" + pressioneValue +
+                ", precipitazioniValue=" + precipitazioniValue +
+                ", temperaturaValue=" + temperaturaValue +
+                ", altitudineValue=" + altitudineValue +
+                '}';
     }
 }

@@ -593,4 +593,30 @@ public class Worker extends Thread{
             return res == 1;
         }catch(SQLException sqle){sqle.printStackTrace(); return false;}
     }
+
+    //WARNING: DOES NOT INSERT notaID
+    public boolean insertParametroClimatico(ParametroClimatico pc){
+        String query =
+                "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
+                        "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+        query = query.formatted(
+                pc.getParameterId(),
+                pc.getIdCentro(),
+                pc.getAreaInteresseId(),
+                pc.getPubDate(),
+                //pc.getNotaId(),
+                pc.getVentoValue(),
+                pc.getUmiditaValue(),
+                pc.getPressioneValue(),
+                pc.getTemperaturaValue(),
+                pc.getPrecipitazioniValue(),
+                pc.getAltitudineValue(),
+                pc.getMassaValue());
+        System.out.println(workerID + ": " + query);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            System.out.println(res);
+            return res == 1;
+        }catch(SQLException sqle){sqle.printStackTrace(); return false;}
+    }
 }
