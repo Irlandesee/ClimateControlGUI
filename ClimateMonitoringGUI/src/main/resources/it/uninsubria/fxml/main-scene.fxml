@@ -38,6 +38,7 @@
                 <!-->Insert action buttons here<!-->
                 <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#ricercaAreaInteresse"/>
                 <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#visualizzaParametriClimatici"/>
+                <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#visualizzaGrafici"/>
             </children>
         </VBox>
     </left>

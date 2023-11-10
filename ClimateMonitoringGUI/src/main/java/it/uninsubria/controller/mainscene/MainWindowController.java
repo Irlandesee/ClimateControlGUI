@@ -390,6 +390,14 @@ public class MainWindowController{
 
     }
 
+    @FXML
+    public void visualizzaGrafici(){
+        this.paramBox = new VBox(10);
+
+
+
+    }
+
 
     private void visualizzaPC(ActionEvent event){
         String denomAiCercata = tAreaInteresse.getText();
