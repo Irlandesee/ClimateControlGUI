@@ -3,7 +3,6 @@ package it.uninsubria.controller.dialog;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -17,7 +16,6 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 import java.util.*;
 
 public class GraphDialog {
@@ -64,6 +62,7 @@ public class GraphDialog {
 
     private final List<ParametroClimatico> params;
     private final String areaId;
+    private final String denomArea;
 
     private final int defaultYear = 1900;
     private final int defaultMonth = 1;
@@ -72,15 +71,13 @@ public class GraphDialog {
         this.queryHandler = queryHandler;
         this.params = params;
         this.areaId = areaId;
+        denomArea = queryHandler.selectObjectWithCond(
+                "denominazione",
+                QueryHandler.tables.AREA_INTERESSE,
+                "areaid",
+                params.get(0).getAreaInteresseId()).get(0);
     }
 
-
-    /**
-     * Note to self:
-     * Si assume che venga passata una lista che rappresenta l'interita
-     * dei parametri climatici registrati per quell'area e verranno
-     * rappresentati sul grafico.
-     * **/
     @FXML
     public void initialize(){
         //init the graphs
@@ -111,11 +108,6 @@ public class GraphDialog {
         tfYearFilter.setOnMouseClicked(e -> tfYearFilter.setText(""));
 
         //default charts - temperature charts
-        String denomArea = queryHandler.selectObjectWithCond(
-                "denominazione",
-                QueryHandler.tables.AREA_INTERESSE,
-                "areaid",
-                params.get(0).getAreaInteresseId()).get(0);
 
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         series.setName(denomArea);
@@ -170,6 +162,21 @@ public class GraphDialog {
         return (int) params.stream().filter(p -> p.getPubDate().getMonth().getValue() == month).count();
     }
 
+
+    private XYChart.Series<String, Number> addMonthlyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
+        data.forEach(param -> series
+                .getData()
+                .add(new XYChart.Data<String, Number>(GraphBuilder.getLocaleMonth(param.getKey().getMonthValue()), param.getValue())));
+        return series;
+    }
+
+    private XYChart.Series<String, Number> addDailyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
+        data.forEach(param -> series
+                .getData()
+                .add(new XYChart.Data<String, Number>(String.valueOf(param.getKey().getDayOfMonth()), param.getValue())));
+        return series;
+    }
+
     @FXML
     public void filterYear(){
         String yearFilterText = tfYearFilter.getText();
@@ -189,17 +196,14 @@ public class GraphDialog {
         filteredParams.forEach(System.out::println);
 
         //if not working?
-        if(filteredParams.size() == 0){
-            new Alert(Alert.AlertType.ERROR, "Dati non presenti per questa area e anno");
+        if(filteredParams.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "Dati non presenti per questa area e anno").showAndWait();
             return;
         }
 
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        String seriesName = queryHandler
-                .selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid",areaId)
-                .get(0);
-        series.setName(seriesName);
+        series.setName(denomArea);
         for(Node n: contentBox.getChildren()){
             if(n.equals(monthlyTempLineChart) && monthlyTempLineChart.isVisible()){
                 monthlyTempLineChart.getData().clear();
@@ -249,21 +253,6 @@ public class GraphDialog {
         }
         tfYearFilter.setText("Inserisci anno");
     }
-
-    private XYChart.Series<String, Number> addMonthlyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
-        data.forEach(param -> series
-                .getData()
-                .add(new XYChart.Data<String, Number>(GraphBuilder.getLocaleMonth(param.getKey().getMonthValue()), param.getValue())));
-        return series;
-    }
-
-    private XYChart.Series<String, Number> addDailyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
-        data.forEach(param -> series
-                .getData()
-                .add(new XYChart.Data<String, Number>(String.valueOf(param.getKey().getDayOfMonth()), param.getValue())));
-        return series;
-    }
-
     @FXML
     public void filterMonth(){
         String monthFilterText = tfMonthFilter.getText();
@@ -275,7 +264,6 @@ public class GraphDialog {
         int month = Integer.parseInt(monthFilterText);
 
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
-        int year = params.get(0).getPubDate().getYear();
         Month m = Month.of(month);
         List<ParametroClimatico> filteredParams = params
                 .stream()
@@ -289,10 +277,7 @@ public class GraphDialog {
 
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        String seriesName = queryHandler
-                .selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", areaId)
-                .get(0);
-        series.setName(seriesName);
+        series.setName(denomArea);
         System.out.println("Number of children in contentBox: " + contentBox.getChildren().size());
         for(Node n : contentBox.getChildren()){
             if(n.equals(dailyTempLineChart) && dailyTempLineChart.isVisible()){
@@ -349,50 +334,57 @@ public class GraphDialog {
         tfMonthFilter.setText("Filtra Mese");
     }
 
+    private void addParamToList(ParameterType pType, List<Pair<LocalDate, Number>> data, ParametroClimatico param) {
+        switch(pType){
+            case vento ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getVentoValue()));
+            case temperatura ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getTemperaturaValue()));
+            case umidita ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getUmiditaValue()));
+            case pressione ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPressioneValue()));
+            case precipitazioni ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPrecipitazioniValue()));
+            case alt_ghiacciai ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getAltitudineValue()));
+            case massa_ghiacciai ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getMassaValue()));
+        }
+    }
+
+    private void addParamAverageToList(List<ParametroClimatico> filteredParams, ParameterType pType, List<Pair<LocalDate, Number>> data, ParametroClimatico param) {
+        switch(pType){
+            case vento ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.vento)));
+            case temperatura ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.temperatura)));
+            case umidita ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.umidita)));
+            case pressione ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.pressione)));
+            case precipitazioni ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.precipitazioni)));
+            case alt_ghiacciai ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.alt_ghiacciai)));
+            case massa_ghiacciai ->
+                    data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.massa_ghiacciai)));
+        }
+    }
+
     private List<Pair<LocalDate, Number>> calcMonthlyData(List<ParametroClimatico> filteredParams, ParameterType pType){
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         for(ParametroClimatico param : filteredParams){
             LocalDate pubDate = param.getPubDate();
             if(getNumOccurrencesOfMonth(filteredParams, pubDate.getMonth().getValue()) > 1){
-                switch(pType){
-                    case vento ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.vento)));
-                    case temperatura ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.temperatura)));
-                    case umidita ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.umidita)));
-                    case pressione ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.pressione)));
-                    case precipitazioni ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.precipitazioni)));
-                    case alt_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.alt_ghiacciai)));
-                    case massa_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(filteredParams, ParameterType.massa_ghiacciai)));
-                }
+                addParamAverageToList(filteredParams, pType, data, param);
             }else{
-                switch(pType){
-                    case vento ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getVentoValue()));
-                    case temperatura ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getTemperaturaValue()));
-                    case umidita ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getUmiditaValue()));
-                    case pressione ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPressioneValue()));
-                    case precipitazioni ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPrecipitazioniValue()));
-                    case alt_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getAltitudineValue()));
-                    case massa_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getMassaValue()));
-                }
+                addParamToList(pType, data, param);
             }
 
         }
         return data;
     }
-
 
     private List<Pair<LocalDate, Number>> calcDailyData(List<ParametroClimatico> filteredParams, ParameterType pType){
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
@@ -400,39 +392,9 @@ public class GraphDialog {
             LocalDate pubDate = param.getPubDate();
             if(getNumOccurrences(filteredParams, pubDate.getDayOfMonth()) > 1) {
                 List<ParametroClimatico> paramsSameDate = filteredParams.stream().filter(pc -> pc.getPubDate().equals(param.getPubDate())).toList();
-                switch(pType){
-                    case vento ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.vento)));
-                    case temperatura ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.temperatura)));
-                    case umidita ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.umidita)));
-                    case pressione ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.pressione)));
-                    case precipitazioni ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.precipitazioni)));
-                    case alt_ghiacciai ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.alt_ghiacciai)));
-                    case massa_ghiacciai ->
-                        data.add(new Pair<LocalDate, Number>(param.getPubDate(), getAverageValue(paramsSameDate, ParameterType.massa_ghiacciai)));
-                }
+                addParamAverageToList(paramsSameDate, pType, data, param);
             } else {
-                switch(pType){
-                    case vento ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getVentoValue()));
-                    case temperatura ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getTemperaturaValue()));
-                    case umidita ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getUmiditaValue()));
-                    case pressione ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPressioneValue()));
-                    case precipitazioni ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getPrecipitazioniValue()));
-                    case alt_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getAltitudineValue()));
-                    case massa_ghiacciai ->
-                            data.add(new Pair<LocalDate, Number>(param.getPubDate(), param.getMassaValue()));
-                }
+                addParamToList(pType, data, param);
             }
         }
         return data;
