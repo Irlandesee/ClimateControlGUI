@@ -2,6 +2,7 @@ package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.controller.dialog.AiDialog;
+import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
@@ -56,6 +57,7 @@ public class MainWindowController{
     private DatePicker endDatePicker;
     private Button btnRicercaPcArea;
     private Button btnRicercaPcCm;
+    private Button btnRicercaArea;
     private ToggleButton tglDatePicker;
     private ToggleButton tglRicercaAreaCm;
 
@@ -392,9 +394,37 @@ public class MainWindowController{
 
     @FXML
     public void visualizzaGrafici(){
-        this.paramBox = new VBox(10);
+        this.paramBox = new VBox(2);
+        this.tAreaInteresse = new TextField("Nome Area");
+        this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
+        this.btnRicercaArea = new Button("Ricerca area");
+        this.btnRicercaArea.setOnAction(e -> createChart());
 
+        this.paramBox.getChildren().add(tAreaInteresse);
+        this.paramBox.getChildren().add(btnRicercaArea);
+        this.borderPane.setRight(paramBox);
 
+    }
+
+    private void createChart(){
+        String nomeArea = tAreaInteresse.getText();
+        if(nomeArea.isEmpty() || nomeArea.equals("Nome Area")){
+            new Alert(Alert.AlertType.ERROR, "nome area non valido").showAndWait();
+            return;
+        }
+        System.out.println("Creating chart for" + nomeArea);
+        String areaid = queryHandler
+                .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", nomeArea)
+                .get(0);
+        System.out.println("areaid ->" + areaid);
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
+            fxmlLoader.setController(new GraphDialog(queryHandler, areaid));
+            Stage chartStage = new Stage();
+            Scene scene = new Scene(fxmlLoader.load(), 800, 900);
+            chartStage.setScene(scene);
+            chartStage.show();
+        }catch(IOException ioe){ioe.printStackTrace();}
 
     }
 

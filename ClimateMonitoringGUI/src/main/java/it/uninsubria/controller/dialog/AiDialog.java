@@ -50,44 +50,60 @@ public class AiDialog {
         latitudineLabel.setText(String.valueOf(ai.getLatitudine()));
         longitudineLabel.setText(String.valueOf(ai.getLongitudine()));
 
-        TableColumn<LocalDate, String> pubDateColumn = new TableColumn<LocalDate, String>("Data pubblicazione");
-        TableColumn<String, String> nomeCentroColumn = new TableColumn<String, String>("Nome Centro");
+        TableColumn<ParametroClimatico, String> pubDateColumn = new TableColumn<ParametroClimatico, String>("Data pubblicazione");
+        TableColumn<ParametroClimatico, Short> tempColumn = new TableColumn<ParametroClimatico, Short>("temperatura");
+        TableColumn<ParametroClimatico, Short> umidityColumn = new TableColumn<ParametroClimatico, Short>("umidità");
+        TableColumn<ParametroClimatico, Short> pressureColumn = new TableColumn<ParametroClimatico, Short>("pressione");
+        TableColumn<ParametroClimatico, Short> windColumn = new TableColumn<ParametroClimatico, Short>("vento");
+        TableColumn<ParametroClimatico, Short> rainfallColumn = new TableColumn<ParametroClimatico, Short>("precipitazioni");
+        TableColumn<ParametroClimatico, Short> altColumn = new TableColumn<ParametroClimatico, Short>("altitudine g.");
+        TableColumn<ParametroClimatico, Short> massColumn = new TableColumn<ParametroClimatico, Short>("massa g.");
 
-        pubDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().toString()));
-        nomeCentroColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-
-        //paramClimaticiTableView.getColumns().addAll(pubDateColumn, nomeCentroColumn);
+        pubDateColumn.setCellValueFactory(new PropertyValueFactory<>("pubDate"));
+        tempColumn.setCellValueFactory(new PropertyValueFactory<>("temperaturaValue"));
+        umidityColumn.setCellValueFactory(new PropertyValueFactory<>("umiditaValue"));
+        pressureColumn.setCellValueFactory(new PropertyValueFactory<>("pressioneValue"));
+        windColumn.setCellValueFactory(new PropertyValueFactory<>("ventoValue"));
+        rainfallColumn.setCellValueFactory(new PropertyValueFactory<>("precipitazioniValue"));
+        altColumn.setCellValueFactory(new PropertyValueFactory<>("altitudineValue"));
+        massColumn.setCellValueFactory(new PropertyValueFactory<>("massaValue"));
         paramClimaticiTableView.getColumns().add(pubDateColumn);
 
         paramClimaticiTableView.setRowFactory(tv -> {
             TableRow row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
-                    String pubDateSelected = row.getItem().toString();
-                    ParametroClimatico pc = parameters
-                            .stream()
-                            .filter(p -> p.getPubDate() != LocalDate.parse(pubDateSelected))
-                            .toList()
-                            .get(0);
-                    String areaId = pc.getAreaInteresseId();
-                    String centroId = pc.getIdCentro();
-                    String denomArea = queryHandler
-                            .selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", areaId)
-                            .get(0);
+                    ParametroClimatico pcSelected = (ParametroClimatico) row.getItem();
+                    String centroId = pcSelected.getIdCentro();
                     String denomCentro = queryHandler
                             .selectObjectWithCond("nomecentro", QueryHandler.tables.CENTRO_MONITORAGGIO, "centroid", centroId)
                             .get(0);
-                    System.out.println(pc);
-                    System.out.println(denomArea);
+
+                    if(!paramClimaticiTableView.getColumns().contains(tempColumn))
+                        paramClimaticiTableView.getColumns().add(tempColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(umidityColumn))
+                        paramClimaticiTableView.getColumns().add(umidityColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(pressureColumn))
+                        paramClimaticiTableView.getColumns().add(pressureColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(windColumn))
+                        paramClimaticiTableView.getColumns().add(windColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(rainfallColumn))
+                        paramClimaticiTableView.getColumns().add(rainfallColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(altColumn))
+                        paramClimaticiTableView.getColumns().add(altColumn);
+                    if(!paramClimaticiTableView.getColumns().contains(massColumn))
+                        paramClimaticiTableView.getColumns().add(massColumn);
+
+                    System.out.println(pcSelected);
                     System.out.println(denomCentro);
                 }
             });
             return row;
         });
 
-        if(parameters.size() > 0){
+        if(!parameters.isEmpty()){
             parameters.forEach(pc -> {
-                paramClimaticiTableView.getItems().add(pc.getPubDate());
+                paramClimaticiTableView.getItems().add(pc);
             });
         }
     }

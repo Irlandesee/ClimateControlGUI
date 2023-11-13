@@ -60,7 +60,7 @@ public class GraphDialog {
 
     private final QueryHandler queryHandler;
 
-    private final List<ParametroClimatico> params;
+    private List<ParametroClimatico> params;
     private final String areaId;
     private final String denomArea;
 
@@ -71,11 +71,22 @@ public class GraphDialog {
         this.queryHandler = queryHandler;
         this.params = params;
         this.areaId = areaId;
-        denomArea = queryHandler.selectObjectWithCond(
+        denomArea = getDenomArea();
+    }
+
+    public GraphDialog(QueryHandler queryHandler, String areaId){
+        this.queryHandler = queryHandler;
+        this.areaId = areaId;
+        this.denomArea = getDenomArea();
+        this.params = new LinkedList<ParametroClimatico>();
+    }
+
+    private String getDenomArea(){
+        return queryHandler.selectObjectWithCond(
                 "denominazione",
                 QueryHandler.tables.AREA_INTERESSE,
                 "areaid",
-                params.get(0).getAreaInteresseId()).get(0);
+                areaId).get(0);
     }
 
     @FXML
@@ -109,13 +120,16 @@ public class GraphDialog {
 
         //default charts - temperature charts
 
-        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        series.setName(denomArea);
-        List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
-        List<Pair<LocalDate, Number>> data = calcMonthlyData(filteredParams, ParameterType.temperatura);
-        addMonthlyDataToSeries(data, series);
+        if(!params.isEmpty()){
+            XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+            series.setName(denomArea);
+            List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
+            List<Pair<LocalDate, Number>> data = calcMonthlyData(filteredParams, ParameterType.temperatura);
+            addMonthlyDataToSeries(data, series);
 
-        monthlyTempLineChart.getData().add(series);
+            monthlyTempLineChart.getData().add(series);
+        }
+
         contentBox.getChildren().add(monthlyTempLineChart);
     }
 
