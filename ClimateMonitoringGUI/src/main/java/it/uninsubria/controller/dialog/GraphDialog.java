@@ -10,6 +10,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -58,6 +59,9 @@ public class GraphDialog {
     public TextField tfYearFilter;
     @FXML
     public TextField tfMonthFilter;
+
+    @FXML
+    public ListView listViewDati;
 
     private final QueryHandler queryHandler;
 
@@ -129,7 +133,14 @@ public class GraphDialog {
             addMonthlyDataToSeries(data, series);
 
             monthlyTempLineChart.getData().add(series);
+        }else{
+            params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+
+            for(ParametroClimatico p : params){
+                listViewDati.getItems().add(p.getPubDate());
+            }
         }
+
 
         contentBox.getChildren().add(monthlyTempLineChart);
     }

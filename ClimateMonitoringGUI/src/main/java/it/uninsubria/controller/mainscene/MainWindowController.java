@@ -424,7 +424,7 @@ public class MainWindowController{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
             fxmlLoader.setController(new GraphDialog(queryHandler, areaid));
             Stage chartStage = new Stage();
-            Scene scene = new Scene(fxmlLoader.load(), 800, 900);
+            Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
             chartStage.setScene(scene);
             chartStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}

@@ -72,6 +72,7 @@
             <TextField fx:id="tfMonthFilter">Inserisci mese</TextField>
             <Button fx:id="btnFilterYear" onAction="#filterYear">Filtra anno</Button>
             <Button fx:id="btnFilterMonth" onAction="#filterMonth">Filtra mese</Button>
+            <ListView fx:id="listViewDati"/>
         </VBox>
     </right>
     <bottom>
