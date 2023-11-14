@@ -13,6 +13,7 @@ import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -73,7 +74,8 @@ public class MainWindowController{
 
     private QueryHandler queryHandler;
 
-    private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://localhost/postgres";
+    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;
@@ -211,6 +213,7 @@ public class MainWindowController{
     }
 
     private void prepTableParamClimatici(){
+        System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
         tableView.getItems().clear();
 
@@ -260,19 +263,15 @@ public class MainWindowController{
                         }
                     }
             );
-
             return row;
         });
-
+        tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
     private void prepTableAreaInteresse(){
-        /**
-        TableColumn keyColumn = new TableColumn("areaID");
-        keyColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
-         **/
-        tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.getColumns().clear();
+        System.out.println("table view column size in prepAreaInteresse: "+ tableView.getColumns().size());
 
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
@@ -290,13 +289,15 @@ public class MainWindowController{
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     AreaInteresse a = (AreaInteresse) row.getItem();
-                    System.out.println("Item double Clicked: "+a);
+
+                    System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
                     List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
                         AiDialog aiDialogController = new AiDialog(sceneController, queryHandler, a, params);
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
+
                         fxmlLoader.setController(aiDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
                         aiDialogStage.setScene(dialogScene);
@@ -307,6 +308,7 @@ public class MainWindowController{
             });
             return row;
         });
+        tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
     private void showAreeInserite(){
@@ -521,6 +523,7 @@ public class MainWindowController{
             mainWindowStage.close();
             return true;
         }
+
         return false;
     }
 
