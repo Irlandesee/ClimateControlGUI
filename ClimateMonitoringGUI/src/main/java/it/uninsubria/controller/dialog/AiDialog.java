@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class AiDialog {
 
-    private final SceneController sceneController;
+    private Stage stage;
     private final AreaInteresse ai;
     private List<ParametroClimatico> parameters;
     public Label nomeLabel;
@@ -33,10 +33,13 @@ public class AiDialog {
     public Label latitudineLabel;
     public Label longitudineLabel;
 
+    private static final int MAX_WINDOW_SIZE = 800;
+
+
     public TableView paramClimaticiTableView;
     private final QueryHandler queryHandler;
-    public AiDialog(SceneController sceneController, QueryHandler queryHandler, AreaInteresse ai, List<ParametroClimatico> parameters){
-        this.sceneController = sceneController;
+    public AiDialog(Stage stage, QueryHandler queryHandler, AreaInteresse ai, List<ParametroClimatico> parameters){
+        this.stage = stage;
         this.ai = ai;
         this.parameters = parameters;
         this.queryHandler = queryHandler;
@@ -78,6 +81,8 @@ public class AiDialog {
                     String denomCentro = queryHandler
                             .selectObjectWithCond("nomecentro", QueryHandler.tables.CENTRO_MONITORAGGIO, "centroid", centroId)
                             .get(0);
+                    System.out.println("Aumento dimensioni");
+                    if(stage.getWidth() < MAX_WINDOW_SIZE) stage.setWidth(MAX_WINDOW_SIZE);
 
                     if(!paramClimaticiTableView.getColumns().contains(tempColumn))
                         paramClimaticiTableView.getColumns().add(tempColumn);
@@ -93,6 +98,8 @@ public class AiDialog {
                         paramClimaticiTableView.getColumns().add(altColumn);
                     if(!paramClimaticiTableView.getColumns().contains(massColumn))
                         paramClimaticiTableView.getColumns().add(massColumn);
+
+
 
                     System.out.println(pcSelected);
                     System.out.println(denomCentro);

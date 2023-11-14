@@ -295,7 +295,8 @@ public class MainWindowController{
                     List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
-                        AiDialog aiDialogController = new AiDialog(sceneController, queryHandler, a, params);
+                        AiDialog aiDialogController = new AiDialog(aiDialogStage, queryHandler, a, params);
+
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
 
                         fxmlLoader.setController(aiDialogController);
