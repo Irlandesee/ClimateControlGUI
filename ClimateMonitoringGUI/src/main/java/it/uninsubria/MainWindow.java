@@ -29,7 +29,7 @@ public class MainWindow extends Application {
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
         //QueryHandler queryHandler = new QueryHandler(url, props);
-        MainWindowController mainWindowController = new MainWindowController();
+        MainWindowController mainWindowController = new MainWindowController(stage);
         fxmlLoader.setController(mainWindowController);
         Scene scene = new Scene(fxmlLoader.load(),800, 800);
         stage.setTitle("ClimateMonitoringApp!");

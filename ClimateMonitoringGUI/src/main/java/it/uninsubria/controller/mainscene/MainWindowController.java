@@ -13,6 +13,7 @@ import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -83,13 +84,17 @@ public class MainWindowController{
     private Stage mainWindowStage;
     private SceneController sceneController;
 
-    public MainWindowController(){
+    public MainWindowController(Stage stage){
         //set up the controllers
         sceneController = new SceneController(this);
         sceneController.setLoginViewController(new LoginViewController(sceneController));
         sceneController.setOperatoreViewController(new OperatoreViewController(sceneController));
         sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
         sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
+
+        this.mainWindowStage = stage;
+        mainWindowStage.setMinHeight(800);
+        mainWindowStage.setMinWidth(1200);
 
         //init the query handler
         props = new Properties();
@@ -104,8 +109,6 @@ public class MainWindowController{
     public void initialize(){
         //table view
         showAreeInserite();
-        //line chart
-        //contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
     }
 
     static TableView<String[]> createTable(String[] columnNames){
@@ -219,6 +222,7 @@ public class MainWindowController{
         tableView.getColumns().clear();
         tableView.getItems().clear();
 
+
         TableColumn dateColumn = new TableColumn("Data");
         dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
         TableColumn ventoColumn = new TableColumn("Vento");
@@ -277,12 +281,16 @@ public class MainWindowController{
 
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
+        denomColumn.setMinWidth(120);
         TableColumn countryColumn = new TableColumn("stato");
         countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
+        countryColumn.setMinWidth(100);
         TableColumn latColumn = new TableColumn("latitudine");
         latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
+        latColumn.setMinWidth(100);
         TableColumn longColumn = new TableColumn("longitudine");
         longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
+        longColumn.setMinWidth(100);
 
         tableView.getColumns().addAll(denomColumn, countryColumn, latColumn, longColumn);
 
@@ -321,11 +329,11 @@ public class MainWindowController{
     }
 
     private void ricercaAreaPerDenom(){
+        tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
             List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
             //res.forEach(System.out::println);
-            tableView.getItems().clear();
             res.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
             }));
@@ -336,6 +344,7 @@ public class MainWindowController{
     }
 
     private void ricercaAreaPerStato(){
+        tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
             List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
@@ -521,35 +530,44 @@ public class MainWindowController{
         tableView.getColumns().clear();
         tableView.getItems().clear();
 
+        /**
         List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
-        List<Pair<CentroMonitoraggio, List<AreaInteresse>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<AreaInteresse>>>();
+        List<Pair<CentroMonitoraggio, List<String>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<String>>>();
         for(CentroMonitoraggio cm : centriMonitoraggio){
-            List<AreaInteresse> areeInteresseAssociate = new LinkedList<AreaInteresse>();
+            List<String> areeInteresseAssociate = new LinkedList<String>();
             for(String areaid : cm.getAreeInteresseIdAssociate()){
                 AreaInteresse a = (AreaInteresse)queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaid).get(0);
-                areeInteresseAssociate.add(a);
+                areeInteresseAssociate.add(a.getDenominazione());
             }
-            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<AreaInteresse>>(cm, areeInteresseAssociate));
+            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<String>>(cm, areeInteresseAssociate));
         }
+
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-        List<TableColumn> columns = new LinkedList<TableColumn>();
-        for(Pair<CentroMonitoraggio, List<AreaInteresse>> pair : centriConAreaAssociata){
-            int numberOfColumns = pair.getKey().getAreeInteresseIdAssociate().size();
-            for(int i = 0; i < numberOfColumns; i++){
-                TableColumn column = new TableColumn("area_"+i);
-                column.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
-                columns.add(column);
+        tableView.getColumns().add(denomCentro);
+        for(Pair<CentroMonitoraggio, List<String>> pair : centriConAreaAssociata){
+            for(int i = 0; i < pair.getKey().getAreeInteresseIdAssociate().size(); i++){
+                TableColumn<List<String>, String> column = new TableColumn<List<String>, String>("area_"+i);
+                column.setMinWidth(10);
+                final int colIndex = i;
+                column.setCellValueFactory(data -> {
+                    List<String> rowValues = data.getValue();
+                    String cellValue;
+                    if(colIndex < rowValues.size()){
+                        cellValue = rowValues.get(colIndex);
+                    }else{
+                        cellValue = "";
+                    }
+                    return new ReadOnlyStringWrapper(cellValue);
+                });
+                tableView.getItems().add(pair.getKey().getDenominazione());
+                tableView.getColumns().add(column);
             }
         }
+         **/
 
-        tableView.getColumns().add(denomCentro);
-        tableView.getColumns().addAll(columns);
 
-        centriConAreaAssociata.forEach(pair -> {
-            tableView.getItems().add(pair.getKey());
-            tableView.getItems().addAll(pair.getValue());
-        });
+
         tableView.refresh();
     }
 
