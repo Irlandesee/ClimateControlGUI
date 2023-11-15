@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.BorderPane?>
@@ -39,6 +38,7 @@
                 <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#ricercaAreaInteresse"/>
                 <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#visualizzaParametriClimatici"/>
                 <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#visualizzaGrafici"/>
+                <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#visualizzaCentri"/>
             </children>
         </VBox>
     </left>

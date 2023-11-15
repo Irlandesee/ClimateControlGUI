@@ -1,6 +1,7 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
@@ -24,6 +25,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -512,6 +514,43 @@ public class MainWindowController{
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
         }
+    }
+
+    @FXML
+    public void visualizzaCentri(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+
+        List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<Pair<CentroMonitoraggio, List<AreaInteresse>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<AreaInteresse>>>();
+        for(CentroMonitoraggio cm : centriMonitoraggio){
+            List<AreaInteresse> areeInteresseAssociate = new LinkedList<AreaInteresse>();
+            for(String areaid : cm.getAreeInteresseIdAssociate()){
+                AreaInteresse a = (AreaInteresse)queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaid).get(0);
+                areeInteresseAssociate.add(a);
+            }
+            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<AreaInteresse>>(cm, areeInteresseAssociate));
+        }
+        TableColumn denomCentro = new TableColumn("Denominazione");
+        denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+        List<TableColumn> columns = new LinkedList<TableColumn>();
+        for(Pair<CentroMonitoraggio, List<AreaInteresse>> pair : centriConAreaAssociata){
+            int numberOfColumns = pair.getKey().getAreeInteresseIdAssociate().size();
+            for(int i = 0; i < numberOfColumns; i++){
+                TableColumn column = new TableColumn("area_"+i);
+                column.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
+                columns.add(column);
+            }
+        }
+
+        tableView.getColumns().add(denomCentro);
+        tableView.getColumns().addAll(columns);
+
+        centriConAreaAssociata.forEach(pair -> {
+            tableView.getItems().add(pair.getKey());
+            tableView.getItems().addAll(pair.getValue());
+        });
+        tableView.refresh();
     }
 
     public boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
