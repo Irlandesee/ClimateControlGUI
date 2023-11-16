@@ -9,14 +9,15 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class CmDialog {
 
     private final SceneController sceneController;
-    private final LinkedList<String> nomiAree;
+    private final List<String> nomiAree;
     //public VBox areeBox;
     public ListView listAree;
-    public CmDialog(SceneController sceneController, LinkedList<String> nomiAree){
+    public CmDialog(SceneController sceneController, List<String> nomiAree){
         this.sceneController = sceneController;
         this.nomiAree = nomiAree;
     }

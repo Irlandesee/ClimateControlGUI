@@ -3,6 +3,7 @@ import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.AiDialog;
+import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
@@ -410,6 +411,10 @@ public class MainWindowController{
 
     @FXML
     public void visualizzaGrafici(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        prepTableAreaInteresse();
+        showAreeInserite();
         this.paramBox = new VBox(2);
         this.tAreaInteresse = new TextField("Nome Area");
         this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
@@ -531,34 +536,45 @@ public class MainWindowController{
     public void visualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
-        tableView.setRowFactory(null);
+        //tableView.setRowFactory(null);
 
         List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
-        List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
-        List<Pair<CentroMonitoraggio, List<AreaInteresse>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<AreaInteresse>>>();
 
-        for(CentroMonitoraggio cm : centriMonitoraggio){
-            List<AreaInteresse> areeInteresseCentro = areeInteresse.stream()
-                    .filter(areaInteresse -> {
-                        return cm.getAreeInteresseIdAssociate().stream().anyMatch(areaInteresse.getAreaid()::equals);
-                    }).toList();
-            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<AreaInteresse>>(cm, areeInteresseCentro));
-        }
-
-        /**
-        centriConAreaAssociata.forEach(pair -> {
-            System.out.println(pair.getKey() + "->" + pair.getValue());
-        });
-         **/
-
-        //TODO: Show the areaInteresse for each cm? HOW!
+        //TODO: Show the areaInteresse for each cm?
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
         tableView.getColumns().add(denomCentro);
-        for(Pair<CentroMonitoraggio, List<AreaInteresse>> pair : centriConAreaAssociata){
-            tableView.getItems().add(pair.getKey());
 
-        }
+        centriMonitoraggio.forEach(cm -> {
+            tableView.getItems().add(cm);
+        });
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && !(row.isEmpty())){
+                    CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
+                    System.out.println("Item double clicked: " + c);
+                    List<String> areeId = c.getAreeInteresseIdAssociate();
+                    List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
+                    for(String areaId : areeId){
+                        AreaInteresse ai = (AreaInteresse) queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaId).get(0);
+                        areeInteresseAssociateAlCentro.add(ai.getDenominazione());
+                    }
+                    try{
+                        Stage cmDialogStage = new Stage();
+                        CmDialog cmDialogController = new CmDialog(sceneController, areeInteresseAssociateAlCentro);
+                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                        fxmlLoader.setController(cmDialogController);
+                        Scene dialogScene = new Scene(fxmlLoader.load());
+                        cmDialogStage.setScene(dialogScene);
+                        cmDialogStage.show();
+                    }catch(IOException ioe){ioe.printStackTrace();}
+                }
+            });
+
+            return row;
+        });
 
         tableView.refresh();
     }
