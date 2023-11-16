@@ -13,6 +13,8 @@ import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -529,44 +531,34 @@ public class MainWindowController{
     public void visualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.setRowFactory(null);
 
-        /**
         List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
-        List<Pair<CentroMonitoraggio, List<String>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<String>>>();
+        List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+        List<Pair<CentroMonitoraggio, List<AreaInteresse>>> centriConAreaAssociata = new LinkedList<Pair<CentroMonitoraggio, List<AreaInteresse>>>();
+
         for(CentroMonitoraggio cm : centriMonitoraggio){
-            List<String> areeInteresseAssociate = new LinkedList<String>();
-            for(String areaid : cm.getAreeInteresseIdAssociate()){
-                AreaInteresse a = (AreaInteresse)queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaid).get(0);
-                areeInteresseAssociate.add(a.getDenominazione());
-            }
-            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<String>>(cm, areeInteresseAssociate));
+            List<AreaInteresse> areeInteresseCentro = areeInteresse.stream()
+                    .filter(areaInteresse -> {
+                        return cm.getAreeInteresseIdAssociate().stream().anyMatch(areaInteresse.getAreaid()::equals);
+                    }).toList();
+            centriConAreaAssociata.add(new Pair<CentroMonitoraggio, List<AreaInteresse>>(cm, areeInteresseCentro));
         }
 
+        /**
+        centriConAreaAssociata.forEach(pair -> {
+            System.out.println(pair.getKey() + "->" + pair.getValue());
+        });
+         **/
+
+        //TODO: Show the areaInteresse for each cm? HOW!
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
         tableView.getColumns().add(denomCentro);
-        for(Pair<CentroMonitoraggio, List<String>> pair : centriConAreaAssociata){
-            for(int i = 0; i < pair.getKey().getAreeInteresseIdAssociate().size(); i++){
-                TableColumn<List<String>, String> column = new TableColumn<List<String>, String>("area_"+i);
-                column.setMinWidth(10);
-                final int colIndex = i;
-                column.setCellValueFactory(data -> {
-                    List<String> rowValues = data.getValue();
-                    String cellValue;
-                    if(colIndex < rowValues.size()){
-                        cellValue = rowValues.get(colIndex);
-                    }else{
-                        cellValue = "";
-                    }
-                    return new ReadOnlyStringWrapper(cellValue);
-                });
-                tableView.getItems().add(pair.getKey().getDenominazione());
-                tableView.getColumns().add(column);
-            }
+        for(Pair<CentroMonitoraggio, List<AreaInteresse>> pair : centriConAreaAssociata){
+            tableView.getItems().add(pair.getKey());
+
         }
-         **/
-
-
 
         tableView.refresh();
     }
