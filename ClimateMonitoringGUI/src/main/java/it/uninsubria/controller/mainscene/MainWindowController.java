@@ -359,6 +359,24 @@ public class MainWindowController{
 
     }
 
+    //Calculate the parameter passed in radians
+    private Float toRad(Float value){
+        return (float) (value * Math.PI / 180);
+    }
+
+    private Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
+        final int earthRadius = 6731; // in kms
+        float latDistance = toRad(latSecondPoint - latFirstPoint);
+        float longDistance = toRad(longSecondPoint - longFirstPoint);
+
+        float a = (float) (Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
+                        Math.cos(toRad(latFirstPoint)) * Math.cos(toRad(latSecondPoint)) *
+                                Math.sin(toRad(longDistance / 2))  * Math.sin(longDistance / 2));
+        float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+
+        return earthRadius * c;
+    }
+
     //TODO
     private void ricercaPerCoord(){
         String longi = this.tLongitudine.getText();
@@ -370,7 +388,18 @@ public class MainWindowController{
         }else{
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
-            //Sperical law of cosines?
+
+            List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+            List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
+            areeInteresse.forEach(area -> {
+                float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
+                if(distance < 50) { //50 km
+                    System.out.println(area);
+                    areeVicine.add(area);
+                }
+            });
+            tableView.getItems().clear();
+            areeVicine.forEach(area -> tableView.getItems().add(area));
 
         }
 
@@ -540,7 +569,6 @@ public class MainWindowController{
 
         List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
 
-        //TODO: Show the areaInteresse for each cm?
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
         tableView.getColumns().add(denomCentro);
