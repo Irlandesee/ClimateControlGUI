@@ -10,12 +10,14 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 import java.util.*;
 
 public class GraphDialog {
@@ -58,9 +60,12 @@ public class GraphDialog {
     @FXML
     public TextField tfMonthFilter;
 
+    @FXML
+    public ListView listViewDati;
+
     private final QueryHandler queryHandler;
 
-    private final List<ParametroClimatico> params;
+    private List<ParametroClimatico> params;
     private final String areaId;
     private final String denomArea;
 
@@ -71,11 +76,22 @@ public class GraphDialog {
         this.queryHandler = queryHandler;
         this.params = params;
         this.areaId = areaId;
-        denomArea = queryHandler.selectObjectWithCond(
+        denomArea = getDenomArea();
+    }
+
+    public GraphDialog(QueryHandler queryHandler, String areaId){
+        this.queryHandler = queryHandler;
+        this.areaId = areaId;
+        this.denomArea = getDenomArea();
+        this.params = new LinkedList<ParametroClimatico>();
+    }
+
+    private String getDenomArea(){
+        return queryHandler.selectObjectWithCond(
                 "denominazione",
                 QueryHandler.tables.AREA_INTERESSE,
                 "areaid",
-                params.get(0).getAreaInteresseId()).get(0);
+                areaId).get(0);
     }
 
     @FXML
@@ -109,13 +125,23 @@ public class GraphDialog {
 
         //default charts - temperature charts
 
-        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-        series.setName(denomArea);
-        List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
-        List<Pair<LocalDate, Number>> data = calcMonthlyData(filteredParams, ParameterType.temperatura);
-        addMonthlyDataToSeries(data, series);
+        if(!params.isEmpty()){
+            XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+            series.setName(denomArea);
+            List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
+            List<Pair<LocalDate, Number>> data = calcMonthlyData(filteredParams, ParameterType.temperatura);
+            addMonthlyDataToSeries(data, series);
 
-        monthlyTempLineChart.getData().add(series);
+            monthlyTempLineChart.getData().add(series);
+        }else{
+            params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+
+            for(ParametroClimatico p : params){
+                listViewDati.getItems().add(p.getPubDate());
+            }
+        }
+
+
         contentBox.getChildren().add(monthlyTempLineChart);
     }
 
@@ -186,10 +212,7 @@ public class GraphDialog {
         }
         int year = Integer.parseInt(yearFilterText);
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
-        List<ParametroClimatico> filteredParams = params
-                .stream()
-                .filter(pc -> pc.getPubDate().getYear() == year)
-                .toList();
+        List<ParametroClimatico> filteredParams = filterListByYear(params, year);
 
         System.out.println("printing params");
         System.out.println(filteredParams.size());
@@ -256,26 +279,31 @@ public class GraphDialog {
     @FXML
     public void filterMonth(){
         String monthFilterText = tfMonthFilter.getText();
-        if(monthFilterText.isEmpty() || monthFilterText.equals("Filtra Mese")) {
+        String yearFilterText = tfYearFilter.getText();
+
+        if(monthFilterText.isEmpty() || monthFilterText.equals("Inserisci mese")) {
+            new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
+            return;
+        }
+        if(yearFilterText.isEmpty() || yearFilterText.equals("Inserisci anno")){
             new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
             return;
         }
 
         int month = Integer.parseInt(monthFilterText);
+        int year = Integer.parseInt(yearFilterText);
 
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
-        Month m = Month.of(month);
-        List<ParametroClimatico> filteredParams = params
-                .stream()
-                .filter(pc -> pc.getPubDate().getMonth().equals(m))
-                .toList();
+
+        List<ParametroClimatico> filteredParams = filterListByMonth(filterListByYear(params, year), Month.of(month));
 
         if(filteredParams.isEmpty()){
-            new Alert(Alert.AlertType.ERROR, "Dati non presenti per questo mese e area").showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Dati non presenti per questo mese, anno e area").showAndWait();
             return;
         }
 
-        List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
+        filteredParams.forEach(System.out::println);
+
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         series.setName(denomArea);
         System.out.println("Number of children in contentBox: " + contentBox.getChildren().size());
@@ -331,8 +359,19 @@ public class GraphDialog {
             }
         }
 
-        tfMonthFilter.setText("Filtra Mese");
+        tfMonthFilter.setText("Inserisci mese");
+        tfYearFilter.setText("Inserisci anno");
     }
+
+
+    private List<ParametroClimatico> filterListByMonth(List<ParametroClimatico> params, Month m){
+        return params.stream().filter(pc -> pc.getPubDate().getMonth().equals(m)).toList();
+    }
+
+    private List<ParametroClimatico> filterListByYear(List<ParametroClimatico> params, int year){
+        return params.stream().filter(pc -> pc.getPubDate().getYear() == year).toList();
+    }
+
 
     private void addParamToList(ParameterType pType, List<Pair<LocalDate, Number>> data, ParametroClimatico param) {
         switch(pType){

@@ -23,17 +23,19 @@ import java.util.stream.Collectors;
 public class MainWindow extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        /**
         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
-        MainWindowController mainWindowController = new MainWindowController();
-        fxmlLoader.setController(mainWindowController);
-         **/
-        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
         final String url = "jdbc:postgresql://192.168.1.26/postgres";
         final Properties props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
-        QueryHandler queryHandler = new QueryHandler(url, props);
+        //QueryHandler queryHandler = new QueryHandler(url, props);
+        MainWindowController mainWindowController = new MainWindowController(stage);
+        fxmlLoader.setController(mainWindowController);
+        Scene scene = new Scene(fxmlLoader.load(),800, 800);
+        stage.setTitle("ClimateMonitoringApp!");
+        stage.setScene(scene);
+        stage.show();
+        /**
         String idHunterTown = "1a4957fdc6382209d4d59bc2469722e5";
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(
                 QueryHandler.tables.PARAM_CLIMATICO,
@@ -51,6 +53,7 @@ public class MainWindow extends Application {
         stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();
+         **/
     }
 
     public static void main(String[] args) {

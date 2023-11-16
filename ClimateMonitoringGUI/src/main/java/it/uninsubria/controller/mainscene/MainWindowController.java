@@ -1,7 +1,10 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.AiDialog;
+import it.uninsubria.controller.dialog.CmDialog;
+import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
@@ -11,7 +14,11 @@ import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +29,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -56,6 +64,7 @@ public class MainWindowController{
     private DatePicker endDatePicker;
     private Button btnRicercaPcArea;
     private Button btnRicercaPcCm;
+    private Button btnRicercaArea;
     private ToggleButton tglDatePicker;
     private ToggleButton tglRicercaAreaCm;
 
@@ -71,19 +80,24 @@ public class MainWindowController{
 
     private QueryHandler queryHandler;
 
-    private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://localhost/postgres";
+    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;
     private SceneController sceneController;
 
-    public MainWindowController(){
+    public MainWindowController(Stage stage){
         //set up the controllers
         sceneController = new SceneController(this);
         sceneController.setLoginViewController(new LoginViewController(sceneController));
         sceneController.setOperatoreViewController(new OperatoreViewController(sceneController));
         sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
         sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
+
+        this.mainWindowStage = stage;
+        mainWindowStage.setMinHeight(800);
+        mainWindowStage.setMinWidth(1200);
 
         //init the query handler
         props = new Properties();
@@ -98,8 +112,6 @@ public class MainWindowController{
     public void initialize(){
         //table view
         showAreeInserite();
-        //line chart
-        //contentBox.getChildren().add(GraphBuilder.getBasicLineChart(GraphBuilder.Resource.wind));
     }
 
     static TableView<String[]> createTable(String[] columnNames){
@@ -209,8 +221,10 @@ public class MainWindowController{
     }
 
     private void prepTableParamClimatici(){
+        System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
         tableView.getItems().clear();
+
 
         TableColumn dateColumn = new TableColumn("Data");
         dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
@@ -258,28 +272,28 @@ public class MainWindowController{
                         }
                     }
             );
-
             return row;
         });
-
+        tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
     private void prepTableAreaInteresse(){
-        /**
-        TableColumn keyColumn = new TableColumn("areaID");
-        keyColumn.setCellValueFactory(new PropertyValueFactory<>("areaid"));
-         **/
-        tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.getColumns().clear();
+        System.out.println("table view column size in prepAreaInteresse: "+ tableView.getColumns().size());
 
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
+        denomColumn.setMinWidth(120);
         TableColumn countryColumn = new TableColumn("stato");
         countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
+        countryColumn.setMinWidth(100);
         TableColumn latColumn = new TableColumn("latitudine");
         latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
+        latColumn.setMinWidth(100);
         TableColumn longColumn = new TableColumn("longitudine");
         longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
+        longColumn.setMinWidth(100);
 
         tableView.getColumns().addAll(denomColumn, countryColumn, latColumn, longColumn);
 
@@ -288,13 +302,16 @@ public class MainWindowController{
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     AreaInteresse a = (AreaInteresse) row.getItem();
-                    System.out.println("Item double Clicked: "+a);
+
+                    System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
                     List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
-                        AiDialog aiDialogController = new AiDialog(sceneController, queryHandler, a, params);
+                        AiDialog aiDialogController = new AiDialog(aiDialogStage, queryHandler, a, params);
+
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
+
                         fxmlLoader.setController(aiDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
                         aiDialogStage.setScene(dialogScene);
@@ -305,6 +322,7 @@ public class MainWindowController{
             });
             return row;
         });
+        tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
     private void showAreeInserite(){
@@ -314,11 +332,11 @@ public class MainWindowController{
     }
 
     private void ricercaAreaPerDenom(){
+        tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
             List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
             //res.forEach(System.out::println);
-            tableView.getItems().clear();
             res.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
             }));
@@ -329,6 +347,7 @@ public class MainWindowController{
     }
 
     private void ricercaAreaPerStato(){
+        tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
             List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
@@ -387,6 +406,46 @@ public class MainWindowController{
         nodesToAdd.add(btnRicercaPcCm);
         addNodesToParamBox(nodesToAdd);
         this.borderPane.setRight(paramBox);
+
+    }
+
+    @FXML
+    public void visualizzaGrafici(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        prepTableAreaInteresse();
+        showAreeInserite();
+        this.paramBox = new VBox(2);
+        this.tAreaInteresse = new TextField("Nome Area");
+        this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
+        this.btnRicercaArea = new Button("Ricerca area");
+        this.btnRicercaArea.setOnAction(e -> createChart());
+
+        this.paramBox.getChildren().add(tAreaInteresse);
+        this.paramBox.getChildren().add(btnRicercaArea);
+        this.borderPane.setRight(paramBox);
+
+    }
+
+    private void createChart(){
+        String nomeArea = tAreaInteresse.getText();
+        if(nomeArea.isEmpty() || nomeArea.equals("Nome Area")){
+            new Alert(Alert.AlertType.ERROR, "nome area non valido").showAndWait();
+            return;
+        }
+        System.out.println("Creating chart for" + nomeArea);
+        String areaid = queryHandler
+                .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", nomeArea)
+                .get(0);
+        System.out.println("areaid ->" + areaid);
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
+            fxmlLoader.setController(new GraphDialog(queryHandler, areaid));
+            Stage chartStage = new Stage();
+            Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
+            chartStage.setScene(scene);
+            chartStage.show();
+        }catch(IOException ioe){ioe.printStackTrace();}
 
     }
 
@@ -473,6 +532,53 @@ public class MainWindowController{
         }
     }
 
+    @FXML
+    public void visualizzaCentri(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        //tableView.setRowFactory(null);
+
+        List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+
+        //TODO: Show the areaInteresse for each cm?
+        TableColumn denomCentro = new TableColumn("Denominazione");
+        denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+        tableView.getColumns().add(denomCentro);
+
+        centriMonitoraggio.forEach(cm -> {
+            tableView.getItems().add(cm);
+        });
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && !(row.isEmpty())){
+                    CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
+                    System.out.println("Item double clicked: " + c);
+                    List<String> areeId = c.getAreeInteresseIdAssociate();
+                    List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
+                    for(String areaId : areeId){
+                        AreaInteresse ai = (AreaInteresse) queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaId).get(0);
+                        areeInteresseAssociateAlCentro.add(ai.getDenominazione());
+                    }
+                    try{
+                        Stage cmDialogStage = new Stage();
+                        CmDialog cmDialogController = new CmDialog(sceneController, areeInteresseAssociateAlCentro);
+                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                        fxmlLoader.setController(cmDialogController);
+                        Scene dialogScene = new Scene(fxmlLoader.load());
+                        cmDialogStage.setScene(dialogScene);
+                        cmDialogStage.show();
+                    }catch(IOException ioe){ioe.printStackTrace();}
+                }
+            });
+
+            return row;
+        });
+
+        tableView.refresh();
+    }
+
     public boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
         return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
     }
@@ -483,6 +589,7 @@ public class MainWindowController{
             mainWindowStage.close();
             return true;
         }
+
         return false;
     }
 
