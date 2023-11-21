@@ -38,7 +38,7 @@ public class MainWindow extends Application {
         /**
         String idHunterTown = "1a4957fdc6382209d4d59bc2469722e5";
         List<ParametroClimatico> params = queryHandler.selectAllWithCond(
-                QueryHandler.tables.PARAM_CLIMATICO,
+                QueryHandler.Tables.PARAM_CLIMATICO,
                 "areaid",
                 idHunterTown);
         int year = 2008;

@@ -44,7 +44,7 @@
     </left>
     <center>
         <VBox styleClass="content-section" fx:id="contentBox">
-            <Label id="content-header" text="Data"/>
+            <Label id="content-header" fx:id="labelData" text="Data"/>
             <TableView fx:id="tableView"/>
         </VBox>
     </center>

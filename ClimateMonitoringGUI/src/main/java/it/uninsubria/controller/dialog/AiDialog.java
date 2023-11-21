@@ -1,26 +1,16 @@
 package it.uninsubria.controller.dialog;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AiDialog {
 
@@ -79,7 +69,7 @@ public class AiDialog {
                     ParametroClimatico pcSelected = (ParametroClimatico) row.getItem();
                     String centroId = pcSelected.getIdCentro();
                     String denomCentro = queryHandler
-                            .selectObjectWithCond("nomecentro", QueryHandler.tables.CENTRO_MONITORAGGIO, "centroid", centroId)
+                            .selectObjectWithCond("nomecentro", QueryHandler.Tables.CENTRO_MONITORAGGIO, "centroid", centroId)
                             .get(0);
                     System.out.println("Aumento dimensioni");
                     if(stage.getWidth() < MAX_WINDOW_SIZE) stage.setWidth(MAX_WINDOW_SIZE);

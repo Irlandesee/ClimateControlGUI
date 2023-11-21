@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 import java.util.*;
 
 public class GraphDialog {
@@ -89,7 +88,7 @@ public class GraphDialog {
     private String getDenomArea(){
         return queryHandler.selectObjectWithCond(
                 "denominazione",
-                QueryHandler.tables.AREA_INTERESSE,
+                QueryHandler.Tables.AREA_INTERESSE,
                 "areaid",
                 areaId).get(0);
     }
@@ -134,7 +133,7 @@ public class GraphDialog {
 
             monthlyTempLineChart.getData().add(series);
         }else{
-            params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+            params = queryHandler.selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", areaId);
 
             for(ParametroClimatico p : params){
                 listViewDati.getItems().add(p.getPubDate());
@@ -211,7 +210,7 @@ public class GraphDialog {
             return;
         }
         int year = Integer.parseInt(yearFilterText);
-        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", areaId);
         List<ParametroClimatico> filteredParams = filterListByYear(params, year);
 
         System.out.println("printing params");
@@ -293,7 +292,7 @@ public class GraphDialog {
         int month = Integer.parseInt(monthFilterText);
         int year = Integer.parseInt(yearFilterText);
 
-        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", areaId);
 
         List<ParametroClimatico> filteredParams = filterListByMonth(filterListByYear(params, year), Month.of(month));
 

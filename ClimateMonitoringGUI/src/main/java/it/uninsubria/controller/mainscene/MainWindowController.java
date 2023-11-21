@@ -14,11 +14,7 @@ import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.queryhandler.QueryHandler;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +25,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -254,11 +249,11 @@ public class MainWindowController{
                             ParametroClimatico pc = (ParametroClimatico) row.getItem();
                             System.out.println("item clicked" + pc.getPubDate());
                             String nomeArea = queryHandler.selectObjectJoinWithCond("denominazione",
-                                    QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.AREA_INTERESSE,
+                                    QueryHandler.Tables.PARAM_CLIMATICO, QueryHandler.Tables.AREA_INTERESSE,
                                     "areaid", pc.getAreaInteresseId()).get(0);
                             String nomeCentro = queryHandler.selectObjectJoinWithCond(
                                     "nomecentro",
-                                    QueryHandler.tables.PARAM_CLIMATICO, QueryHandler.tables.CENTRO_MONITORAGGIO,
+                                    QueryHandler.Tables.PARAM_CLIMATICO, QueryHandler.Tables.CENTRO_MONITORAGGIO,
                                     "centroid", pc.getIdCentro()).get(0);
                             try{
                                Stage pcDialogStage = new Stage();
@@ -305,7 +300,7 @@ public class MainWindowController{
 
                     System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
-                    List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
+                    List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
                     try{
                         Stage aiDialogStage = new Stage();
                         AiDialog aiDialogController = new AiDialog(aiDialogStage, queryHandler, a, params);
@@ -326,7 +321,7 @@ public class MainWindowController{
     }
 
     private void showAreeInserite(){
-        List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+        List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
         prepTableAreaInteresse();
         res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
@@ -335,7 +330,7 @@ public class MainWindowController{
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "denominazione", denom);
+            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "denominazione", denom);
             //res.forEach(System.out::println);
             res.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
@@ -350,7 +345,7 @@ public class MainWindowController{
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "stato", stato);
+            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "stato", stato);
             res.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
             res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
         }else{
@@ -389,7 +384,7 @@ public class MainWindowController{
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
 
-            List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
+            List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
                 float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
@@ -464,7 +459,7 @@ public class MainWindowController{
         }
         System.out.println("Creating chart for" + nomeArea);
         String areaid = queryHandler
-                .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", nomeArea)
+                .selectObjectWithCond("areaid", QueryHandler.Tables.AREA_INTERESSE, "denominazione", nomeArea)
                 .get(0);
         System.out.println("areaid ->" + areaid);
         try{
@@ -508,10 +503,10 @@ public class MainWindowController{
                 this.areaInteresseAlert.showAndWait();
             }else{
                 String areaInteresseId = queryHandler
-                        .selectObjectWithCond("areaid", QueryHandler.tables.AREA_INTERESSE, "denominazione", denomAiCercata)
+                        .selectObjectWithCond("areaid", QueryHandler.Tables.AREA_INTERESSE, "denominazione", denomAiCercata)
                         .get(0);
                 List<ParametroClimatico> parametriClimatici = queryHandler
-                        .selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
+                        .selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
                 tableView
                         .getItems()
                         .clear();
@@ -534,14 +529,14 @@ public class MainWindowController{
             }else{
                 String centroId = queryHandler
                         .selectObjectJoinWithCond("centroid",
-                                QueryHandler.tables.PARAM_CLIMATICO,
-                                QueryHandler.tables.CENTRO_MONITORAGGIO,
+                                QueryHandler.Tables.PARAM_CLIMATICO,
+                                QueryHandler.Tables.CENTRO_MONITORAGGIO,
                                 "nomecentro",
                                 denomCmCercato)
                         .get(0);
                 List<ParametroClimatico> parametriClimatici = queryHandler
                         .selectAllWithCond(
-                                QueryHandler.tables.PARAM_CLIMATICO,
+                                QueryHandler.Tables.PARAM_CLIMATICO,
                                 "centroid",
                                 centroId);
                 tableView
@@ -567,7 +562,7 @@ public class MainWindowController{
         tableView.getItems().clear();
         //tableView.setRowFactory(null);
 
-        List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
 
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
@@ -586,7 +581,7 @@ public class MainWindowController{
                     List<String> areeId = c.getAreeInteresseIdAssociate();
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
-                        AreaInteresse ai = (AreaInteresse) queryHandler.selectAllWithCond(QueryHandler.tables.AREA_INTERESSE, "areaid", areaId).get(0);
+                        AreaInteresse ai = (AreaInteresse) queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "areaid", areaId).get(0);
                         areeInteresseAssociateAlCentro.add(ai.getDenominazione());
                     }
                     try{
@@ -627,7 +622,7 @@ public class MainWindowController{
             System.out.println("Operatore inesistente");
             return false;
         }else{//
-            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza)
+            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.Tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza)
                     .get(0);
             return queryHandler.executeSignUp(nomeOp, cognomeOp, codFisc, userID, email, password, centroID);
         }

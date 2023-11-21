@@ -4,7 +4,6 @@ import it.uninsubria.MainWindow;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.queryhandler.QueryHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -72,35 +71,40 @@ public class OperatoreViewController {
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
-    private QueryHandler queryHandler;
-    private final String url = "jdbc:postgresql://localhost/postgres";
     private Properties props;
+    private QueryHandler queryHandler;
+    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
+    //private final String url = "jdbc:postgresql://localhost/postgres";
 
     private final SceneController sceneController;
+
+    private Stage mainWindowStage;
+    private Stage operatoreWindowStage;
     public OperatoreViewController(SceneController sceneController){
         this.sceneController = sceneController;
+    }
+
+    public OperatoreViewController(SceneController sceneController, Stage mainWindowStage, Stage operatoreWindowStage){
+        this.sceneController = sceneController;
+        this.mainWindowStage = mainWindowStage;
+        this.operatoreWindowStage = operatoreWindowStage;
+    }
+
+    private void initQueryHandler(String user, String password){
+        props = new Properties();
+        props.setProperty("user", user);
+        props.setProperty("password", password);
+
+        queryHandler = new QueryHandler(url, props);
+
     }
 
 
     @FXML
     public void initialize(){
-
-        //Init the query handler
-        props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "qwerty");
-
-        queryHandler = new QueryHandler(url, props);
-
+        initAlerts();
         //show aree interesse presenti
         showAreeInserite();
-        //line chart
-        contentBox.getChildren().add(
-                GraphBuilder.getBasicMonthLineChart(
-                        GraphBuilder.Resource.wind
-                )
-        );
-        initAlerts();
     }
 
     private void initAlerts(){
@@ -185,7 +189,7 @@ public class OperatoreViewController {
         tableView.getColumns().addAll(nomeColumn, comuneColumn, countryColumn);
 
         //populate the tableView
-        List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
         centriPresenti.forEach(centro -> {
             tableView.getItems().add(centro);
         });
@@ -202,7 +206,7 @@ public class OperatoreViewController {
                     LinkedList<String> nomiAree = new LinkedList<String>();
                     for(String id: cmAree){
                         //query the db to get the areas names
-                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.tables.AREA_INTERESSE, "areaid", id)
+                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.Tables.AREA_INTERESSE, "areaid", id)
                                 .get(0);
                         nomiAree.add(denominazione);
                     }

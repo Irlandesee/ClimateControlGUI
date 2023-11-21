@@ -11,7 +11,6 @@ import it.uninsubria.util.IDGenerator;
 import javafx.util.Pair;
 
 import java.sql.*;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -432,7 +431,7 @@ public class Worker extends Thread{
         return getQueryResult(query, oggetto, cond);
     }
 
-    public <T> List<T> selectAllFromTable(QueryHandler.tables table){
+    public <T> List<T> selectAllFromTable(QueryHandler.Tables table){
         switch (table){
             case CITY -> {
                 List<City> res = new LinkedList<City>();

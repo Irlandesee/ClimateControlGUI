@@ -37,7 +37,9 @@
             <children>
                 <!-->Insert action buttons here<!-->
                 <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#handleRicercaAreaInteresse"/>
-                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleInserisciParametriClimatici"/>
+                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#visualizzaParametriClimatici"/>
+                <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#visualizzaGrafici"/>
+                <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#visualizzaCentri"/>
                 <Button text="Inserisci Parametro climatico" fx:id="buttonInserisciParametri" onAction="#handleInserisciParametriClimatici"/>
                 <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleButtonInserisciCentroMonitoraggio"/>
                 <Button text="Registra nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleRegistraOperatore"/>
@@ -46,7 +48,7 @@
     </left>
     <center>
         <VBox styleClass="content-section" fx:id="contentBox">
-            <Label id="content-header" text="Data"/>
+            <Label id="content-header" fx:id="labelData" text="Data"/>
             <TableView fx:id="tableView"/>
         </VBox>
     </center>
