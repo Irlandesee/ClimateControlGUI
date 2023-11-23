@@ -33,65 +33,6 @@ public class QueryHandler{
         this.props = props;
     }
 
-    public List<String> selectObjectJoinWithCond(String oggetto, Tables table, Tables otherTable, String fieldCond, String cond){
-        switch(table){
-            case CITY -> {
-                Worker w = new Worker(dbUrl, props, "workerCity_");
-                switch(otherTable){
-                    case AREA_INTERESSE -> {
-                        return w.selectObjectsCityJoinAiCond(oggetto, fieldCond, cond);
-                    }
-                    case CENTRO_MONITORAGGIO -> {
-                        return w.selectObjectsCityJoinCmCond(oggetto, fieldCond, cond);
-                    }
-                }
-            }
-            case CENTRO_MONITORAGGIO -> {
-                Worker w = new Worker(dbUrl, props, "workerCM_");
-                switch(otherTable){
-                    case AREA_INTERESSE -> {
-                        return w.selectObjectsCmJoinAiCond(oggetto, fieldCond, cond);
-                    }
-                    case PARAM_CLIMATICO -> {
-                        return w.selectObjectsCmJoinPcCond(oggetto, fieldCond, cond);
-                    }
-                }
-            }
-            case AREA_INTERESSE -> {
-                Worker w = new Worker(dbUrl, props, "workerAI_");
-                switch(otherTable){
-                    case CENTRO_MONITORAGGIO -> {
-                        return w.selectObjectsAiJoinCmCond(oggetto, fieldCond, cond);
-                    }
-                    case PARAM_CLIMATICO -> {
-                        return w.selectObjectsAiJoinPcCond(oggetto, fieldCond, cond);
-                    }
-                    case CITY -> {
-                        return w.selectObjectsAiJoinCityCond(oggetto, fieldCond, cond);
-                    }
-                }
-            }
-            case NOTA_PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerNota_");
-                return w.selectObjectsNotaJoinPcCond(oggetto, fieldCond, cond);
-            }
-            case PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerPC_");
-                switch(otherTable){
-                    case AREA_INTERESSE -> {
-                        return w.selectObjectsPcJoinAiCond(oggetto, fieldCond, cond);
-                    }
-                    case CENTRO_MONITORAGGIO -> {
-                        return w.selectObjectsPcJoinCmCond(oggetto, fieldCond, cond);
-                    }
-                    case NOTA_PARAM_CLIMATICO -> {
-                        return w.selectObjectsPcJoinNpcCond(oggetto, fieldCond, cond);
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
     public List<String> selectObjectWithCond(String oggetto, Tables table, String fieldCond, String cond){
         switch(table){
@@ -128,73 +69,7 @@ public class QueryHandler{
 
     }
 
-    public <T> List<T> selectAll(Tables table){
-        switch(table){
-            case CITY -> {
-                Worker w = new Worker(dbUrl, props, "workerCity_");
-                return w.selectAllFromTable(Tables.CITY);
-            }
-            case CENTRO_MONITORAGGIO -> {
-                Worker w = new Worker(dbUrl, props, "workerCM_");
-                return w.selectAllFromTable(Tables.CENTRO_MONITORAGGIO);
-            }
-            case OPERATORE -> {
-                Worker w = new Worker(dbUrl, props, "workerOP_");
-                return w.selectAllFromTable(Tables.OPERATORE);
-            }
-            case OP_AUTORIZZATO -> {
-                Worker w = new Worker(dbUrl, props, "workerAuthOp_");
-                return w.selectAllFromTable(Tables.OP_AUTORIZZATO);
-            }
-            case AREA_INTERESSE -> {
-                Worker w = new Worker(dbUrl, props, "workerAI_");
-                return w.selectAllFromTable(Tables.AREA_INTERESSE);
-            }
-            case NOTA_PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerNota_");
-                return w.selectAllFromTable(Tables.NOTA_PARAM_CLIMATICO);
-            }
-            case PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerPC_") ;
-                return w.selectAllFromTable(Tables.PARAM_CLIMATICO);
-            }
-            default -> {return null;}
-        }
-    }
 
-    public <T> List<T> selectAllWithCond(Tables table, String fieldCond, String cond){
-        switch(table){
-            case CITY -> {
-                Worker w = new Worker(dbUrl, props, "workerCity_");
-                return (List<T>) w.selectAllCityCond(fieldCond, cond);
-            }
-            case CENTRO_MONITORAGGIO -> {
-                Worker w = new Worker(dbUrl, props, "workerCM_");
-                return (List<T>) w.selectAllCmCond(fieldCond, cond);
-            }
-            case OPERATORE -> {
-                Worker w = new Worker(dbUrl, props, "workerOperatore_");
-                return (List<T>) w.selectAllOpCond(fieldCond, cond);
-            }
-            case OP_AUTORIZZATO -> {
-                Worker w = new Worker(dbUrl, props, "workerAuthOP_");
-                return (List<T>) w.selectAllAuthOpCond(fieldCond, cond);
-            }
-            case AREA_INTERESSE -> {
-                Worker w = new Worker(dbUrl, props, "workerAI_");
-                return (List<T>) w.selectAllAiCond(fieldCond, cond);
-            }
-            case NOTA_PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerNota_");
-                return (List<T>) w.selectAllNotaCond(fieldCond, cond);
-            }
-            case PARAM_CLIMATICO -> {
-                Worker w = new Worker(dbUrl, props, "workerPM_");
-                return (List<T>) w.selectAllPcCond(fieldCond, cond);
-            }
-            default -> {return null;}
-        }
-    }
 
     public Operatore executeLogin(String userID, String password){
         Worker w = new Worker(dbUrl, props, "workerLogin_");

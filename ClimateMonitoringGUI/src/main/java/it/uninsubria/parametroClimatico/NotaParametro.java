@@ -1,6 +1,11 @@
 package it.uninsubria.parametroClimatico;
 
-public class NotaParametro {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class NotaParametro implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String notaId;
     private String notaVento;
     private String notaUmidita;

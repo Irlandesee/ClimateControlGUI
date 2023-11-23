@@ -3,9 +3,13 @@ package it.uninsubria.areaInteresse;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class AreaInteresse {
+public class AreaInteresse implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String areaid;
     private String denominazione;

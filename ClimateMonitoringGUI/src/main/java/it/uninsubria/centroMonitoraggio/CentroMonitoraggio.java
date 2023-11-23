@@ -5,12 +5,15 @@ import it.uninsubria.util.IDGenerator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
-public class CentroMonitoraggio {
-
+public class CentroMonitoraggio implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     //key: String => areaID
 

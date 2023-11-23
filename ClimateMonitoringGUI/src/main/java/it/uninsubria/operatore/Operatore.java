@@ -1,8 +1,12 @@
 package it.uninsubria.operatore;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Operatore {
+public class Operatore implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String nome;
     private String cognome;

@@ -25,7 +25,6 @@ public interface ServerInterface {
     public enum RequestType{
         selectAll("selectAll"),
         selectAllWithCond("selectAllWithCond"),
-        selectObj("selectObject"),
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond");
         public final String label;
@@ -47,8 +46,8 @@ public interface ServerInterface {
 
     public static final int PORT = 9999;
     public static final int selectAllParamsLength = 1;
-    public static final int selectAllWithCondParamsLength = 3;
-    public static final int selectObjWithCondParamsLength = 4;
+    public static final int selectAllWithCondParamsLength = 2;
+    public static final int selectObjWithCondParamsLength = 3;
     public static final int selectObjJoinWithCondParamsLength = 5;
 
     public static final String QUIT = "QUIT";

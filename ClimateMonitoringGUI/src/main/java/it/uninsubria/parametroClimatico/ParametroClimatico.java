@@ -3,11 +3,14 @@ package it.uninsubria.parametroClimatico;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.time.LocalDate;
 
-public class ParametroClimatico {
-
+public class ParametroClimatico implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     public static final String generalSeparator = ",";
 
     public static final String notaVento = "Vento note";
