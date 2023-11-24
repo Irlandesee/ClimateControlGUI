@@ -262,7 +262,7 @@ public class MainWindowController{
                                     ServerInterface.RequestType.selectObjJoinWithCond,
                                     ServerInterface.Tables.PARAM_CLIMATICO,
                                     params);
-                            String denomRequestId = requestDenominazione.getRequestId();
+                            String denomReqId = requestDenominazione.getRequestId();
                             /**
                              * Params(From: ParametroClimatico)
                              * "nomecentro"
@@ -275,10 +275,26 @@ public class MainWindowController{
                                     ServerInterface.RequestType.selectObjJoinWithCond,
                                     ServerInterface.Tables.PARAM_CLIMATICO,
                                     params);
-                            String nomeCentroRequestId = requestNomeCentro.getRequestId();
+                            String nomeCentroReqId = requestNomeCentro.getRequestId();
                             client.addRequest(requestDenominazione);
                             client.addRequest(requestNomeCentro);
 
+                            Response respDenom = client.getResponse(denomReqId);
+                            Response respNomeCentro = client.getResponse(nomeCentroReqId);
+
+                            String nomeArea = "";
+                            String nomeCentro = "";
+
+                            if(respDenom.getRespType().equals(ServerInterface.ResponseType.Object) && respDenom.getTable().equals(ServerInterface.Tables.AREA_INTERESSE)){
+                                nomeArea = respDenom.getResult().toString();
+                            }else{
+                                nomeArea = "Error while retrieving denominazione area";
+                            }
+                            if(respNomeCentro.getRespType().equals(ServerInterface.ResponseType.Object) && respNomeCentro.getTable().equals(ServerInterface.Tables.CENTRO_MONITORAGGIO)){
+                                nomeCentro = respNomeCentro.getResult().toString();
+                            }else{
+                                nomeCentro = "Error while retrieving denominazione centro";
+                            }
 
                             try{
                                Stage pcDialogStage = new Stage();
@@ -632,7 +648,7 @@ public class MainWindowController{
     }
 
     public boolean onExecuteLoginQuery(String userID, String password){
-        Operatore o = queryHandler.executeLogin(userID, password);
+        Operatore o = .executeLogin(userID, password);
         if(o != null){
             mainWindowStage.close();
             return true;

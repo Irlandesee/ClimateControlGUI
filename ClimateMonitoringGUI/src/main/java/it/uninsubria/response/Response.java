@@ -13,7 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Response implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     private final String clientId;
     private final String responseId;
     private final ResponseType respType;
