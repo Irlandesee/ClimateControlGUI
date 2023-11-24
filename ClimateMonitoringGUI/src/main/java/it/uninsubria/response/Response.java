@@ -14,13 +14,15 @@ public class Response implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     private final String clientId;
+    private final String requestId;
     private final String responseId;
     private final ResponseType respType;
     private final Tables table;
-    private Object result;
+    private final Object result;
 
-    public Response(String clientId, ResponseType respType, Tables table, Object result){
+    public Response(String clientId, String requestId, ResponseType respType, Tables table, Object result){
         this.clientId = clientId;
+        this.requestId = requestId;
         this.responseId = IDGenerator.generateID();
         this.respType = respType;
         this.table = table;
@@ -35,6 +37,8 @@ public class Response implements Serializable {
         return this.responseId;
     }
 
+    public String getRequestId(){return this.requestId;}
+
     public ResponseType getRespType(){
         return this.respType;
     }
@@ -48,7 +52,7 @@ public class Response implements Serializable {
     }
 
     public String toString(){
-        return "{%s, %s := %s, %s}".formatted(this.clientId, this.responseId, this.respType, this.table);
+        return "{%s, %s, %s := %s, %s}".formatted(this.clientId, this.requestId, this.responseId, this.respType, this.table);
     }
 
 }

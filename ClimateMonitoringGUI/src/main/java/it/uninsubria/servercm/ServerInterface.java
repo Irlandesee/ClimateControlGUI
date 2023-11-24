@@ -50,16 +50,21 @@ public interface ServerInterface {
 
 
 
-    static final int PORT = 9999;
-    static final int selectAllParamsLength = 1;
-    static final int selectAllWithCondParamsLength = 2;
-    static final int selectObjWithCondParamsLength = 3;
-    static final int selectObjJoinWithCondParamsLength = 5;
+    int PORT = 9999;
+    int selectAllWithCondParamsLength = 2;
+    int selectObjWithCondParamsLength = 3;
+    int selectObjJoinWithCondParamsLength = 4;
+    int executeLoginParamsLength = 2;
+    int insertPcParamsLength = 12;
+    int insertCmParamsLength = 4;
+    //int insertAiParamsLength ;
+    int insertOpParamsLength = 7;
+    //int insertAuthOpParamsLength;
 
-    static final String QUIT = "QUIT";
-    static final String NEXT = "NEXT";
-    static final String ID = "ID";
-    static final String UNDEFINED_BEHAVIOUR = "UNDEFINED";
+    String QUIT = "QUIT";
+    String NEXT = "NEXT";
+    String ID = "ID";
+    String UNDEFINED_BEHAVIOUR = "UNDEFINED";
 
     //public void quit() throws IOException;
     void sendRequest(Request r);

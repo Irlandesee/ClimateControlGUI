@@ -14,10 +14,8 @@ public class Request implements Serializable {
     private final String requestId;
     private final String clientId;
     private final Tables table;
-
-    private final RequestType requestType;
+     final RequestType requestType;
     private final String[] params;
-
     public Request(String clientId, RequestType requestType, Tables table, String[] params){
         this.requestId = IDGenerator.generateID();
         this.clientId = clientId;
