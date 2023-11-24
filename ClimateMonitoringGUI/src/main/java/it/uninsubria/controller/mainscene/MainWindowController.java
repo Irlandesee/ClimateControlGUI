@@ -2,6 +2,7 @@ package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
@@ -13,7 +14,9 @@ import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
+import it.uninsubria.request.Request;
+import it.uninsubria.response.Response;
+import it.uninsubria.servercm.ServerInterface;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -73,16 +76,16 @@ public class MainWindowController{
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
-    private QueryHandler queryHandler;
-
     //private final String url = "jdbc:postgresql://localhost/postgres";
     private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;
     private SceneController sceneController;
+    private final Client client;
 
-    public MainWindowController(Stage stage){
+    public MainWindowController(Stage stage, Client client){
+        this.client = client;
         //set up the controllers
         sceneController = new SceneController(this);
         sceneController.setLoginViewController(new LoginViewController(sceneController));
@@ -98,7 +101,6 @@ public class MainWindowController{
         props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
-        queryHandler = new QueryHandler(url, props);
 
         initAlerts();
     }
@@ -248,13 +250,36 @@ public class MainWindowController{
                         if(event.getClickCount() == 2 && (!row.isEmpty())){
                             ParametroClimatico pc = (ParametroClimatico) row.getItem();
                             System.out.println("item clicked" + pc.getPubDate());
-                            String nomeArea = queryHandler.selectObjectJoinWithCond("denominazione",
-                                    QueryHandler.Tables.PARAM_CLIMATICO, QueryHandler.Tables.AREA_INTERESSE,
-                                    "areaid", pc.getAreaInteresseId()).get(0);
-                            String nomeCentro = queryHandler.selectObjectJoinWithCond(
-                                    "nomecentro",
-                                    QueryHandler.Tables.PARAM_CLIMATICO, QueryHandler.Tables.CENTRO_MONITORAGGIO,
-                                    "centroid", pc.getIdCentro()).get(0);
+                            /**
+                             * Params (From: ParametroClimatico)
+                             * "denominazione"
+                             * "AREA_INTERESSE"
+                             * "areaid"
+                             * areaid: String
+                             */
+                            Request requestDenominazione = new Request(
+                                    client.getClientId(),
+                                    ServerInterface.RequestType.selectObjJoinWithCond,
+                                    ServerInterface.Tables.PARAM_CLIMATICO,
+                                    params);
+                            String denomRequestId = requestDenominazione.getRequestId();
+                            /**
+                             * Params(From: ParametroClimatico)
+                             * "nomecentro"
+                             * "CENTRO_MONITORAGGIO"
+                             * "centroid"
+                             * centroid: String
+                             */
+                            Request requestNomeCentro = new Request(
+                                    client.getClientId(),
+                                    ServerInterface.RequestType.selectObjJoinWithCond,
+                                    ServerInterface.Tables.PARAM_CLIMATICO,
+                                    params);
+                            String nomeCentroRequestId = requestNomeCentro.getRequestId();
+                            client.addRequest(requestDenominazione);
+                            client.addRequest(requestNomeCentro);
+
+
                             try{
                                Stage pcDialogStage = new Stage();
                                PcDialog pcDialogController = new PcDialog(sceneController, pc, nomeCentro, nomeArea);

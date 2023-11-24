@@ -4,7 +4,6 @@ import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.parametroClimatico.NotaParametro;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
 
 import java.io.*;
 import java.time.LocalDate;

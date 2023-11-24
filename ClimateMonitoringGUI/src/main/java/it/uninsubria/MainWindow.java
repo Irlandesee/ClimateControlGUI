@@ -1,24 +1,14 @@
 package it.uninsubria;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
-import it.uninsubria.controller.dialog.GraphDialog;
+import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.mainscene.MainWindowController;
-import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.parametroClimatico.NotaParametro;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
-import it.uninsubria.util.FakeDataGenerator;
+import it.uninsubria.util.IDGenerator;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.util.List;
-import java.util.LinkedList;
+
 import java.io.IOException;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class MainWindow extends Application {
     @Override
@@ -28,8 +18,8 @@ public class MainWindow extends Application {
         final Properties props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
-        //QueryHandler queryHandler = new QueryHandler(url, props);
-        MainWindowController mainWindowController = new MainWindowController(stage);
+        Client client = new Client(IDGenerator.generateID());
+        MainWindowController mainWindowController = new MainWindowController(stage, client);
         fxmlLoader.setController(mainWindowController);
         Scene scene = new Scene(fxmlLoader.load(),800, 800);
         stage.setTitle("ClimateMonitoringApp!");

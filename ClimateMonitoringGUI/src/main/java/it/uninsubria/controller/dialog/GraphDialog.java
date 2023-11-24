@@ -2,7 +2,6 @@ package it.uninsubria.controller.dialog;
 
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;

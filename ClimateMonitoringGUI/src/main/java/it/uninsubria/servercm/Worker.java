@@ -6,12 +6,11 @@ import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.NotaParametro;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
-import it.uninsubria.servercm.ServerInterface.RequestType;
 import it.uninsubria.servercm.ServerInterface.Tables;
 import it.uninsubria.servercm.ServerInterface.ResponseType;
+import it.uninsubria.util.IDGenerator;
 
 
 import java.sql.*;
@@ -623,7 +622,108 @@ public class Worker extends Thread{
         return null;
     }
 
+    public Response executeLogin(String userId, String password){
+        String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userId, password);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
+            rSet.next();//expects 1 row
+            Operatore operatore = extractOperatore(rSet);
+            return new Response(
+                    clientId,
+                    ResponseType.loginOk,
+                    Tables.OPERATORE,
+                    operatore);
 
+        }catch(SQLException sqle){sqle.printStackTrace();
+            return new Response(
+                    clientId,
+                    ResponseType.loginKo,
+                    Tables.OPERATORE,
+                    null);
+        }
+    }
+
+    public Response insertOperatore(String nomeOp, String cognomeOp, String codFisc, String userId, String email, String password, String centroAfferenza){
+        String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+                .formatted(nomeOp, cognomeOp, codFisc, userId, email, password, centroAfferenza);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1){
+                return new Response(
+                        clientId,
+                        ResponseType.insertOk,
+                        Tables.OPERATORE,
+                        true);
+            }
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return new Response(
+                clientId,
+                ResponseType.insertKo,
+                Tables.OPERATORE,
+                false);
+    }
+
+    public Response insertCentroMonitoraggio(String nomeCentro, String comune, String stato, List<String> idAreeInteresseAssociate){
+        String centroId = IDGenerator.generateID();
+        int idListSize = idAreeInteresseAssociate.size();
+        StringBuilder ids = new StringBuilder();
+        for(int i = 0; i < idListSize; i++){
+            ids.append(idAreeInteresseAssociate.get(i));
+            if(i < idListSize - 1)
+                ids.append(",");
+        }
+        String query = "insert into centro_monitoraggio(centroid, nomecentro, comune, country, aree_interesse_ids) values ('%s', '%s', '%s', '%s', '{%s}')"
+                .formatted(centroId, nomeCentro, comune, stato, ids.toString());
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1){
+                return new Response(
+                        clientId,
+                        ResponseType.insertOk,
+                        Tables.CENTRO_MONITORAGGIO,
+                        true);
+            }
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return new Response(
+                clientId,
+                ResponseType.insertKo,
+                Tables.CENTRO_MONITORAGGIO,
+                false);
+    }
+
+    //Non inserisci notaid
+    public Response insertParametroClimatico(ParametroClimatico pc){
+        String query =
+                "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
+                        "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+        query = query.formatted(
+                pc.getParameterId(),
+                pc.getIdCentro(),
+                pc.getAreaInteresseId(),
+                pc.getPubDate(),
+                //pc.getNotaId(),
+                pc.getVentoValue(),
+                pc.getUmiditaValue(),
+                pc.getPressioneValue(),
+                pc.getTemperaturaValue(),
+                pc.getPrecipitazioniValue(),
+                pc.getAltitudineValue(),
+                pc.getMassaValue());
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1)
+                return new Response(
+                        clientId,
+                        ResponseType.insertOk,
+                        Tables.PARAM_CLIMATICO,
+                        true);
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return new Response(
+                clientId,
+                ResponseType.insertKo,
+                Tables.PARAM_CLIMATICO,
+                false);
+    }
 
 
 }

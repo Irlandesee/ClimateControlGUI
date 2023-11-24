@@ -41,6 +41,7 @@ public interface ServerInterface {
         NoSuchElement("NoSuchElement"),
         Error("Error"),
         insertOk("insertOk"),
+        insertKo("insertKo"),
         loginOk("loginOk"),
         loginKo("loginKo");
         public final String label;
@@ -61,7 +62,7 @@ public interface ServerInterface {
     static final String UNDEFINED_BEHAVIOUR = "UNDEFINED";
 
     //public void quit() throws IOException;
-    Response addRequest(Request r);
+    void sendRequest(Request r);
 
 
 }

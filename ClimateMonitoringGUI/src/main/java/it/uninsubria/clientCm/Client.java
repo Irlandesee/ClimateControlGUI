@@ -8,57 +8,100 @@ import it.uninsubria.servercm.ServerInterface.Tables;
 import it.uninsubria.servercm.ServerInterface.RequestType;
 import it.uninsubria.servercm.ServerInterface.ResponseType;
 import it.uninsubria.util.IDGenerator;
+import java.util.logging.Logger;
 
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Client {
+public class Client extends Thread{
 
-    private ClientProxy cp;
-    private String clientId;
+    private final ClientProxy clientProxy;
+    private final String clientId;
     private Socket sock;
+    private boolean runCondition;
+
+    private LinkedBlockingQueue<Request> requests;
+    private LinkedBlockingQueue<Response> responses;
+    private Logger logger;
+
     public Client(String clientId){
         this.clientId = clientId;
+        this.setName(clientId);
+        logger = Logger.getLogger("Client");
         try{
             sock = new Socket(InetAddress.getLocalHost(), ServerInterface.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
-        this.cp = new ClientProxy(sock, clientId);
+        this.requests = new LinkedBlockingQueue<Request>();
+        this.responses = new LinkedBlockingQueue<Response>();
+        this.clientProxy = new ClientProxy(this, sock, clientId);
+        this.runCondition = true;
     }
 
-    public static void main(String[] args){
-        Client c = new Client(IDGenerator.generateID());
-        System.err.printf("Client %s started\n", c.clientId);
-
-        String[] params = new String[1];
-        Request request = new Request(
-                c.clientId,
-                RequestType.selectAll,
-                Tables.AREA_INTERESSE,
-                params);
-        Response res = c.cp.addRequest(request);
-        if(res != null){
-            System.out.printf("Client %s, received: %s\n", c.clientId, res);
-            switch(res.getRespType()){
-                case List -> {
-                    List<Object> result = (List<Object>) res.getResult();
-                    //Cast the object to the needed class
-                }
-                case Object -> {
-                    Object o = res.getResult();
-                }
-                case Error -> {
-                    System.out.printf("Response %s containing error\n", res.getResponseId());
-                }
-                case NoSuchElement -> {
-                    System.out.println("No such element in db");
-                }
-
-            }
+    public synchronized void setRunCondition(boolean runCondition) {
+        try{
+            wait();
+            this.runCondition = runCondition;
+        }catch(InterruptedException ie){
+            logger.info(ie.getMessage());
         }
+        notify();
+    }
+
+    public String getClientId(){
+        return this.clientId;
+    }
+
+    public synchronized boolean getRunCondition(){
+        //does this method release the lock on the object?
+        try{
+            wait();
+        }catch(InterruptedException ie){logger.info(ie.getMessage());}
+        return this.runCondition;
+    }
+
+    public void addRequest(Request req){
+        try{
+            requests.put(req);
+        }catch(InterruptedException ie){logger.info(ie.getMessage());}
+    }
+
+    public Request getRequest(){
+        try{
+            return requests.take();
+        }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}
+    }
+
+    public void addResponse(Response res){
+        try{
+            responses.put(res);
+        }catch(InterruptedException ie){logger.info(ie.getMessage());}
+    }
+
+    public Response getResponse(){
+        try{
+            return responses.take();
+        }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}
+    }
+
+    public void run(){
+        logger.info("Client started");
+        while (getRunCondition()) {
+            //wait for requests from the gui
+            logger.info("waiting for a request");
+            Request request = getRequest();
+            //send request
+            logger.info("Sending Request");
+            clientProxy.sendRequest(request);
+        }
+        logger.info("Client quitting, closing the socket");
+        try{
+            sock.close();
+        }catch(IOException ioe){logger.info(ioe.getMessage());}
 
     }
 

@@ -22,6 +22,7 @@ public class ServerCm {
     private LinkedBlockingQueue<ServerSlave> slaves;
     private LinkedBlockingQueue<Worker> workers;
 
+
     private final String dbUrl = "jdbc:postgresql://192.168.1.26/postgres";
     private final Properties props;
 

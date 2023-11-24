@@ -9,17 +9,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 public class ClientProxy implements ServerInterface {
     private final String proxyId;
     private final Socket sock;
+    private final Client client;
+    private final Logger logger;
 
-    public ClientProxy(Socket sock, String proxyId){
+    public ClientProxy(Client client, Socket sock, String proxyId){
+        this.logger = Logger.getLogger("ClientProxy: "+proxyId);
+        this.client = client;
         this.proxyId = proxyId;
         this.sock = sock;
     }
 
-    public Response addRequest(Request req){
+    public void sendRequest(Request req){
         int result = -1;
         try{
             ObjectOutputStream outStream = new ObjectOutputStream(sock.getOutputStream());
@@ -43,13 +48,13 @@ public class ClientProxy implements ServerInterface {
 
             //System.out.printf("Proxy %s waiting for response from server\n", this.proxyId);
             Response res =  (Response) inStream.readObject();
+            client.addResponse(res);
+            logger.info("Adding response to queue");
             //System.out.printf("Proxy %s quitting\n", proxyId);
             outStream.writeObject(ServerInterface.QUIT);
-            return  res;
         }catch(IOException ioe){
             ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
-        return null;
     }
 
 }

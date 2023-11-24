@@ -4,7 +4,6 @@ import it.uninsubria.MainWindow;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.queryhandler.QueryHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
