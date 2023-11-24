@@ -57,9 +57,8 @@ public interface ServerInterface {
     int executeLoginParamsLength = 2;
     int insertPcParamsLength = 12;
     int insertCmParamsLength = 4;
-    //int insertAiParamsLength ;
     int insertOpParamsLength = 7;
-    //int insertAuthOpParamsLength;
+    //int insertAiParamsLength ;
 
     String QUIT = "QUIT";
     String NEXT = "NEXT";
