@@ -20,10 +20,10 @@ public class Response implements Serializable {
     private final Tables table;
     private final Object result;
 
-    public Response(String clientId, String requestId, ResponseType respType, Tables table, Object result){
+    public Response(String clientId, String requestId, String responseId, ResponseType respType, Tables table, Object result){
         this.clientId = clientId;
         this.requestId = requestId;
-        this.responseId = IDGenerator.generateID();
+        this.responseId = responseId;
         this.respType = respType;
         this.table = table;
         this.result = result;

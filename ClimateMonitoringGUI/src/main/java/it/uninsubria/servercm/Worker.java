@@ -46,6 +46,7 @@ public class Worker extends Thread{
         Request request = server.getRequest(this.workerId);
         this.clientId = request.getClientId();
         this.requestId = request.getRequestId();
+        String responseId = IDGenerator.generateID();
         System.out.printf("Worker %s serving client{%s} request: %s\n", workerId, clientId, requestId);
         //System.out.println("Request: " + request.toString());
         //Read the request
@@ -58,21 +59,25 @@ public class Worker extends Thread{
             }
             case selectAllWithCond -> {
                 if(request.getParams().length < ServerInterface.selectAllWithCondParamsLength){
-                    res = new Response(clientId, ResponseType.Error, request.getTable(), null);
+                    res = new Response(clientId, requestId, responseId,  ResponseType.Error, request.getTable(), null);
                 }else{
                     res = selectAllWithCond(request);
                 }
             }
             case selectObjWithCond -> {
                 if(request.getParams().length < ServerInterface.selectObjWithCondParamsLength){
-                    res = new Response(clientId, ResponseType.Error, request.getTable(), null);
+                    res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
                 }
                 else{
                     res = selectObjWithCond(request);
                 }
             }
             case selectObjJoinWithCond -> {
-                //TODO
+                if(request.getParams().length < ServerInterface.selectObjJoinWithCondParamsLength){
+                    res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
+                }else{
+                    res = selectObjectJoinWithCond(request);
+                }
             }
         }
         //save the result in the server's queue
@@ -564,8 +569,9 @@ public class Worker extends Thread{
         return getQueryResultList(table, oggetto, fieldCond, cond, query);
     }
 
-    public Response selectObjectJoinWithCond(String oggetto, Tables table, Tables otherTable, String fieldCond, String cond){
-        switch(table){
+    public Response selectObjectJoinWithCond(Request r){
+        Tables otherTable = Tables.valueOf(r.getParams()[1]);
+        switch(r.getTable()){
             case CITY -> {
                 switch(otherTable){
                     case AREA_INTERESSE -> {
