@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public interface ServerInterface {
 
-     public enum Tables{
+     enum Tables{
         AREA_INTERESSE("area_interesse"),
         CENTRO_MONITORAGGIO("centro_monitoraggio"),
         CITY("city"),
@@ -22,41 +22,46 @@ public interface ServerInterface {
         }
     }
 
-    public enum RequestType{
+    enum RequestType{
         selectAll("selectAll"),
         selectAllWithCond("selectAllWithCond"),
         selectObjWithCond("selectObjectWithCond"),
-        selectObjJoinWithCond("selectObjectJoinWithCond");
+        selectObjJoinWithCond("selectObjectJoinWithCond"),
+        executeLogin("executeLogin"),
+        insert("insert");
         public final String label;
         private RequestType(String label){
             this.label = label;
         }
     }
 
-    public enum ResponseType {
+    enum ResponseType {
         List("List"),
         Object("Object"),
         NoSuchElement("NoSuchElement"),
-        Error("Error");
+        Error("Error"),
+        insertOk("insertOk"),
+        loginOk("loginOk"),
+        loginKo("loginKo");
         public final String label;
         private ResponseType(String label){this.label = label;}
     }
 
 
 
-    public static final int PORT = 9999;
-    public static final int selectAllParamsLength = 1;
-    public static final int selectAllWithCondParamsLength = 2;
-    public static final int selectObjWithCondParamsLength = 3;
-    public static final int selectObjJoinWithCondParamsLength = 5;
+    static final int PORT = 9999;
+    static final int selectAllParamsLength = 1;
+    static final int selectAllWithCondParamsLength = 2;
+    static final int selectObjWithCondParamsLength = 3;
+    static final int selectObjJoinWithCondParamsLength = 5;
 
-    public static final String QUIT = "QUIT";
-    public static final String NEXT = "NEXT";
-    public static final String ID = "ID";
-    public static final String UNDEFINED_BEHAVIOUR = "UNDEFINED";
+    static final String QUIT = "QUIT";
+    static final String NEXT = "NEXT";
+    static final String ID = "ID";
+    static final String UNDEFINED_BEHAVIOUR = "UNDEFINED";
 
     //public void quit() throws IOException;
-    public Response addRequest(Request r);
+    Response addRequest(Request r);
 
 
 }

@@ -129,21 +129,6 @@ public class Worker extends Thread{
     }
 
 
-    //city
-
-
-    //AreaInteresse
-
-
-
-    //npc
-
-    //parametro climatco
-
-
-
-
-
     public Operatore executeLogin(String userID, String password){
         String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userID, password);
         System.out.println(workerID + ":" + query);
