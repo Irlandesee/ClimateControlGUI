@@ -2,6 +2,8 @@ package it.uninsubria.servercm;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
+import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.factories.ResponseFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.NotaParametro;
@@ -23,6 +25,7 @@ public class Worker extends Thread{
     private static int workerCount = 0;
     private String clientId;
     private String requestId;
+    private String responseId;
     private final String workerId;
     private final ServerCm server;
     private final String dbUrl;
@@ -46,7 +49,7 @@ public class Worker extends Thread{
         Request request = server.getRequest(this.workerId);
         this.clientId = request.getClientId();
         this.requestId = request.getRequestId();
-        String responseId = IDGenerator.generateID();
+        this.responseId = IDGenerator.generateID();
         System.out.printf("Worker %s serving client{%s} request: %s\n", workerId, clientId, requestId);
         //System.out.println("Request: " + request.toString());
         //Read the request
@@ -54,7 +57,7 @@ public class Worker extends Thread{
         switch(request.getRequestType()){
             //query the database
             case selectAll -> {
-                res = selectAll(request.getTable());
+                res = selectAll(request);
                 System.out.println("Response: " + res);
             }
             case selectAllWithCond -> {
@@ -193,8 +196,8 @@ public class Worker extends Thread{
         return authOp;
     }
 
-    private Response selectAll(Tables table){
-        switch(table){
+    private Response selectAll(Request req){
+        switch(req.getTable()){
             case CITY -> {
                 List<City> res = new LinkedList<City>();
                 String query = "select * from city";
@@ -205,9 +208,12 @@ public class Worker extends Thread{
                         res.add(c);
                     }
                 }catch(SQLException sqle){sqle.printStackTrace();}
-                return new Response(clientId,
+                return new Response(
+                        clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
-                        Tables.CITY,
+                        req.getTable(),
                         res);
             }
             case CENTRO_MONITORAGGIO -> {
@@ -223,6 +229,8 @@ public class Worker extends Thread{
                 }catch(SQLException sqle){sqle.printStackTrace();}
                 return new Response(
                         clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         Tables.CENTRO_MONITORAGGIO,
                         res);
@@ -238,6 +246,8 @@ public class Worker extends Thread{
                 }catch(SQLException sqle){sqle.printStackTrace();}
                 return new Response(
                         clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         Tables.AREA_INTERESSE,
                         res);
@@ -254,7 +264,10 @@ public class Worker extends Thread{
                     }
 
                 }catch(SQLException sqle){sqle.printStackTrace();}
-                return new Response(clientId,
+                return new Response(
+                        clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         Tables.OPERATORE,
                         res);
@@ -271,7 +284,10 @@ public class Worker extends Thread{
                     }
 
                 }catch(SQLException sqle){sqle.printStackTrace();}
-                return new Response(clientId,
+                return new Response(
+                        clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         Tables.OP_AUTORIZZATO,
                         res);
@@ -287,13 +303,22 @@ public class Worker extends Thread{
                         res.add(pc);
                     }
                 }catch(SQLException sqle){sqle.printStackTrace(); }
-                return new Response(clientId,
+                return new Response(
+                        clientId,
+                        req.getRequestId(),
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         Tables.PARAM_CLIMATICO,
                         res);
             }
         }
-        return new Response(clientId, ResponseType.Error, table, null);
+        return new Response(
+                clientId,
+                req.getRequestId(),
+                IDGenerator.generateID(),
+                ResponseType.Error,
+                req.getTable(),
+                null);
     }
 
     private List<City> selectAllCityCond(String fieldCond, String cond){
@@ -386,35 +411,37 @@ public class Worker extends Thread{
         switch(r.getTable()){
             case CITY -> {
                 List<City> res = selectAllCityCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case CENTRO_MONITORAGGIO -> {
                 List<CentroMonitoraggio> res = selectAllCmCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case AREA_INTERESSE -> {
                 List<AreaInteresse> res = selectAllAiCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case PARAM_CLIMATICO -> {
                 List<ParametroClimatico> res = selectAllPcCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case NOTA_PARAM_CLIMATICO -> {
                 List<NotaParametro> res = selectAllNotaCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case OPERATORE -> {
                 List<Operatore> res = selectAllOpCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case OP_AUTORIZZATO -> {
                 List<OperatoreAutorizzato> res = selectAllAuthOpCond(r.getParams()[0], r.getParams()[1]);
-                return new Response(r.getClientId(), ResponseType.List, r.getTable(), res);
+                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             default -> {
                 return new Response(
-                        r.getClientId(),
+                        clientId,
+                        requestId,
+                        IDGenerator.generateID(),
                         ResponseType.List,
                         r.getTable(),
                         null);
@@ -458,38 +485,41 @@ public class Worker extends Thread{
     }
 
     private Response selectObjWithCond(Request r){
+        String[] params = r.getParams();
         switch(r.getTable()){
             case CITY -> {
-                String res = selectObjCityCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjCityCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CITY, res);
             }
             case CENTRO_MONITORAGGIO -> {
-                String res = selectObjCmCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjCmCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CENTRO_MONITORAGGIO, res);
             }
             case AREA_INTERESSE -> {
-                String res = selectObjAiCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjAiCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.AREA_INTERESSE, res);
             }
             case PARAM_CLIMATICO -> {
-                String res = selectObjPcCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjPcCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.PARAM_CLIMATICO, res);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                String res = selectObjNpcCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjNpcCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.NOTA_PARAM_CLIMATICO, res);
             }
             case OPERATORE -> {
-                String res = selectObjOpCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjOpCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OPERATORE, res);
             }
             case OP_AUTORIZZATO -> {
-                String res = selectObjAuthOpCond(r.getParams()[0], r.getParams()[1], r.getParams()[3]);
-                return new Response(r.getClientId(), ResponseType.Object, r.getTable(), res);
+                String res = selectObjAuthOpCond(params[0], params[1], params[2]);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OP_AUTORIZZATO, res);
             }
             default -> {
                 return new Response(
-                        r.getClientId(),
+                        clientId,
+                        requestId,
+                        responseId,
                         ResponseType.Object,
                         r.getTable(),
                         null);
@@ -506,7 +536,7 @@ public class Worker extends Thread{
             while(rSet.next()){
                 resultList.add(rSet.getString(oggetto));
             }
-            res = new Response(clientId, ResponseType.Object, table, resultList);
+            res = new Response(clientId, requestId, responseId, ResponseType.Object, table, resultList);
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
         return res;
     }
@@ -569,60 +599,61 @@ public class Worker extends Thread{
         return getQueryResultList(table, oggetto, fieldCond, cond, query);
     }
 
-    public Response selectObjectJoinWithCond(Request r){
-        Tables otherTable = Tables.valueOf(r.getParams()[1]);
-        switch(r.getTable()){
+    public Response selectObjectJoinWithCond(Request req){
+        Tables otherTable = Tables.valueOf(req.getParams()[1]);
+        String[] params = req.getParams();
+        switch(req.getTable()){
             case CITY -> {
                 switch(otherTable){
                     case AREA_INTERESSE -> {
-                        return selectObjectsCityJoinAiCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsCityJoinAiCond(otherTable, params[0], params[2], params[3]);
                     }
                     case CENTRO_MONITORAGGIO -> {
-                        return selectObjectsCityJoinCmCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsCityJoinCmCond(otherTable, params[0], params[2], params[3]);
                     }
                 }
             }
             case CENTRO_MONITORAGGIO -> {
                 switch(otherTable){
                     case AREA_INTERESSE -> {
-                        return selectObjectsCmJoinAiCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsCmJoinAiCond(otherTable, params[0], params[2], params[3]);
                     }
                     case PARAM_CLIMATICO -> {
-                        return selectObjectsCmJoinPcCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsCmJoinPcCond(otherTable, params[0], params[2], params[3]);
                     }
                 }
             }
             case AREA_INTERESSE -> {
                 switch(otherTable){
                     case CENTRO_MONITORAGGIO -> {
-                        return selectObjectsAiJoinCmCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsAiJoinCmCond(otherTable, params[0], params[2], params[3]);
                     }
                     case PARAM_CLIMATICO -> {
-                        return selectObjectsAiJoinPcCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsAiJoinPcCond(otherTable, params[0], params[2], params[3]);
                     }
                     case CITY -> {
-                        return selectObjectsAiJoinCityCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsAiJoinCityCond(otherTable, params[0], params[2], params[3]);
                     }
                 }
             }
             case NOTA_PARAM_CLIMATICO -> {
-                return selectObjectsNotaJoinPcCond(table, oggetto, fieldCond, cond);
+                return selectObjectsNotaJoinPcCond(otherTable, params[0], params[2], params[3]);
             }
             case PARAM_CLIMATICO -> {
                 switch(otherTable){
                     case AREA_INTERESSE -> {
-                        return selectObjectsPcJoinAiCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsPcJoinAiCond(otherTable, params[0], params[2], params[3]);
                     }
                     case CENTRO_MONITORAGGIO -> {
-                        return selectObjectsPcJoinCmCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsPcJoinCmCond(otherTable, params[0], params[2], params[3]);
                     }
                     case NOTA_PARAM_CLIMATICO -> {
-                        return selectObjectsPcJoinNpcCond(table, oggetto, fieldCond, cond);
+                        return selectObjectsPcJoinNpcCond(otherTable, params[0], params[2], params[3]);
                     }
                 }
             }
             default -> {
-                return new Response(clientId, ResponseType.Error, table, null);
+                return new Response(clientId, requestId, responseId, ResponseType.Error, req.getTable(), null);
             }
         }
         return null;
@@ -636,6 +667,8 @@ public class Worker extends Thread{
             Operatore operatore = extractOperatore(rSet);
             return new Response(
                     clientId,
+                    requestId,
+                    responseId,
                     ResponseType.loginOk,
                     Tables.OPERATORE,
                     operatore);
@@ -643,6 +676,8 @@ public class Worker extends Thread{
         }catch(SQLException sqle){sqle.printStackTrace();
             return new Response(
                     clientId,
+                    requestId,
+                    responseId,
                     ResponseType.loginKo,
                     Tables.OPERATORE,
                     null);
@@ -657,6 +692,8 @@ public class Worker extends Thread{
             if(res == 1){
                 return new Response(
                         clientId,
+                        requestId,
+                        responseId,
                         ResponseType.insertOk,
                         Tables.OPERATORE,
                         true);
@@ -664,6 +701,8 @@ public class Worker extends Thread{
         }catch(SQLException sqle){sqle.printStackTrace();}
         return new Response(
                 clientId,
+                requestId,
+                responseId,
                 ResponseType.insertKo,
                 Tables.OPERATORE,
                 false);
@@ -685,6 +724,8 @@ public class Worker extends Thread{
             if(res == 1){
                 return new Response(
                         clientId,
+                        requestId,
+                        responseId,
                         ResponseType.insertOk,
                         Tables.CENTRO_MONITORAGGIO,
                         true);
@@ -692,6 +733,8 @@ public class Worker extends Thread{
         }catch(SQLException sqle){sqle.printStackTrace();}
         return new Response(
                 clientId,
+                requestId,
+                responseId,
                 ResponseType.insertKo,
                 Tables.CENTRO_MONITORAGGIO,
                 false);
@@ -720,12 +763,16 @@ public class Worker extends Thread{
             if(res == 1)
                 return new Response(
                         clientId,
+                        requestId,
+                        responseId,
                         ResponseType.insertOk,
                         Tables.PARAM_CLIMATICO,
                         true);
         }catch(SQLException sqle){sqle.printStackTrace();}
         return new Response(
                 clientId,
+                requestId,
+                responseId,
                 ResponseType.insertKo,
                 Tables.PARAM_CLIMATICO,
                 false);
