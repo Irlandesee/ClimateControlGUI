@@ -12,8 +12,10 @@ import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
@@ -33,6 +35,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class MainWindowController{
@@ -257,12 +260,28 @@ public class MainWindowController{
                              * "areaid"
                              * areaid: String
                              */
-                            Request requestDenominazione = new Request(
-                                    client.getClientId(),
-                                    ServerInterface.RequestType.selectObjJoinWithCond,
-                                    ServerInterface.Tables.PARAM_CLIMATICO,
-                                    params);
-                            String denomReqId = requestDenominazione.getRequestId();
+                            Map<String, String> paramsReqDenom =
+                                    RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
+                            if(paramsReqDenom != null){
+                                paramsReqDenom.replace(RequestFactory.objectKey, "denominazione");
+                                paramsReqDenom.replace(RequestFactory.joinKey, ServerInterface.Tables.AREA_INTERESSE.label);
+                                paramsReqDenom.replace(RequestFactory.condKey, "areaid");
+                                paramsReqDenom.replace(RequestFactory.fieldKey, pc.getAreaInteresseId());
+                            }
+
+                            Request requestDenominazione = null;
+                            try {
+                                requestDenominazione = RequestFactory
+                                        .buildRequest(
+                                                client.getClientId(),
+                                                ServerInterface.RequestType.selectObjJoinWithCond,
+                                                ServerInterface.Tables.PARAM_CLIMATICO,
+                                                paramsReqDenom);
+                            } catch (MalformedRequestException e) {
+                                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                                e.printStackTrace();
+                                return;
+                            }
                             /**
                              * Params(From: ParametroClimatico)
                              * "nomecentro"
@@ -270,17 +289,45 @@ public class MainWindowController{
                              * "centroid"
                              * centroid: String
                              */
-                            Request requestNomeCentro = new Request(
-                                    client.getClientId(),
-                                    ServerInterface.RequestType.selectObjJoinWithCond,
-                                    ServerInterface.Tables.PARAM_CLIMATICO,
-                                    params);
-                            String nomeCentroReqId = requestNomeCentro.getRequestId();
+                            Map<String, String> paramsReqNomeCentro = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
+                            if(paramsReqNomeCentro!= null){
+                                paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
+                                paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
+                                paramsReqNomeCentro.replace(RequestFactory.condKey, "centroid");
+                                paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getIdCentro());
+                            }
+                            Request requestNomeCentro = null;
+                            try{
+                                requestNomeCentro = RequestFactory
+                                        .buildRequest(
+                                                client.getClientId(),
+                                                ServerInterface.RequestType.selectObjJoinWithCond,
+                                                ServerInterface.Tables.PARAM_CLIMATICO,
+                                                paramsReqNomeCentro
+                                        );
+
+                            }catch(MalformedRequestException e){
+                                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                                e.printStackTrace();
+                                return;
+
+                            }
+
                             client.addRequest(requestDenominazione);
                             client.addRequest(requestNomeCentro);
 
-                            Response respDenom = client.getResponse(denomReqId);
-                            Response respNomeCentro = client.getResponse(nomeCentroReqId);
+                            Response respDenom = null;
+                            Response respNomeCentro = null;
+                            if(requestDenominazione != null && requestNomeCentro != null){
+                                respDenom = client.getResponse(requestDenominazione.getRequestId());
+                                respNomeCentro = client.getResponse(requestNomeCentro.getRequestId());
+
+                            }
+
+                            if(respDenom == null || respNomeCentro == null){
+                                new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
+                                return;
+                            }
 
                             String nomeArea = "";
                             String nomeCentro = "";
