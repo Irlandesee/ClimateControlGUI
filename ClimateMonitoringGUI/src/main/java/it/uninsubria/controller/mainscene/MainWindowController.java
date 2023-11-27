@@ -290,7 +290,7 @@ public class MainWindowController{
                              * centroid: String
                              */
                             Map<String, String> paramsReqNomeCentro = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                            if(paramsReqNomeCentro!= null){
+                            if(paramsReqNomeCentro != null){
                                 paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
                                 paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
                                 paramsReqNomeCentro.replace(RequestFactory.condKey, "centroid");
@@ -388,10 +388,44 @@ public class MainWindowController{
 
                     System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
-                    List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", a.getAreaid());
+                    Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    if(requestParams != null){
+                        requestParams.replace(RequestFactory.condKey, "areaid");
+                        requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
+                    }
+                    Request req = null;
+                    try{
+                        req = RequestFactory.buildRequest(
+                                client.getClientId(),
+                                ServerInterface.RequestType.selectAllWithCond,
+                                ServerInterface.Tables.AREA_INTERESSE,
+                                requestParams);
+
+                    }catch(MalformedRequestException mre){
+                        new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                        mre.printStackTrace();
+                        return;
+                    }
+                    client.addRequest(req);
+
+                    //get response
+                    Response res = null;
+                    if(req != null){
+                        res = client.getResponse(req.getRequestId());
+                    }
+                    if(res == null){
+                        new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
+                        return;
+                    }
+                    List<ParametroClimatico> params = new LinkedList<ParametroClimatico>();
+                    if(res.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
+                            && res.getRespType() == ServerInterface.ResponseType.List){
+                        params = (List<ParametroClimatico>)res.getResult();
+                    }
+
                     try{
                         Stage aiDialogStage = new Stage();
-                        AiDialog aiDialogController = new AiDialog(aiDialogStage, queryHandler, a, params);
+                        AiDialog aiDialogController = new AiDialog(aiDialogStage, client, a, params);
 
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
 

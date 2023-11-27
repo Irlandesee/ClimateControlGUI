@@ -1,7 +1,13 @@
 package it.uninsubria.controller.dialog;
 
 import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.clientCm.Client;
+import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.request.MalformedRequestException;
+import it.uninsubria.request.Request;
+import it.uninsubria.response.Response;
+import it.uninsubria.servercm.ServerInterface;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,6 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Map;
 
 public class AiDialog {
 
@@ -26,12 +33,13 @@ public class AiDialog {
 
 
     public TableView paramClimaticiTableView;
-    private final QueryHandler queryHandler;
-    public AiDialog(Stage stage, QueryHandler queryHandler, AreaInteresse ai, List<ParametroClimatico> parameters){
+    private final Client client;
+    //private final QueryHandler queryHandler;
+    public AiDialog(Stage stage, Client client, AreaInteresse ai, List<ParametroClimatico> parameters){
         this.stage = stage;
         this.ai = ai;
         this.parameters = parameters;
-        this.queryHandler = queryHandler;
+        this.client = client;
     }
 
     @FXML
@@ -67,9 +75,31 @@ public class AiDialog {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     ParametroClimatico pcSelected = (ParametroClimatico) row.getItem();
                     String centroId = pcSelected.getIdCentro();
-                    String denomCentro = queryHandler
-                            .selectObjectWithCond("nomecentro", QueryHandler.Tables.CENTRO_MONITORAGGIO, "centroid", centroId)
-                            .get(0);
+                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+                    if(params != null){
+                        params.replace(RequestFactory.objectKey, "nomecentro");
+                        params.replace(RequestFactory.condKey, "centroid");
+                        params.replace(RequestFactory.fieldKey, centroId);
+                    }
+                    Request request = null;
+                    try{
+                        request = RequestFactory.buildRequest(client.getClientId(),
+                                ServerInterface.RequestType.selectObjWithCond,
+                                ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                                params);
+                    }catch(MalformedRequestException mre){
+                        new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                        mre.printStackTrace();
+                        return;
+                    }
+                    client.addRequest(request);
+
+                    Response res = client.getResponse(request.getRequestId());
+                    String denomCentro = "";
+                    if(res.getRespType() == ServerInterface.ResponseType.Object){
+                        denomCentro = res.getResult().toString();
+                    }
+
                     System.out.println("Aumento dimensioni");
                     if(stage.getWidth() < MAX_WINDOW_SIZE) stage.setWidth(MAX_WINDOW_SIZE);
 
