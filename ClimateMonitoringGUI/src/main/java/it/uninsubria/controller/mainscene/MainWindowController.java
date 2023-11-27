@@ -30,13 +30,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.http.protocol.RequestUserAgent;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class MainWindowController{
     public Button buttonRicercaAreaInteresse;
@@ -443,18 +441,53 @@ public class MainWindowController{
     }
 
     private void showAreeInserite(){
-        List<AreaInteresse> res = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
-        prepTableAreaInteresse();
-        res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+        Request request = null;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    new HashMap<>());//select all does not need parameters
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(request);
+        //get response
+        Response response = client.getResponse(request.getRequestId());
+        if(response.getRespType() == ServerInterface.ResponseType.List
+                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
+            List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
+            prepTableAreaInteresse();
+            res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+        }
     }
 
     private void ricercaAreaPerDenom(){
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "denominazione", denom);
+            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+            params.replace(RequestFactory.condKey, "denominazione");
+            params.replace(RequestFactory.fieldKey, denom);
+            Request request = null;
+            try{
+                request = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.selectAllWithCond,
+                        ServerInterface.Tables.AREA_INTERESSE,
+                        params);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                mre.printStackTrace();
+                return;
+            }
+            client.addRequest(request);
+            Response response = client.getResponse(request.getRequestId());
+            List<AreaInteresse> l = (List<AreaInteresse>) response.getResult();
             //res.forEach(System.out::println);
-            res.forEach((areaInteresse -> {
+            l.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
             }));
         }
@@ -467,9 +500,31 @@ public class MainWindowController{
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            List<AreaInteresse> res = queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "stato", stato);
-            res.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
-            res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+            params.replace(RequestFactory.condKey, "stato");
+            params.replace(RequestFactory.fieldKey, stato);
+            Request request = null;
+            try{
+                request = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.selectAllWithCond,
+                        ServerInterface.Tables.AREA_INTERESSE,
+                        params);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                mre.printStackTrace();
+                return;
+            }
+
+            client.addRequest(request);
+            Response response = client.getResponse(request.getRequestId());
+
+            if(response.getRespType() == ServerInterface.ResponseType.List &&
+                response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
+                List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
+                queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
+                queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+            }
         }else{
             statoAlert.showAndWait();
         }
@@ -494,7 +549,6 @@ public class MainWindowController{
         return earthRadius * c;
     }
 
-    //TODO
     private void ricercaPerCoord(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
