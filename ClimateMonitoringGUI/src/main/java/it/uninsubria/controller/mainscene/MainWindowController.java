@@ -883,6 +883,8 @@ public class MainWindowController{
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
                         Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                        reqAiParams.replace(RequestFactory.condKey, "areaid");
+                        reqAiParams.replace(RequestFactory.fieldKey, areaId);
                         Request requestAi;
                         try{
                             requestAi = RequestFactory.buildRequest(
@@ -924,7 +926,26 @@ public class MainWindowController{
     }
 
     public boolean onExecuteLoginQuery(String userID, String password){
-        Operatore o = .executeLogin(userID, password);
+        Map<String, String> loginParams = RequestFactory.buildParams(ServerInterface.RequestType.executeLogin);
+        loginParams.replace(RequestFactory.userKey, userID);
+        loginParams.replace(RequestFactory.passwordKey, password);
+
+        Request loginRequest;
+        try{
+            loginRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.executeLogin,
+                    ServerInterface.Tables.OPERATORE,
+                    loginParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return false;
+        }
+        client.addRequest(loginRequest);
+        Response response = client.getResponse(loginRequest.getRequestId());
+        Operatore o = (Operatore) response.getResult();
         if(o != null){
             mainWindowStage.close();
             return true;
