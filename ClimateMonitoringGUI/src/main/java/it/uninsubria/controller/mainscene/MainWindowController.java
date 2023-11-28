@@ -560,7 +560,27 @@ public class MainWindowController{
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
 
-            List<AreaInteresse> areeInteresse = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
+            Request request = null;
+            try{
+                request = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.selectAll,
+                        ServerInterface.Tables.AREA_INTERESSE,
+                        null);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                mre.printStackTrace();
+                return;
+            }
+            client.addRequest(request);
+            List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
+            Response response = client.getResponse(request.getRequestId());
+            if(response.getRespType() == ServerInterface.ResponseType.List
+                    && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
+                areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
+
+            }
+
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
                 float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
@@ -634,13 +654,38 @@ public class MainWindowController{
             return;
         }
         System.out.println("Creating chart for" + nomeArea);
-        String areaid = queryHandler
-                .selectObjectWithCond("areaid", QueryHandler.Tables.AREA_INTERESSE, "denominazione", nomeArea)
-                .get(0);
-        System.out.println("areaid ->" + areaid);
+
+        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        if(params == null){return;}
+        params.replace(RequestFactory.objectKey, "areaid");
+        params.replace(RequestFactory.condKey, "denominazione");
+        params.replace(RequestFactory.fieldKey, nomeArea);
+        Request request = null;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    params
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(request);
+        if(request == null){return;}
+        Response response = client.getResponse(request.getRequestId());
+        String areaId = "";
+        if(response.getRespType() == ServerInterface.ResponseType.Object
+                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
+            areaId = response.getResult().toString();
+        }
+
+        System.out.println("areaid ->" + areaId);
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
-            fxmlLoader.setController(new GraphDialog(queryHandler, areaid));
+            fxmlLoader.setController(new GraphDialog(client, areaId));
             Stage chartStage = new Stage();
             Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
             chartStage.setScene(scene);
@@ -678,11 +723,47 @@ public class MainWindowController{
             if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
                 this.areaInteresseAlert.showAndWait();
             }else{
-                String areaInteresseId = queryHandler
-                        .selectObjectWithCond("areaid", QueryHandler.Tables.AREA_INTERESSE, "denominazione", denomAiCercata)
-                        .get(0);
-                List<ParametroClimatico> parametriClimatici = queryHandler
-                        .selectAllWithCond(QueryHandler.Tables.PARAM_CLIMATICO, "areaid", areaInteresseId);
+                Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+                reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
+                reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
+                reqAreaIdParams.replace(RequestFactory.fieldKey, denomAiCercata);
+                Request requestAreaId = null;
+                try{
+                    requestAreaId = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectObjWithCond,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            reqAreaIdParams);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    mre.printStackTrace();
+                    return;
+                }
+                client.addRequest(requestAreaId);
+                Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
+                String areaInteresseId = resAreaId.toString();
+
+                Map<String, String> reqParamClimatici = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                reqParamClimatici.replace(RequestFactory.condKey, "areaid");
+                reqParamClimatici.replace(RequestFactory.fieldKey, areaInteresseId);
+                Request requestParamClimatici = null;
+                try{
+                    requestParamClimatici = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.PARAM_CLIMATICO,
+                            reqParamClimatici
+                    );
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    mre.printStackTrace();
+                    return;
+                }
+                client.addRequest(requestParamClimatici);
+                Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
+
+
+                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
                 tableView
                         .getItems()
                         .clear();
@@ -703,18 +784,49 @@ public class MainWindowController{
             if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
                 this.centroMonitoraggioAlert.showAndWait();
             }else{
-                String centroId = queryHandler
-                        .selectObjectJoinWithCond("centroid",
-                                QueryHandler.Tables.PARAM_CLIMATICO,
-                                QueryHandler.Tables.CENTRO_MONITORAGGIO,
-                                "nomecentro",
-                                denomCmCercato)
-                        .get(0);
-                List<ParametroClimatico> parametriClimatici = queryHandler
-                        .selectAllWithCond(
-                                QueryHandler.Tables.PARAM_CLIMATICO,
-                                "centroid",
-                                centroId);
+                Map<String, String> requestCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
+                requestCentroIdParams.replace(RequestFactory.objectKey, "centroid");
+                requestCentroIdParams.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
+                requestCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
+                requestCentroIdParams.replace(RequestFactory.objectKey, denomCmCercato);
+                Request requestCentroId;
+                try{
+                    requestCentroId = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectObjJoinWithCond,
+                            ServerInterface.Tables.PARAM_CLIMATICO,
+                            requestCentroIdParams);
+
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    mre.printStackTrace();
+                    return;
+
+                }
+                client.addRequest(requestCentroId);
+                Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
+                String centroId = responseCentroId.getResult().toString();
+
+                Map<String, String> requestParametriClimaticiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                requestParametriClimaticiParams.replace(RequestFactory.condKey, "centroid");
+                requestParametriClimaticiParams.replace(RequestFactory.objectKey, centroId);
+
+                Request requestParametriClimatici;
+                try{
+                    requestParametriClimatici = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.PARAM_CLIMATICO,
+                            requestParametriClimaticiParams);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    mre.printStackTrace();
+                    return;
+                }
+                client.addRequest(requestParametriClimatici);
+                Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
+                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
+
                 tableView
                         .getItems()
                         .clear();
@@ -737,9 +849,22 @@ public class MainWindowController{
         tableView.getColumns().clear();
         tableView.getItems().clear();
         //tableView.setRowFactory(null);
+        Request requestCentro = null;
+        try{
+            requestCentro = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    null);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage());
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(requestCentro);
+        Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
 
-        List<CentroMonitoraggio> centriMonitoraggio = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
-
+        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
         TableColumn denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
         tableView.getColumns().add(denomCentro);
@@ -757,7 +882,23 @@ public class MainWindowController{
                     List<String> areeId = c.getAreeInteresseIdAssociate();
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
-                        AreaInteresse ai = (AreaInteresse) queryHandler.selectAllWithCond(QueryHandler.Tables.AREA_INTERESSE, "areaid", areaId).get(0);
+                        Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                        Request requestAi;
+                        try{
+                            requestAi = RequestFactory.buildRequest(
+                                    client.getClientId(),
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    ServerInterface.Tables.AREA_INTERESSE,
+                                    reqAiParams
+                            );
+                        }catch(MalformedRequestException mre){
+                            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                            mre.printStackTrace();
+                            return;
+                        }
+                        client.addRequest(requestAi);
+                        Response responseAi = client.getResponse(requestAi.getRequestId());
+                        AreaInteresse ai = (AreaInteresse) responseAi.getResult();
                         areeInteresseAssociateAlCentro.add(ai.getDenominazione());
                     }
                     try{
