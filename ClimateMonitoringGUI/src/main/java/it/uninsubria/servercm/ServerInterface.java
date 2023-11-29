@@ -28,7 +28,9 @@ public interface ServerInterface {
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond"),
         executeLogin("executeLogin"),
-        insert("insert");
+        insert("insert"),
+        requestSignUp("requestSignUp"),
+        executeSignUp("executeSignUp");
         public final String label;
         private RequestType(String label){
             this.label = label;
@@ -43,7 +45,11 @@ public interface ServerInterface {
         insertOk("insertOk"),
         insertKo("insertKo"),
         loginOk("loginOk"),
-        loginKo("loginKo");
+        loginKo("loginKo"),
+        requestSignUpOk("requestSignUpOk"),
+        requestSignUpKo("requestSignUpKo"),
+        executeSignUpOk("executeSignUpOk"),
+        executeSignUpKo("executeSignUpKo");
         public final String label;
         private ResponseType(String label){this.label = label;}
     }

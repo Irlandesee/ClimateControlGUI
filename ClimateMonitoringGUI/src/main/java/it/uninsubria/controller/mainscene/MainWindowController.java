@@ -14,6 +14,7 @@ import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
+import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
@@ -954,15 +955,71 @@ public class MainWindowController{
         return false;
     }
 
+    private boolean requestSignUp(String codFisc, String email){
+        Request request;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.OP_AUTORIZZATO,
+                    null);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return false;
+        }
+        client.addRequest(request);
+        Response response = client.getResponse(request.getClientId());
+        List<OperatoreAutorizzato> operatoriAutorizzati = (List<OperatoreAutorizzato>) response.getResult();
+        for(OperatoreAutorizzato op : operatoriAutorizzati){
+            if(op.getEmail().equals(email) && op.getCodFiscale().equals(codFisc))
+                return true;
+        }
+        return false;
+    }
+
 
     public boolean onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
-        if(!queryHandler.requestSignUp(codFisc, email)){
+        if(!requestSignUp(codFisc, email)){
             System.out.println("Operatore inesistente");
             return false;
         }else{//
-            String centroID = queryHandler.selectObjectWithCond("centroid", QueryHandler.Tables.CENTRO_MONITORAGGIO, "comune", centroAfferenza)
-                    .get(0);
-            return queryHandler.executeSignUp(nomeOp, cognomeOp, codFisc, userID, email, password, centroID);
+            Map<String, String> reqCmIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+            reqCmIdParams.replace(RequestFactory.objectKey, "centroid");
+            reqCmIdParams.replace(RequestFactory.condKey, "comune");
+            reqCmIdParams.replace(RequestFactory.fieldKey, centroAfferenza);
+            Request requestCentroId;
+            try{
+                requestCentroId = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO, reqCmIdParams);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                mre.printStackTrace();
+                return false;
+            }
+            client.addRequest(requestCentroId);
+            Response responseCmId = client.getResponse(requestCentroId.getRequestId());
+            String centroID = responseCmId.getResult().toString();
+
+            Map<String, String> requestSignUpParams = RequestFactory.buildParams(ServerInterface.RequestType.executeSignUp);
+            Request signUpRequest;
+            try{
+                signUpRequest = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.executeSignUp,
+                        ServerInterface.Tables.OPERATORE,
+                        requestSignUpParams);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                mre.printStackTrace();
+                return false;
+            }
+
+            client.addRequest(signUpRequest);
+            Response responseSignUp = client.getResponse(signUpRequest.getRequestId());
+            return (boolean) responseSignUp.getResult();
         }
     }
 

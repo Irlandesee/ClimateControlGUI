@@ -17,6 +17,11 @@ public class RequestFactory {
     public static final String joinKey = "joinTable";
     public static final String userKey = "user";
     public static final String passwordKey = "password";
+    public static final String nomeOpKey = "nomeOp";
+    public static final String cognomeOpKey = "cognomeOp";
+    public static final String codFiscOpKey = "codFiscOp";
+    public static final String emailOpKey = "emailOp";
+    public static final String centroAfferenzaKey = "centroAfferenzaOp";
     public static final String parameterIdKey = "parameterId";
     public static final String centroIdKey = "centroId";
     public static final String areaIdKey = "areaId";
