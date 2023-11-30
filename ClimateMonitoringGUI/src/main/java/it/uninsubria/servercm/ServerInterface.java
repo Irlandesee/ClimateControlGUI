@@ -64,6 +64,9 @@ public interface ServerInterface {
     int insertPcParamsLength = 12;
     int insertCmParamsLength = 4;
     int insertOpParamsLength = 7;
+    int insertAiParamsLength = 5;
+    int insertNpcParamsLength = 7;
+
     //int insertAiParamsLength ;
 
     String QUIT = "QUIT";

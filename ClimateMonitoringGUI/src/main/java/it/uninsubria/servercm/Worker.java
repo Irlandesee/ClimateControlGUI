@@ -117,7 +117,7 @@ public class Worker extends Thread{
                         if(request.getParams().size() < ServerInterface.insertNpcParamsLength){
                             res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
                         }else{
-                            res = insertNotaParametro(request);
+                            res = insertNotaParametroClimatico(request);
                         }
                     }
                     case CENTRO_MONITORAGGIO -> {
@@ -135,6 +135,7 @@ public class Worker extends Thread{
         System.out.printf("Worker %s saving request %s in server's queue\n", this.workerId, request.getRequestId());
         server.addResponse(res, this.workerId);
     }
+
 
 
     public ResultSet prepAndExecuteStatement(String query, String arg) throws SQLException{
@@ -768,17 +769,25 @@ public class Worker extends Thread{
                 false);
     }
 
-    public Response insertCentroMonitoraggio(String nomeCentro, String comune, String stato, List<String> idAreeInteresseAssociate){
+    public Response insertCentroMonitoraggio(Request request){
+        Map<String, String> params = request.getParams();
         String centroId = IDGenerator.generateID();
-        int idListSize = idAreeInteresseAssociate.size();
+        //String,String,String,String
+        String tmp =  params.get(RequestFactory.listAiKey);
+        String[] idAreeInteresseAssociate = tmp.split(",");
+        int idListSize = idAreeInteresseAssociate.length;
         StringBuilder ids = new StringBuilder();
         for(int i = 0; i < idListSize; i++){
-            ids.append(idAreeInteresseAssociate.get(i));
+            ids.append(idAreeInteresseAssociate[i]);
             if(i < idListSize - 1)
                 ids.append(",");
         }
         String query = "insert into centro_monitoraggio(centroid, nomecentro, comune, country, aree_interesse_ids) values ('%s', '%s', '%s', '%s', '{%s}')"
-                .formatted(centroId, nomeCentro, comune, stato, ids.toString());
+                .formatted(centroId,
+                        params.get(RequestFactory.nomeCentroKey),
+                        params.get(RequestFactory.comuneCentroKey),
+                        params.get(RequestFactory.countryCentroKey),
+                        ids.toString());
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
             if(res == 1){
@@ -801,23 +810,34 @@ public class Worker extends Thread{
     }
 
     //Non inserisci notaid
-    public Response insertParametroClimatico(ParametroClimatico pc){
+    public Response insertParametroClimatico(Request request){
+        Map<String, String> params = request.getParams();
+        String parameterId = params.get(RequestFactory.parameterIdKey);
+        String centroId = params.get(RequestFactory.centroIdKey);
+        String areaId = params.get(RequestFactory.pubDateKey);
+        String notaId = params.get(RequestFactory.notaIdKey);
+        String valoreVento = params.get(RequestFactory.valoreVentoKey);
+        String valoreUmidita = params.get(RequestFactory.valoreUmiditaKey);
+        String valorePressione = params.get(RequestFactory.valorePressioneKey);
+        String valoreTemperatura= params.get(RequestFactory.valoreTemperaturaKey);
+        String valorePrecipitazioni = params.get(RequestFactory.valorePrecipitazioniKey);
+        String valoreAltGhiacciai = params.get(RequestFactory.valoreAltGhiacciaiKey);
+        String valoreMassaGhiacciai = params.get(RequestFactory.valoreMassaGhiacciaiKey);
         String query =
                 "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
                         "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
         query = query.formatted(
-                pc.getParameterId(),
-                pc.getIdCentro(),
-                pc.getAreaInteresseId(),
-                pc.getPubDate(),
-                //pc.getNotaId(),
-                pc.getVentoValue(),
-                pc.getUmiditaValue(),
-                pc.getPressioneValue(),
-                pc.getTemperaturaValue(),
-                pc.getPrecipitazioniValue(),
-                pc.getAltitudineValue(),
-                pc.getMassaValue());
+                parameterId,
+                centroId,
+                areaId,
+                notaId,
+                valoreVento,
+                valoreUmidita,
+                valorePressione,
+                valoreTemperatura,
+                valorePrecipitazioni,
+                valoreAltGhiacciai,
+                valoreMassaGhiacciai);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
             if(res == 1)
@@ -836,6 +856,76 @@ public class Worker extends Thread{
                 ResponseType.insertKo,
                 Tables.PARAM_CLIMATICO,
                 false);
+    }
+
+
+    private Response insertAreaInteresse(Request request) {
+        Map<String, String> params = request.getParams();
+        String areaId = params.get(RequestFactory.areaIdKey);
+        String denominazione = params.get(RequestFactory.denominazioneAreaKey);
+        String stato = params.get(RequestFactory.statoAreaKey);
+        String latitudine = params.get(RequestFactory.latitudineKey);
+        String longitudine = params.get(RequestFactory.longitudineKey);
+        String query = "insert into area_interesse(areaid, denominazione, stato, latitudine, longitudine) values ('%s', '%s', '%s', '%s', '%s')";
+        query = query.formatted(areaId, denominazione, stato, latitudine, longitudine);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1){
+                return new Response(
+                        clientId,
+                        requestId,
+                        responseId,
+                        ResponseType.insertOk,
+                        Tables.AREA_INTERESSE,
+                        true
+                );
+            }
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return new Response(
+                clientId,
+                requestId,
+                responseId,
+                ResponseType.insertKo,
+                Tables.AREA_INTERESSE,
+                false
+        );
+    }
+
+    private Response insertNotaParametroClimatico(Request request){
+        Map<String, String> params = request.getParams();
+        String notaId = params.get(RequestFactory.notaIdKey);
+        String notaVento = params.get(RequestFactory.notaVentoKey);
+        String notaUmidita = params.get(RequestFactory.notaUmidita);
+        String notaPressione = params.get(RequestFactory.notaPressione);
+        String notaTemperatura = params.get(RequestFactory.notaTemperatura);
+        String notaPrecipitazioni = params.get(RequestFactory.notaPrecipitazioni);
+        String notaAltGhiacciai = params.get(RequestFactory.notaAltGhiacciai);
+        String notaMassaGhiacciai = params.get(RequestFactory.notaMassaGhiacciai);
+
+        String query = "insert into nota_parametro_climatico(notaid, nota_vento, nota_umidita, nota_pressione, nota_temperatura, nota_precipitazioni, nota_alt_ghiacciai, nota_massa_ghiacciai)" +
+                "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+        query = query.formatted(notaId, notaVento, notaUmidita, notaPressione, notaTemperatura, notaPrecipitazioni, notaAltGhiacciai, notaMassaGhiacciai);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1){
+                return new Response(
+                        clientId,
+                        requestId,
+                        responseId,
+                        ResponseType.insertOk,
+                        Tables.NOTA_PARAM_CLIMATICO,
+                        true
+                );
+            }
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return new Response(
+                clientId,
+                requestId,
+                responseId,
+                ResponseType.insertKo,
+                Tables.NOTA_PARAM_CLIMATICO,
+                false
+        );
     }
 
 

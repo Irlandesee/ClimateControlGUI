@@ -34,6 +34,23 @@ public class RequestFactory {
     public static final String valorePrecipitazioniKey = "valore_precipitazioni";
     public static final String valoreAltGhiacciaiKey = "valore_alt_ghiacciai";
     public static final String valoreMassaGhiacciaiKey = "valore_massa_ghiacciai";
+
+    public static final String nomeCentroKey = "nomeCentro";
+    public static final String comuneCentroKey = "comuneCentro";
+    public static final String countryCentroKey = "countryCentro";
+    public static final String listAiKey = "listAi";
+    public static final String denominazioneAreaKey = "denominazioneArea";
+    public static final String statoAreaKey = "statoArea";
+    public static final String latitudineKey = "latitudine";
+    public static final String longitudineKey = "longitudine";
+    public static final String notaVentoKey = "notaVento";
+    public static final String notaUmidita = "notaUmidita";
+    public static final String notaPressione = "notaPressione";
+    public static final String notaTemperatura = "notaTemperatura";
+    public static final String notaPrecipitazioni = "notaPrecipitazioni";
+    public static final String notaAltGhiacciai = "notaAltGhiacciai";
+    public static final String notaMassaGhiacciai = "notaMassaGhiacciai";
+
     public static Request buildRequest(String clientId, ServerInterface.RequestType requestType, ServerInterface.Tables table, Map<String, String> params) throws MalformedRequestException{
         switch(requestType){
             case selectAll -> {
@@ -70,8 +87,11 @@ public class RequestFactory {
             case insert -> {
                 switch (table){
                     case AREA_INTERESSE -> {
-                        //TODO
-                        return null;
+                        if(params.keySet().size() < ServerInterface.insertAiParamsLength){
+                            throw new MalformedRequestException(paramLengthError);
+                        }else{
+                            return new Request(clientId, requestType, table, params);
+                        }
                     }
                     case CENTRO_MONITORAGGIO -> {
                         if(params.keySet().size() < ServerInterface.insertCmParamsLength){
@@ -100,6 +120,60 @@ public class RequestFactory {
         throw new MalformedRequestException(undefinedRequestType);
     }
 
+    public static Map<String, String> buildInsertParams(ServerInterface.Tables table){
+        Map<String, String> params = new HashMap<String, String>();
+        switch(table){
+            case AREA_INTERESSE -> {
+                params.put(areaIdKey, "");
+                params.put(denominazioneAreaKey, "");
+                params.put(statoAreaKey, "");
+                params.put(latitudineKey, "");
+                params.put(longitudineKey, "");
+            }
+            case PARAM_CLIMATICO -> {
+                params.put(parameterIdKey, "");
+                params.put(centroIdKey, "");
+                params.put(areaIdKey, "");
+                params.put(pubDateKey, "");
+                params.put(notaIdKey, "");
+                params.put(valoreVentoKey, "");
+                params.put(valoreUmiditaKey, "");
+                params.put(valorePressioneKey, "");
+                params.put(valoreTemperaturaKey, "");
+                params.put(valorePrecipitazioniKey, "");
+                params.put(valoreAltGhiacciaiKey, "");
+                params.put(valoreMassaGhiacciaiKey, "");
+            }
+            case CENTRO_MONITORAGGIO -> {
+                params.put(centroIdKey, "");
+                params.put(nomeCentroKey, "");
+                params.put(comuneCentroKey, "");
+                params.put(countryCentroKey, "");
+                params.put(listAiKey, "");
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                params.put(notaIdKey, "");
+                params.put(notaVentoKey, "");
+                params.put(notaUmidita, "");
+                params.put(notaPressione, "");
+                params.put(notaPrecipitazioni, "");
+                params.put(notaAltGhiacciai, "");
+                params.put(notaMassaGhiacciai, "");
+            }
+            case OPERATORE -> {
+                params.put(nomeOpKey, "");
+                params.put(cognomeOpKey, "");
+                params.put(codFiscOpKey, "");
+                params.put(emailOpKey, "");
+                params.put(userKey, "");
+                params.put(passwordKey, "");
+                params.put(centroAfferenzaKey, "");
+            }
+            default -> {return null;}
+        }
+        return params;
+    }
+
     public static Map<String, String> buildParams(ServerInterface.RequestType reqType){
         Map<String, String> params = new HashMap<String, String>();
         switch(reqType){
@@ -124,20 +198,6 @@ public class RequestFactory {
             case executeLogin -> {
                 params.put("user", "");
                 params.put("password", "");
-            }
-            case insert -> {
-                params.put("parameterid", "");
-                params.put("centroid", "");
-                params.put("areaid", "");
-                params.put("pubdate", "");
-                params.put("notaid", "");
-                params.put("valore_vento", "");
-                params.put("valore_umidita", "");
-                params.put("valore_pressione", "");
-                params.put("valore_temperatura", "");
-                params.put("valore_precipitazioni", "");
-                params.put("valore_alt_ghiacciai", "");
-                params.put("valore_massa_ghiacciai", "");
             }
             default -> {
                 return null;
