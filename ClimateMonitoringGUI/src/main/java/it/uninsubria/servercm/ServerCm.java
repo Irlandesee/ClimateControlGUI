@@ -124,13 +124,6 @@ public class ServerCm {
             while(true){
                 Socket sock = serv.ss.accept();
                 serv.logger.info("New connection accepted");
-                /**
-                Worker w = new Worker(
-                        IDGenerator.generateID(),
-                        serv.dbUrl,
-                        serv.props,
-                        serv);
-                 **/
                 ServerSlave slave = new ServerSlave(sock, serv, i, serv.props);
                 i++;
                 try{

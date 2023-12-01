@@ -394,22 +394,26 @@ public class Worker extends Thread{
     }
 
     private List<AreaInteresse> selectAllAiCond(String fieldCond, String cond){
-        String query = "select * from area_interesse where " + fieldCond + " = ?";
-        LinkedList<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
-        try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
+        String query = "select * from area_interesse where %s = '%s'".formatted(fieldCond, cond);
+        System.out.println(query);
+        List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 AreaInteresse ai = extractAreaInteresse(rSet);
                 areeInteresse.add(ai);
             }
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+        areeInteresse.forEach(System.out::println);
         return areeInteresse;
     }
 
     private List<ParametroClimatico> selectAllPcCond(String fieldCond, String cond){
-        String query = "select * from parametro_climatico where " + fieldCond + " = ?";
+        String query = "select * from parametro_climatico where %s = '%s'".formatted(fieldCond, cond);
         System.out.println(query);
         LinkedList<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
-        try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 ParametroClimatico cp = extractParametroClimatico(rSet);
                 parametriClimatici.add(cp);
@@ -419,10 +423,10 @@ public class Worker extends Thread{
     }
 
     private List<NotaParametro> selectAllNotaCond(String fieldCond, String cond){
-        String query = "select * from nota_parametro_climatico where %s = '%s'";
-        query = query.formatted(fieldCond, cond);
+        String query = "select * from nota_parametro_climatico where %s = '%s'".formatted(fieldCond, cond);
         List<NotaParametro> resultList = new LinkedList<NotaParametro>();
-        try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 NotaParametro np = extractNota(rSet);
                 resultList.add(np);
@@ -432,9 +436,10 @@ public class Worker extends Thread{
     }
 
     private List<Operatore> selectAllOpCond(String fieldCond, String cond){
-        String query = "select * from operatore where " + fieldCond + " = ?";
+        String query = "select * from operatore where %s = '%s'".formatted(fieldCond, cond);
         LinkedList<Operatore> operatori = new LinkedList<Operatore>();
-        try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 Operatore op = extractOperatore(rSet);
                 operatori.add(op);
@@ -444,9 +449,10 @@ public class Worker extends Thread{
     }
 
     public List<OperatoreAutorizzato> selectAllAuthOpCond(String fieldCond, String cond){
-        String query = "select * from operatore_autorizzati where " + fieldCond + " = ?";
+        String query = "select * from operatore_autorizzati where %s = '%s'".formatted(fieldCond, cond);
         LinkedList<OperatoreAutorizzato> opAutorizzati = new LinkedList<OperatoreAutorizzato>();
-        try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 OperatoreAutorizzato authOp = extractAuthOp(rSet);
                 opAutorizzati.add(authOp);
@@ -460,31 +466,31 @@ public class Worker extends Thread{
         System.out.println("executing request" + r);
         switch(r.getTable()){
             case CITY -> {
-                List<City> res = selectAllCityCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<City> res = selectAllCityCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case CENTRO_MONITORAGGIO -> {
-                List<CentroMonitoraggio> res = selectAllCmCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<CentroMonitoraggio> res = selectAllCmCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case AREA_INTERESSE -> {
-                List<AreaInteresse> res = selectAllAiCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<AreaInteresse> res = selectAllAiCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case PARAM_CLIMATICO -> {
-                List<ParametroClimatico> res = selectAllPcCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<ParametroClimatico> res = selectAllPcCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                List<NotaParametro> res = selectAllNotaCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<NotaParametro> res = selectAllNotaCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case OPERATORE -> {
-                List<Operatore> res = selectAllOpCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<Operatore> res = selectAllOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             case OP_AUTORIZZATO -> {
-                List<OperatoreAutorizzato> res = selectAllAuthOpCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);
+                List<OperatoreAutorizzato> res = selectAllAuthOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             default -> {

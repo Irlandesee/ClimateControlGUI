@@ -488,9 +488,8 @@ public class MainWindowController{
             }
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
-            List<AreaInteresse> l = (List<AreaInteresse>) response.getResult();
-            //res.forEach(System.out::println);
-            l.forEach((areaInteresse -> {
+            List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
+            areeInteresseRichieste.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
             }));
         }
