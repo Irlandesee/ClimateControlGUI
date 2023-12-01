@@ -44,13 +44,14 @@ public class ServerSlave extends Thread{
                 else if(cmd.equals(ServerInterface.NEXT)) {
                     Request req = (Request) inStream.readObject();
                     serv.addRequest(req, this.getName());
-                    //System.err.println("Adding request, size: " + serv.getRequestsQueueSize());
+                    System.err.println("Adding request, size: " + serv.getRequestsQueueSize());
                     try{
                         System.out.printf("%s waiting for worker to join\n", this.getName());
                         worker.join();
+                        System.out.println("worker joined");
                     }catch(InterruptedException ie){ie.printStackTrace();}
                     Response res = serv.getResponse(this.getName());
-                    //System.err.printf("Slave %d sending %s\n", slaveId, res);
+                    System.err.printf("Slave %d sending %s\n", slaveId, res);
                     outStream.writeObject(res);
                 }
                 else{

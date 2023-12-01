@@ -90,7 +90,7 @@ public class Client extends Thread{
 
     public void run(){
         logger.info("Client started");
-        while (getRunCondition()) {
+        while (true) {
             //wait for requests from the gui
             logger.info("waiting for a request");
             Request request = getRequest();
@@ -98,10 +98,12 @@ public class Client extends Thread{
             logger.info("Sending Request");
             clientProxy.sendRequest(request);
         }
+        /**
         logger.info("Client quitting, closing the socket");
         try{
             sock.close();
         }catch(IOException ioe){logger.info(ioe.getMessage());}
+         **/
 
     }
 

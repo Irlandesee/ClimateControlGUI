@@ -71,7 +71,6 @@ public class OperatoreViewController {
     private Alert cmAlert;
 
     private Properties props;
-    private QueryHandler queryHandler;
     private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     //private final String url = "jdbc:postgresql://localhost/postgres";
 
@@ -94,7 +93,6 @@ public class OperatoreViewController {
         props.setProperty("user", user);
         props.setProperty("password", password);
 
-        queryHandler = new QueryHandler(url, props);
 
     }
 
@@ -188,10 +186,12 @@ public class OperatoreViewController {
         tableView.getColumns().addAll(nomeColumn, comuneColumn, countryColumn);
 
         //populate the tableView
+        /**
         List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
         centriPresenti.forEach(centro -> {
             tableView.getItems().add(centro);
         });
+         **/
 
         //aree interesse?
         tableView.setRowFactory(tv -> {
@@ -205,9 +205,11 @@ public class OperatoreViewController {
                     LinkedList<String> nomiAree = new LinkedList<String>();
                     for(String id: cmAree){
                         //query the db to get the areas names
+                        /**
                         String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.Tables.AREA_INTERESSE, "areaid", id)
                                 .get(0);
                         nomiAree.add(denominazione);
+                         **/
                     }
                     //Create a new window containing the cms details
                     try {
@@ -290,12 +292,14 @@ public class OperatoreViewController {
             l.add(nome.trim());
 
         areaInteresseCMField.clear();
+        /**
         boolean res = queryHandler.executeInsertCentroMonitoraggio(nomeCentro, comuneCentro, statoCentro, l);
         if(res){
             System.out.println("CM inserito");
             new Alert(Alert.AlertType.CONFIRMATION).showAndWait();
             clearCMFields();
         }
+         **/
     }
 
     public void handleRegistraOperatore(ActionEvent actionEvent){

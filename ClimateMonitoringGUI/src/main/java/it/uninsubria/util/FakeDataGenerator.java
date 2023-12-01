@@ -23,14 +23,12 @@ import org.json.JSONObject;
 
 public class FakeDataGenerator{
 
-    private final QueryHandler queryHandler;
     private final LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
     private final LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
     private final LocalDate endDate = LocalDate.of(2022, 12, 31);
     private final String apiUrl = "https://api.random.org/json-rpc/4/invoke";
 
-    public FakeDataGenerator(QueryHandler queryHandler){
-        this.queryHandler = queryHandler;
+    public FakeDataGenerator(){
     }
 
     public List<String> getRandomStrings(int numberOfItems, int itemLength, String apiKey){
@@ -150,6 +148,7 @@ public class FakeDataGenerator{
         return setParamValues(pc);
     }
 
+    /**
     public List<ParametroClimatico> generateParamClimatici(int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
         List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
@@ -266,5 +265,6 @@ public class FakeDataGenerator{
         }
         return result;
     }
+     **/
 
 }

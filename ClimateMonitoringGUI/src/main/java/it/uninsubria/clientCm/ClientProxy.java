@@ -17,18 +17,24 @@ public class ClientProxy implements ServerInterface {
     private final Client client;
     private final Logger logger;
 
+    private ObjectInputStream inStream;
+    private ObjectOutputStream outStream;
+
+
     public ClientProxy(Client client, Socket sock, String proxyId){
         this.logger = Logger.getLogger("ClientProxy: "+proxyId);
         this.client = client;
         this.proxyId = proxyId;
         this.sock = sock;
+        try{
+            this.inStream = new ObjectInputStream(sock.getInputStream());
+            this.outStream = new ObjectOutputStream(sock.getOutputStream());
+        }catch(IOException ioe){ioe.printStackTrace();}
     }
 
     public void sendRequest(Request req){
         int result = -1;
         try{
-            ObjectOutputStream outStream = new ObjectOutputStream(sock.getOutputStream());
-            ObjectInputStream inStream = new ObjectInputStream(sock.getInputStream());
 
             //System.out.printf("Proxy %s sending id to server\n", this.proxyId);
             outStream.writeObject(ServerInterface.ID);
@@ -51,10 +57,20 @@ public class ClientProxy implements ServerInterface {
             client.addResponse(res);
             logger.info("Adding response to queue");
             //System.out.printf("Proxy %s quitting\n", proxyId);
-            outStream.writeObject(ServerInterface.QUIT);
+            //outStream.writeObject(ServerInterface.QUIT);
         }catch(IOException ioe){
             ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }
+
+    public void quit(){
+        try{
+            outStream.writeObject(ServerInterface.QUIT);
+            outStream.close();
+            inStream.close();
+        }catch(IOException ioe){ioe.printStackTrace();}
+    }
+
+
 
 }

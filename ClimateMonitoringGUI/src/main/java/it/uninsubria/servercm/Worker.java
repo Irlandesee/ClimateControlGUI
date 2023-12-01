@@ -3,7 +3,6 @@ import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.factories.ResponseFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.NotaParametro;
