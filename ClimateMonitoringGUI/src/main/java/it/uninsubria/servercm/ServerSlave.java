@@ -2,11 +2,13 @@ package it.uninsubria.servercm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerCm;
+import it.uninsubria.util.IDGenerator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ServerSlave extends Thread{
@@ -17,13 +19,13 @@ public class ServerSlave extends Thread{
     private Worker worker;
     private ObjectInputStream inStream;
     private ObjectOutputStream outStream;
+    private Properties props;
 
-
-    public ServerSlave(Socket sock, ServerCm serv, int slaveId, Worker w){
+    public ServerSlave(Socket sock, ServerCm serv, int slaveId, Properties props){
         this.sock = sock;
         this.serv = serv;
         this.slaveId = slaveId;
-        this.worker = w;
+        this.props = props;
         this.setName("Slave " +slaveId);
         try{
             outStream = new ObjectOutputStream(sock.getOutputStream());
@@ -45,6 +47,12 @@ public class ServerSlave extends Thread{
                     Request req = (Request) inStream.readObject();
                     serv.addRequest(req, this.getName());
                     System.err.println("Adding request, size: " + serv.getRequestsQueueSize());
+                    worker = new Worker(
+                            IDGenerator.generateID(),
+                            serv.getDbUrl(),
+                            props,
+                            serv);
+                    worker.start();
                     try{
                         System.out.printf("%s waiting for worker to join\n", this.getName());
                         worker.join();

@@ -36,7 +36,7 @@ public class ClientProxy implements ServerInterface {
         int result = -1;
         try{
 
-            //System.out.printf("Proxy %s sending id to server\n", this.proxyId);
+            System.out.printf("Proxy %s sending id to server\n", this.proxyId);
             outStream.writeObject(ServerInterface.ID);
             outStream.writeObject(proxyId);
             try{
@@ -44,7 +44,7 @@ public class ClientProxy implements ServerInterface {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }catch(InterruptedException ie){ie.printStackTrace();}
 
-            //System.out.printf("Proxy %s sending request to server\n", this.proxyId);
+            System.out.printf("Proxy %s sending request to server\n", this.proxyId);
             outStream.writeObject(ServerInterface.NEXT);
             outStream.writeObject(req);
             try{
@@ -52,7 +52,7 @@ public class ClientProxy implements ServerInterface {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }catch(InterruptedException ie){ie.printStackTrace();}
 
-            //System.out.printf("Proxy %s waiting for response from server\n", this.proxyId);
+            System.out.printf("Proxy %s waiting for response from server\n", this.proxyId);
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
             logger.info("Adding response to queue");

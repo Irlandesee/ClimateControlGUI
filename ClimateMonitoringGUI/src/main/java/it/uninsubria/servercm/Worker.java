@@ -457,6 +457,7 @@ public class Worker extends Thread{
 
     private Response selectAllWithCond(Request r){
         Map<String, String> params = r.getParams();
+        System.out.println("executing request" + r);
         switch(r.getTable()){
             case CITY -> {
                 List<City> res = selectAllCityCond(params.get(RequestFactory.condKey), RequestFactory.fieldKey);

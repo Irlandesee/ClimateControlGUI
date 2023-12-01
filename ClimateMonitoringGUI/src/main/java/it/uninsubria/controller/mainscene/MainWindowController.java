@@ -480,6 +480,7 @@ public class MainWindowController{
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
+                System.out.println("Build request: " + request);
             }catch(MalformedRequestException mre){
                 new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                 mre.printStackTrace();

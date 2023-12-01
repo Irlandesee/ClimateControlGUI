@@ -112,6 +112,10 @@ public class ServerCm {
         return this.workers.size();
     }
 
+    public String getDbUrl(){
+        return this.dbUrl;
+    }
+
     public static void main(String[] args){
         int i = 0;
         ServerCm serv = new ServerCm();
@@ -120,18 +124,19 @@ public class ServerCm {
             while(true){
                 Socket sock = serv.ss.accept();
                 serv.logger.info("New connection accepted");
+                /**
                 Worker w = new Worker(
                         IDGenerator.generateID(),
                         serv.dbUrl,
                         serv.props,
-                        serv);;
-                ServerSlave slave = new ServerSlave(sock, serv, i, w);
+                        serv);
+                 **/
+                ServerSlave slave = new ServerSlave(sock, serv, i, serv.props);
                 i++;
                 try{
                     serv.slaves.put(slave);
                     System.out.printf("%s starting new worker\n", serv.name);
                     //serv.workers.put(w);
-                    w.start();
                 }catch(InterruptedException ie){ie.printStackTrace();}
             }
         }catch(IOException ioe){ioe.printStackTrace();}
