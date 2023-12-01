@@ -393,12 +393,12 @@ public class MainWindowController{
                         requestParams.replace(RequestFactory.condKey, "areaid");
                         requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
                     }
-                    Request req = null;
+                    Request req;
                     try{
                         req = RequestFactory.buildRequest(
                                 client.getClientId(),
                                 ServerInterface.RequestType.selectAllWithCond,
-                                ServerInterface.Tables.AREA_INTERESSE,
+                                ServerInterface.Tables.PARAM_CLIMATICO,
                                 requestParams);
 
                     }catch(MalformedRequestException mre){
@@ -409,10 +409,8 @@ public class MainWindowController{
                     client.addRequest(req);
 
                     //get response
-                    Response res = null;
-                    if(req != null){
-                        res = client.getResponse(req.getRequestId());
-                    }
+                    Response res;
+                    res = client.getResponse(req.getRequestId());
                     if(res == null){
                         new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
                         return;
@@ -422,6 +420,7 @@ public class MainWindowController{
                             && res.getRespType() == ServerInterface.ResponseType.List){
                         params = (List<ParametroClimatico>)res.getResult();
                     }
+                    params.forEach(System.out::println);
 
                     try{
                         Stage aiDialogStage = new Stage();
@@ -473,7 +472,7 @@ public class MainWindowController{
             Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
             params.replace(RequestFactory.condKey, "denominazione");
             params.replace(RequestFactory.fieldKey, denom);
-            Request request = null;
+            Request request;
             try{
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
@@ -505,7 +504,7 @@ public class MainWindowController{
             Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
             params.replace(RequestFactory.condKey, "stato");
             params.replace(RequestFactory.fieldKey, stato);
-            Request request = null;
+            Request request;
             try{
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
@@ -562,7 +561,7 @@ public class MainWindowController{
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
 
-            Request request = null;
+            Request request;
             try{
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
@@ -662,7 +661,7 @@ public class MainWindowController{
         params.replace(RequestFactory.objectKey, "areaid");
         params.replace(RequestFactory.condKey, "denominazione");
         params.replace(RequestFactory.fieldKey, nomeArea);
-        Request request = null;
+        Request request;
         try{
             request = RequestFactory.buildRequest(
                     client.getClientId(),
@@ -729,7 +728,7 @@ public class MainWindowController{
                 reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
                 reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
                 reqAreaIdParams.replace(RequestFactory.fieldKey, denomAiCercata);
-                Request requestAreaId = null;
+                Request requestAreaId;
                 try{
                     requestAreaId = RequestFactory.buildRequest(
                             client.getClientId(),
@@ -743,7 +742,7 @@ public class MainWindowController{
                 }
                 client.addRequest(requestAreaId);
                 Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
-                String areaInteresseId = resAreaId.toString();
+                String areaInteresseId = resAreaId.getResult().toString();
 
                 Map<String, String> reqParamClimatici = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
                 reqParamClimatici.replace(RequestFactory.condKey, "areaid");
@@ -773,9 +772,7 @@ public class MainWindowController{
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
                     parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> {
-                            return isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
-                        });
+                        parametriClimatici.removeIf((pc) -> isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
                     });
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
@@ -790,28 +787,29 @@ public class MainWindowController{
                 requestCentroIdParams.replace(RequestFactory.objectKey, "centroid");
                 requestCentroIdParams.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
                 requestCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
-                requestCentroIdParams.replace(RequestFactory.objectKey, denomCmCercato);
+                requestCentroIdParams.replace(RequestFactory.fieldKey, denomCmCercato);
                 Request requestCentroId;
                 try{
                     requestCentroId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO,
+                            ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
                             requestCentroIdParams);
 
                 }catch(MalformedRequestException mre){
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     mre.printStackTrace();
                     return;
-
                 }
                 client.addRequest(requestCentroId);
                 Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
-                String centroId = responseCentroId.getResult().toString();
+                List<String> result = (List<String>)responseCentroId.getResult(); //returns multiple...
+                String centroId = result.get(0);
+                System.out.println(centroId);
 
                 Map<String, String> requestParametriClimaticiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
                 requestParametriClimaticiParams.replace(RequestFactory.condKey, "centroid");
-                requestParametriClimaticiParams.replace(RequestFactory.objectKey, centroId);
+                requestParametriClimaticiParams.replace(RequestFactory.fieldKey, centroId);
 
                 Request requestParametriClimatici;
                 try{
@@ -902,8 +900,8 @@ public class MainWindowController{
                         }
                         client.addRequest(requestAi);
                         Response responseAi = client.getResponse(requestAi.getRequestId());
-                        AreaInteresse ai = (AreaInteresse) responseAi.getResult();
-                        areeInteresseAssociateAlCentro.add(ai.getDenominazione());
+                        List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
+                        responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
                     }
                     try{
                         Stage cmDialogStage = new Stage();
@@ -1002,7 +1000,6 @@ public class MainWindowController{
             }
             client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
-            String centroID = responseCmId.getResult().toString();
 
             Map<String, String> requestSignUpParams = RequestFactory.buildParams(ServerInterface.RequestType.executeSignUp);
             Request signUpRequest;

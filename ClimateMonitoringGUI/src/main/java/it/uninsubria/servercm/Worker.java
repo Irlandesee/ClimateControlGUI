@@ -144,15 +144,15 @@ public class Worker extends Thread{
         return stat.executeQuery();
     }
 
-    private String getQueryResult(String query, String oggetto, String cond){
-        String obj = "";
+    private String getQueryResult(String query, String oggetto){
+        String result;
         System.out.println(workerId + ":" + query);
-        try(ResultSet res = prepAndExecuteStatement(query, cond)){
-            while(res.next()){
-                obj = res.getString(oggetto);
-            }
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            ResultSet rSet = stat.executeQuery();
+            rSet.next();
+            result = rSet.getString(oggetto);
         }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return obj;
+        return result;
     }
 
 
@@ -506,38 +506,45 @@ public class Worker extends Thread{
     }
 
     private String selectObjCityCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from city where "+ fieldCond + " = ?";
-        return getQueryResult(query, fieldCond, cond) ;
+        String query = "select %s from city where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjCmCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from centro_monitoraggio where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from centro_monitoraggio where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjAiCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from area_interesse where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from area_interesse where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjPcCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from parametro_climatico where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjNpcCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from nota_parametro_climatico where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from nota_parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjOpCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from operatore where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from operatore where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private String selectObjAuthOpCond(String oggetto, String fieldCond, String cond){
-        String query = "select " +oggetto+ " from operatore_autorizzati where "+ fieldCond + " = ?";
-        return getQueryResult(query, oggetto, cond);
+        String query = "select %s from operatore_autorizzati where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        System.out.println(query);
+        return getQueryResult(query, oggetto);
     }
 
     private Response selectObjWithCond(Request r){
@@ -586,14 +593,18 @@ public class Worker extends Thread{
     private Response getQueryResultList(Tables table, String oggetto, String fieldCond, String cond, String query) {
         query = query.formatted(oggetto, fieldCond, cond);
         List<String> resultList = new LinkedList<String>();
-        Response res = null;
+        Response res;
+        System.out.println(query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
             while(rSet.next()){
                 resultList.add(rSet.getString(oggetto));
             }
             res = new Response(clientId, requestId, responseId, ResponseType.Object, table, resultList);
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
+        }catch(SQLException sqle){
+            sqle.printStackTrace();
+            return new Response(clientId, requestId, responseId, ResponseType.Object, table, null);
+        }
         return res;
     }
 
@@ -657,7 +668,18 @@ public class Worker extends Thread{
 
     public Response selectObjectJoinWithCond(Request req){
         Map<String, String> params = req.getParams();
-        Tables otherTable = Tables.valueOf(params.get(RequestFactory.joinKey));
+        String joinTable = params.get(RequestFactory.joinKey);
+        Tables otherTable;
+        switch(joinTable){
+            case "centro_monitoraggio" -> otherTable = Tables.CENTRO_MONITORAGGIO;
+            case "area_interesse"-> otherTable = Tables.AREA_INTERESSE;
+            case "city" -> otherTable = Tables.CITY;
+            case "parametro_climatico" -> otherTable = Tables.PARAM_CLIMATICO;
+            case "operatore" -> otherTable = Tables.OPERATORE;
+            case "operatore_autorizzati" -> otherTable = Tables.OP_AUTORIZZATO;
+            case "nota_parametro_climatico" -> otherTable = Tables.NOTA_PARAM_CLIMATICO;
+            default -> otherTable = null;
+        }
         switch(req.getTable()){
             case CITY -> {
                 switch(otherTable){
@@ -712,7 +734,7 @@ public class Worker extends Thread{
                 return new Response(clientId, requestId, responseId, ResponseType.Error, req.getTable(), null);
             }
         }
-        return null;
+        return new Response(clientId, requestId, responseId, ResponseType.Error, req.getTable(), null);
     }
 
     public Response executeLogin(Request request){
