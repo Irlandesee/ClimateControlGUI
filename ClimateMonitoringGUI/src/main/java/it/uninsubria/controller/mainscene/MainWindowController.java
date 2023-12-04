@@ -926,6 +926,7 @@ public class MainWindowController{
     }
 
     public boolean onExecuteLoginQuery(String userID, String password){
+        System.out.printf("Userid & password: %s %s\n", userID, password);
         Map<String, String> loginParams = RequestFactory.buildParams(ServerInterface.RequestType.executeLogin);
         loginParams.replace(RequestFactory.userKey, userID);
         loginParams.replace(RequestFactory.passwordKey, password);

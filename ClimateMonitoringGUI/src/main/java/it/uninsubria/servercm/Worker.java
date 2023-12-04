@@ -743,25 +743,25 @@ public class Worker extends Thread{
         String query = "select * from operatore where userid = '%s' and password = '%s'".formatted(userId, password);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
-            rSet.next();//expects 1 row
-            Operatore operatore = extractOperatore(rSet);
-            return new Response(
-                    clientId,
-                    requestId,
-                    responseId,
-                    ResponseType.loginOk,
-                    Tables.OPERATORE,
-                    operatore);
-
-        }catch(SQLException sqle){sqle.printStackTrace();
-            return new Response(
-                    clientId,
-                    requestId,
-                    responseId,
-                    ResponseType.loginKo,
-                    Tables.OPERATORE,
-                    null);
-        }
+            if(rSet.next()){
+                Operatore operatore = extractOperatore(rSet);
+                return new Response(
+                        clientId,
+                        requestId,
+                        responseId,
+                        ResponseType.loginOk,
+                        Tables.OPERATORE,
+                        operatore);
+            }
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        //Login has failed
+        return new Response(
+                clientId,
+                requestId,
+                responseId,
+                ResponseType.loginKo,
+                Tables.OPERATORE,
+                null);
     }
 
     public Response insertOperatore(Request request){
