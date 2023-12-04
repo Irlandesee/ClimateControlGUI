@@ -61,6 +61,7 @@ public interface ServerInterface {
     int selectObjWithCondParamsLength = 3;
     int selectObjJoinWithCondParamsLength = 4;
     int executeLoginParamsLength = 2;
+    int executeSignUpParamsLength = 7;
     int insertPcParamsLength = 12;
     int insertCmParamsLength = 4;
     int insertOpParamsLength = 7;

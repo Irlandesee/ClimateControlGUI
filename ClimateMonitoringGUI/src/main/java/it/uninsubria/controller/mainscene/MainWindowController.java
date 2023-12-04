@@ -995,14 +995,23 @@ public class MainWindowController{
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO, reqCmIdParams);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                 mre.printStackTrace();
                 return false;
             }
             client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
-
+            String centroId = responseCmId.getResult().toString();
+            System.out.println(centroId);
             Map<String, String> requestSignUpParams = RequestFactory.buildParams(ServerInterface.RequestType.executeSignUp);
+            requestSignUpParams.replace(RequestFactory.nomeOpKey, nomeOp);
+            requestSignUpParams.replace(RequestFactory.cognomeOpKey, cognomeOp);
+            requestSignUpParams.replace(RequestFactory.codFiscOpKey, codFisc);
+            requestSignUpParams.replace(RequestFactory.userKey, userID);
+            requestSignUpParams.replace(RequestFactory.emailOpKey, email);
+            requestSignUpParams.replace(RequestFactory.passwordKey, password);
+            requestSignUpParams.replace(RequestFactory.centroAfferenzaKey, centroId);
+            requestSignUpParams.forEach((key, value) -> System.out.print(key + ":" + value));
             Request signUpRequest;
             try{
                 signUpRequest = RequestFactory.buildRequest(
@@ -1011,13 +1020,14 @@ public class MainWindowController{
                         ServerInterface.Tables.OPERATORE,
                         requestSignUpParams);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                 mre.printStackTrace();
                 return false;
             }
-
+            System.out.println(signUpRequest);
             client.addRequest(signUpRequest);
             Response responseSignUp = client.getResponse(signUpRequest.getRequestId());
+            System.out.println(responseSignUp);
             return (boolean) responseSignUp.getResult();
         }
     }

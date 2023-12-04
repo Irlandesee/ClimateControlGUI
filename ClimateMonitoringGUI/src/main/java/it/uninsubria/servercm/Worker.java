@@ -89,6 +89,13 @@ public class Worker extends Thread{
                     res = executeLogin(request);
                 }
             }
+            case executeSignUp -> {
+                if(request.getParams().size() < ServerInterface.executeSignUpParamsLength){
+                    res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
+                }else{
+                    res = insertOperatore(request);
+                }
+            }
             case insert -> {
                 switch(request.getTable()){
                     case AREA_INTERESSE -> {
@@ -127,7 +134,6 @@ public class Worker extends Thread{
                         }
                     }
                 }
-
             }
         }
         //save the result in the server's queue
@@ -149,10 +155,10 @@ public class Worker extends Thread{
         System.out.println(workerId + ":" + query);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
-            rSet.next();
-            result = rSet.getString(oggetto);
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return result;
+            if(rSet.next())
+                return rSet.getString(oggetto);
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        return null;
     }
 
 

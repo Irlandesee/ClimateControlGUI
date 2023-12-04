@@ -84,6 +84,13 @@ public class RequestFactory {
                     return new Request(clientId, requestType, table, params);
                 }
             }
+            case executeSignUp -> {
+                if(params.keySet().size() < ServerInterface.executeSignUpParamsLength){
+                    throw new MalformedRequestException(paramLengthError);
+                }else{
+                    return new Request(clientId, requestType, table, params);
+                }
+            }
             case insert -> {
                 switch (table){
                     case AREA_INTERESSE -> {
@@ -198,6 +205,15 @@ public class RequestFactory {
             case executeLogin -> {
                 params.put("user", "");
                 params.put("password", "");
+            }
+            case executeSignUp -> {
+                params.put(codFiscOpKey, "");
+                params.put(nomeOpKey, "");
+                params.put(cognomeOpKey, "");
+                params.put(userKey, "");
+                params.put(emailOpKey, "");
+                params.put(passwordKey, "");
+                params.put(centroAfferenzaKey, "");
             }
             default -> {
                 return null;
