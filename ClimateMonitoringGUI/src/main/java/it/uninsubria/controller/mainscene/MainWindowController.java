@@ -23,7 +23,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -185,10 +184,6 @@ public class MainWindowController{
     }
 
 
-    private void addNodesToParamBox(LinkedList<Node> nodes){
-        nodes.forEach((node) -> paramBox.getChildren().add(node));
-    }
-
     public void handleRicercaAreaInteresse(ActionEvent actionEvent) {
         tableView.getColumns().clear();
         tableView.getItems().clear();
@@ -208,24 +203,20 @@ public class MainWindowController{
         this.btnRicercaAreaCoord = new Button("Ricerca Coord");
 
         this.btnRicercaAreaPerDenom.setOnAction(event -> {
-            ricercaAreaPerDenom();
+            handleRicercaAreaDenom();
         });
 
-        btnRicercaAreaPerStato.setOnAction(event -> {ricercaAreaPerStato();});
+        btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
 
-        this.btnRicercaAreaCoord.setOnAction(event -> {ricercaPerCoord();});
+        this.btnRicercaAreaCoord.setOnAction(event -> {handleRicercaAreaPerCoordinate();});
 
-        LinkedList<Node> nodesToAdd = new LinkedList<Node>();
-
-        nodesToAdd.add(tDenominazione);
-        nodesToAdd.add(tStato);
-        nodesToAdd.add(tLatitudine);
-        nodesToAdd.add(tLongitudine);
-        nodesToAdd.add(btnRicercaAreaPerDenom);
-        nodesToAdd.add(btnRicercaAreaPerStato);
-        nodesToAdd.add(btnRicercaAreaCoord);
-
-        addNodesToParamBox(nodesToAdd);
+        paramBox.getChildren().add(tDenominazione);
+        paramBox.getChildren().add(tStato);
+        paramBox.getChildren().add(tLatitudine);
+        paramBox.getChildren().add(tLongitudine);
+        paramBox.getChildren().add(btnRicercaAreaPerDenom);
+        paramBox.getChildren().add(btnRicercaAreaPerStato);
+        paramBox.getChildren().add(btnRicercaAreaCoord);
 
         this.borderPane.setRight(paramBox);
     }
@@ -275,8 +266,8 @@ public class MainWindowController{
                             if(paramsReqDenom != null){
                                 paramsReqDenom.replace(RequestFactory.objectKey, "denominazione");
                                 paramsReqDenom.replace(RequestFactory.joinKey, ServerInterface.Tables.AREA_INTERESSE.label);
-                                paramsReqDenom.replace(RequestFactory.condKey, "areaid");
-                                paramsReqDenom.replace(RequestFactory.fieldKey, pc.getAreaInteresseId());
+                                paramsReqDenom.replace(RequestFactory.condKey, "parameterid");
+                                paramsReqDenom.replace(RequestFactory.fieldKey, pc.getParameterId());
                             }
 
                             Request requestDenominazione = null;
@@ -303,8 +294,8 @@ public class MainWindowController{
                             if(paramsReqNomeCentro != null){
                                 paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
                                 paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                                paramsReqNomeCentro.replace(RequestFactory.condKey, "centroid");
-                                paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getIdCentro());
+                                paramsReqNomeCentro.replace(RequestFactory.condKey, "parameterid");
+                                paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getParameterId());
                             }
                             Request requestNomeCentro = null;
                             try{
@@ -475,7 +466,7 @@ public class MainWindowController{
         }
     }
 
-    private void ricercaAreaPerDenom(){
+    private void handleRicercaAreaDenom(){
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
@@ -507,7 +498,7 @@ public class MainWindowController{
         }
     }
 
-    private void ricercaAreaPerStato(){
+    private void handleRicercaAreaPerStato(){
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
@@ -543,11 +534,11 @@ public class MainWindowController{
     }
 
     //Calculate the parameter passed in radians
-    private Float toRad(Float value){
+    private static Float toRad(Float value){
         return (float) (value * Math.PI / 180);
     }
 
-    private Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
+    public static Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
         final int earthRadius = 6731; // in kms
         float latDistance = toRad(latSecondPoint - latFirstPoint);
         float longDistance = toRad(longSecondPoint - longFirstPoint);
@@ -560,7 +551,7 @@ public class MainWindowController{
         return earthRadius * c;
     }
 
-    private void ricercaPerCoord(){
+    private void handleRicercaAreaPerCoordinate(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
         String query;
@@ -622,20 +613,18 @@ public class MainWindowController{
         this.endDatePicker = new DatePicker();
         this.tglRicercaAreaCm = new ToggleButton("Ricerca entrambi");
         this.btnRicercaPcArea = new Button("Ricerca per area");
-        this.btnRicercaPcArea.setOnAction(this::visualizzaPC);
+        this.btnRicercaPcArea.setOnAction(this::handleRicercaPc);
         this.btnRicercaPcCm = new Button("Ricerca Per Cm");
-        this.btnRicercaPcCm.setOnAction(this::visualizzaPC);
+        this.btnRicercaPcCm.setOnAction(this::handleRicercaPc);
 
-        LinkedList<Node> nodesToAdd = new LinkedList<Node>();
-        nodesToAdd.add(tAreaInteresse);
-        nodesToAdd.add(tCentroMonitoraggio);
-        nodesToAdd.add(tglDatePicker);
-        nodesToAdd.add(startDatePicker);
-        nodesToAdd.add(endDatePicker);
-        nodesToAdd.add(tglRicercaAreaCm);
-        nodesToAdd.add(btnRicercaPcArea);
-        nodesToAdd.add(btnRicercaPcCm);
-        addNodesToParamBox(nodesToAdd);
+        paramBox.getChildren().add(tAreaInteresse);
+        paramBox.getChildren().add(tCentroMonitoraggio);
+        paramBox.getChildren().add(tglDatePicker);
+        paramBox.getChildren().add(startDatePicker);
+        paramBox.getChildren().add(endDatePicker);
+        paramBox.getChildren().add(tglRicercaAreaCm);
+        paramBox.getChildren().add(btnRicercaPcArea);
+        paramBox.getChildren().add(btnRicercaPcCm);
         this.borderPane.setRight(paramBox);
 
     }
@@ -706,7 +695,7 @@ public class MainWindowController{
     }
 
 
-    private void visualizzaPC(ActionEvent event){
+    private void handleRicercaPc(ActionEvent event){
         String denomAiCercata = tAreaInteresse.getText();
         String denomCmCercato = tCentroMonitoraggio.getText();
         LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
@@ -931,7 +920,7 @@ public class MainWindowController{
         tableView.refresh();
     }
 
-    public boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
+    public static boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
         return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
     }
 

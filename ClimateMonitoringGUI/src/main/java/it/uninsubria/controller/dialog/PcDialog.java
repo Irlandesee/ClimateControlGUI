@@ -50,6 +50,7 @@ public class PcDialog {
 
     }
 
+    @FXML
     public void close(ActionEvent actionEvent){
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
         if(s != null)
