@@ -26,14 +26,9 @@ public class LoginViewController {
 
     private Alert invalidUserNameOrPassword;
     private Alert loggedIn;
-
-    private boolean loggedIN;
-
-    private final Client client;
     private final MainWindowController mainWindowController;
-    public LoginViewController(MainWindowController mainWindowController, Client client){
+    public LoginViewController(MainWindowController mainWindowController){
         this.mainWindowController = mainWindowController;
-        this.client = client;
     }
 
     @FXML

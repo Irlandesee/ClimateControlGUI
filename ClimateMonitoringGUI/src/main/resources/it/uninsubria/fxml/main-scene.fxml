@@ -20,7 +20,7 @@
                 <Label fx:id="loggedInLabel"/>
             </left>
             <right>
-                <Button fx:id="loginButton" text="Account" onAction="#login" contentDisplay="LEFT">
+                <Button fx:id="loginButton" text="Account" onAction="#handleLogin" contentDisplay="LEFT">
                     <!---> Insert button graphic here<!-->
                     <graphic>
                         <ImageView preserveRatio="true" fitWidth="36" fitHeight="36" pickOnBounds="true">
@@ -35,10 +35,10 @@
         <VBox styleClass="sidebar-section">
             <children>
                 <!-->Insert action buttons here<!-->
-                <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#ricercaAreaInteresse"/>
-                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#visualizzaParametriClimatici"/>
-                <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#visualizzaGrafici"/>
-                <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#visualizzaCentri"/>
+                <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#handleRicercaAreaInteresse"/>
+                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleVisualizzaParametriClimatici"/>
+                <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#handleVisualizzaGrafici"/>
+                <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#handleVisualizzaCentri"/>
             </children>
         </VBox>
     </left>

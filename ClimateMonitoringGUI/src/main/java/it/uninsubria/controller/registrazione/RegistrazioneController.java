@@ -26,11 +26,9 @@ public class RegistrazioneController {
     private Alert registrationFailed;
     private Alert registrationSuccess;
 
-    private final Client client;
     private final MainWindowController mainWindowController;
-    public RegistrazioneController(MainWindowController mainWindowController, Client client){
+    public RegistrazioneController(MainWindowController mainWindowController){
         this.mainWindowController = mainWindowController;
-        this.client = client;
     }
 
     @FXML

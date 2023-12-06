@@ -1,6 +1,7 @@
 package it.uninsubria.controller.parametroclimatico;
 
 import it.uninsubria.clientCm.Client;
+import it.uninsubria.controller.operatore.OperatoreViewController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -37,10 +38,9 @@ public class ParametroClimaticoController {
     private Alert nomeOrCentroError;
     private Alert invalidDateError;
     private Alert pcAlert;
-
-    private final Client client;
-    public ParametroClimaticoController(Client client){
-        this.client = client;
+    private OperatoreViewController operatoreViewController;
+    public ParametroClimaticoController(OperatoreViewController operatoreViewController){
+        this.operatoreViewController = operatoreViewController;
     }
     
     @FXML
@@ -161,11 +161,14 @@ public class ParametroClimaticoController {
         notes[6] = notaMassaGhiacciai;
 
         //query the db
-        /**
         try {
-            .executeInsertPCQuery(nomeArea, centroMon, pubdate, paramValues, notes);
+            boolean res = operatoreViewController.executeInsertPCQuery(nomeArea, centroMon, pubdate, paramValues, notes);
+            if(res){
+                new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo");
+            }else{
+                new Alert(Alert.AlertType.ERROR, "L'inserimento ha fallito!");
+            }
         }catch(NullPointerException npe){System.out.println("NullPointerException while executing insertPC query");}
-         **/
         clearValoriFields();
     }
 

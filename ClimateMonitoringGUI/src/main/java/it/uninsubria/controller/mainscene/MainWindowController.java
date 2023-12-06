@@ -107,8 +107,16 @@ public class MainWindowController{
     }
 
     private void createControllers(){
-        loginViewController = new LoginViewController(this, client);
-        registrazioneController = new RegistrazioneController(this, client);
+        loginViewController = new LoginViewController(this);
+        registrazioneController = new RegistrazioneController(this);
+    }
+
+    public LoginViewController getLoginViewController(){
+        return this.loginViewController;
+    }
+
+    public RegistrazioneController getRegistrazioneController(){
+        return this.registrazioneController;
     }
 
     @FXML
@@ -163,19 +171,10 @@ public class MainWindowController{
         this.cmAlert.setContentText("centro in input non valido");
     }
 
-    public LoginViewController getLoginViewController(){
-        return this.loginViewController;
-    }
-
-    public RegistrazioneController getRegistrazioneController(){
-        return this.registrazioneController;
-    }
-
-
     @FXML
-    public void login(ActionEvent actionEvent) {
+    public void handleLogin(ActionEvent actionEvent) {
         try{
-            mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            //mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
             fxmlLoader.setController(getLoginViewController());
             loginStage = new Stage();
@@ -190,7 +189,7 @@ public class MainWindowController{
         nodes.forEach((node) -> paramBox.getChildren().add(node));
     }
 
-    public void ricercaAreaInteresse(ActionEvent actionEvent) {
+    public void handleRicercaAreaInteresse(ActionEvent actionEvent) {
         tableView.getColumns().clear();
         tableView.getItems().clear();
         prepTableAreaInteresse();
@@ -608,7 +607,7 @@ public class MainWindowController{
 
     }
 
-    public void visualizzaParametriClimatici(ActionEvent actionEvent) {
+    public void handleVisualizzaParametriClimatici(ActionEvent actionEvent) {
         tableView.getColumns().clear();
         tableView.getItems().clear();
         prepTableParamClimatici();
@@ -642,7 +641,7 @@ public class MainWindowController{
     }
 
     @FXML
-    public void visualizzaGrafici(){
+    public void handleVisualizzaGrafici(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
         prepTableAreaInteresse();
@@ -856,7 +855,7 @@ public class MainWindowController{
     }
 
     @FXML
-    public void visualizzaCentri(){
+    public void handleVisualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
         //tableView.setRowFactory(null);
@@ -965,7 +964,7 @@ public class MainWindowController{
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(operatoreStage, this, client));
+                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client));
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");

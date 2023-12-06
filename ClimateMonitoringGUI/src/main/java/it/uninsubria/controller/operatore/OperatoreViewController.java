@@ -5,6 +5,7 @@ import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.mainscene.MainWindowController;
+import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -68,7 +69,7 @@ public class OperatoreViewController {
     private Alert pcAlert;
     private Alert areaInteresseAlert;
     private Alert invalidDateAlert;
-    private Alert cmAlert;
+    private Alert centroMonitoraggioAlert;
 
     private Properties props;
     private final String url = "jdbc:postgresql://192.168.1.26/postgres";
@@ -79,14 +80,22 @@ public class OperatoreViewController {
     private final Client client;
     private final MainWindowController mainWindowController;
 
-    public OperatoreViewController(Stage stage, MainWindowController mainWindowController, Client client){
+    private final ParametroClimaticoController parametroClimaticoController;
+
+    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
         this.mainWindowController = mainWindowController;
-        this.operatoreWindowStage = stage;
+        this.mainWindowStage = mainWindowStage;
+        this.operatoreWindowStage = operatoreWindowStage;
         this.client = client;
+
+        this.operatoreWindowStage.setWidth(1200);
+        this.parametroClimaticoController = new ParametroClimaticoController(this);
+
         props = new Properties();
         props.put("user", "postgres");
         props.put("password", "qwerty");
     }
+
 
     @FXML
     public void initialize(){
@@ -96,15 +105,43 @@ public class OperatoreViewController {
     }
 
     private void initAlerts(){
+        this.denomAlert = new Alert(Alert.AlertType.ERROR);
+        this.denomAlert.setHeaderText("Input non valido");
+        this.denomAlert.setContentText("denom non valida");
+
+        this.coordAlert = new Alert(Alert.AlertType.ERROR);
+        this.coordAlert.setHeaderText("Input not valido");
+        this.coordAlert.setContentText("coordinate devono essere positive!");
+
+        this.statoAlert = new Alert(Alert.AlertType.ERROR);
+        this.statoAlert.setHeaderText("Input non valido");
+        this.statoAlert.setContentText("Stato inserito non valido");
+
+        this.pcAlert = new Alert(Alert.AlertType.ERROR);
+        this.pcAlert.setHeaderText("input pc non valido");
+        this.pcAlert.setContentText("PC non valido!");
+
+        this.areaInteresseAlert = new Alert(Alert.AlertType.ERROR);
+        this.areaInteresseAlert.setHeaderText("Area interesse non valida");
+        this.areaInteresseAlert.setContentText("Input non valido");
+
+        this.centroMonitoraggioAlert = new Alert(Alert.AlertType.ERROR);
+        this.centroMonitoraggioAlert.setHeaderText("Centro Monitoraggio non valido");
+        this.centroMonitoraggioAlert.setContentText("Input non valido");
+
+        this.invalidDateAlert = new Alert(Alert.AlertType.ERROR);
+        this.invalidDateAlert.setHeaderText("Invalid date");
+        this.invalidDateAlert.setContentText("data input non valida");
 
     }
 
     @FXML
     public void exit(ActionEvent actionEvent){
-        Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
-        if(s != null)
-            s.close();
+        if(operatoreWindowStage != null) operatoreWindowStage.close();
         //go back to the main window stage
+        if(mainWindowStage != null){
+            mainWindowStage.show();
+        }
     }
 
     public void handleRicercaAreaInteresse(ActionEvent actionEvent){
@@ -155,8 +192,9 @@ public class OperatoreViewController {
 
     }
 
-    public void executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
+    public boolean executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
         //TODO
+        return false;
     }
 
 
@@ -272,7 +310,7 @@ public class OperatoreViewController {
         //indefinita di aree di interesse -> si cancella in automatico
         //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
 
-        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){cmAlert.showAndWait();}
+        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){centroMonitoraggioAlert.showAndWait();}
 
         LinkedList<String> l = new LinkedList<String>();
         for(String nome: areeInteresseBox.getText().split("\n"))
