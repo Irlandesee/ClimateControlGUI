@@ -66,6 +66,8 @@ public class LoginViewController {
                 boolean loginResult = mainWindowController.onExecuteLoginQuery(userID, password);
                 if(loginResult){
                     loggedIn.showAndWait();
+                    Stage s = (Stage) ((Node)actionEvent.getSource()).getScene().getWindow();
+                    if(s != null) s.close();
                 }
                 else{
                     invalidUserNameOrPassword.showAndWait();
