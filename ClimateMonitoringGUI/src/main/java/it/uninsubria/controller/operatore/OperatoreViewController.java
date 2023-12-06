@@ -2,8 +2,9 @@ package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.CmDialog;
-import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.controller.mainscene.MainWindowController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +20,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 public class OperatoreViewController {
@@ -74,28 +74,19 @@ public class OperatoreViewController {
     private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     //private final String url = "jdbc:postgresql://localhost/postgres";
 
-    private final SceneController sceneController;
-
     private Stage mainWindowStage;
     private Stage operatoreWindowStage;
-    public OperatoreViewController(SceneController sceneController){
-        this.sceneController = sceneController;
-    }
+    private final Client client;
+    private final MainWindowController mainWindowController;
 
-    public OperatoreViewController(SceneController sceneController, Stage mainWindowStage, Stage operatoreWindowStage){
-        this.sceneController = sceneController;
-        this.mainWindowStage = mainWindowStage;
-        this.operatoreWindowStage = operatoreWindowStage;
-    }
-
-    private void initQueryHandler(String user, String password){
+    public OperatoreViewController(Stage stage, MainWindowController mainWindowController, Client client){
+        this.mainWindowController = mainWindowController;
+        this.operatoreWindowStage = stage;
+        this.client = client;
         props = new Properties();
-        props.setProperty("user", user);
-        props.setProperty("password", password);
-
-
+        props.put("user", "postgres");
+        props.put("password", "qwerty");
     }
-
 
     @FXML
     public void initialize(){
@@ -110,11 +101,10 @@ public class OperatoreViewController {
 
     @FXML
     public void exit(ActionEvent actionEvent){
-
-    }
-
-    private void addNodesToParamBox(LinkedList<Node> nodes){
-        nodes.forEach((node) -> paramBox.getChildren().add(node));
+        Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
+        if(s != null)
+            s.close();
+        //go back to the main window stage
     }
 
     public void handleRicercaAreaInteresse(ActionEvent actionEvent){
@@ -174,7 +164,7 @@ public class OperatoreViewController {
         //TODO
     }
 
-    public void handleButtonInserisciCentroMonitoraggio(ActionEvent actionEvent){
+    public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){
 
         //show centri di monitoraggio already present in the database
         TableColumn nomeColumn = new TableColumn("denominazione");
@@ -214,7 +204,7 @@ public class OperatoreViewController {
                     //Create a new window containing the cms details
                     try {
                         Stage cmDialogStage = new Stage();
-                        CmDialog cmDialogController = new CmDialog(sceneController, nomiAree);
+                        CmDialog cmDialogController = new CmDialog(nomiAree);
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
                         fxmlLoader.setController(cmDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 300);
@@ -245,17 +235,14 @@ public class OperatoreViewController {
         clearCM = new Button("Pulisci");
         clearCM.setOnAction((event) -> clearCMFields());
 
-        LinkedList<Node> nodesToAdd = new LinkedList<Node>();
-        nodesToAdd.add(nomeCentroField);
-        nodesToAdd.add(comuneField);
-        nodesToAdd.add(statoCMField);
-        nodesToAdd.add(areaInteresseCMField);
-        nodesToAdd.add(areeInteresseBox);
-        nodesToAdd.add(inserisciArea);
-        nodesToAdd.add(inserisciCM);
-        nodesToAdd.add(clearCM);
-
-        addNodesToParamBox(nodesToAdd);
+        paramBox.getChildren().add(nomeCentroField);
+        paramBox.getChildren().add(comuneField);
+        paramBox.getChildren().add(statoCMField);
+        paramBox.getChildren().add(areaInteresseCMField);
+        paramBox.getChildren().add(areeInteresseBox);
+        paramBox.getChildren().add(inserisciArea);
+        paramBox.getChildren().add(inserisciCM);
+        paramBox.getChildren().add(clearCM);
 
         this.borderPane.setRight(paramBox);
 
@@ -312,6 +299,15 @@ public class OperatoreViewController {
             registrazioneStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
+
+    public void handleVisualizzaGrafici(ActionEvent event){
+
+    }
+
+    public void handleVisualizzaCentri(ActionEvent event){
+
+    }
+
 
 
 

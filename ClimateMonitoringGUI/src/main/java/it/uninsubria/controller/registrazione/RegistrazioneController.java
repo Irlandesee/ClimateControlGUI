@@ -1,6 +1,7 @@
 package it.uninsubria.controller.registrazione;
 
-import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.clientCm.Client;
+import it.uninsubria.controller.mainscene.MainWindowController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -25,9 +26,11 @@ public class RegistrazioneController {
     private Alert registrationFailed;
     private Alert registrationSuccess;
 
-    private SceneController sceneController;
-    public RegistrazioneController(SceneController sceneController){
-        this.sceneController = sceneController;
+    private final Client client;
+    private final MainWindowController mainWindowController;
+    public RegistrazioneController(MainWindowController mainWindowController, Client client){
+        this.mainWindowController = mainWindowController;
+        this.client = client;
     }
 
     @FXML
@@ -59,9 +62,7 @@ public class RegistrazioneController {
             invalidFieldAlert.showAndWait();
         }
         try{
-            boolean  resultRegistrazione = sceneController
-                    .getMainWindowController()
-                    .onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, userID, email, password, centroAfferenza);
+            boolean resultRegistrazione = mainWindowController.onExecuteRegistraOpQuery(nomeOp, cognomeOp, codFiscOp, userID, email, password, centroAfferenza);
             if(resultRegistrazione){
                 clearFields();
                 registrationSuccess.showAndWait();

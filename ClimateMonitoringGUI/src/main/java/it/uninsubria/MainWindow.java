@@ -25,6 +25,16 @@ public class MainWindow extends Application {
         stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();
+        /**
+        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
+        Client client = new Client(IDGenerator.generateID());
+        OperatoreViewController operatoreViewController = new OperatoreViewController(stage, client);
+        fxmlLoader.setController(operatoreViewController);
+        Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
+        stage.setTitle("ClimateMonitoringApp!");
+        stage.setScene(scene);
+        stage.show();
+         **/
     }
 
     public static void main(String[] args) {

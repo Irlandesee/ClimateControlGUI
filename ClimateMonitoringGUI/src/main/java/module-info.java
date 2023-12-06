@@ -24,9 +24,6 @@ module it.uninsubria.climatemonitoringgui {
     exports it.uninsubria.controller.registrazione;
     opens it.uninsubria.controller.registrazione to javafx.fxml;
 
-    exports it.uninsubria.controller.scene;
-    opens it.uninsubria.controller.scene to javafx.fxml;
-
     opens it.uninsubria.controller.parametroclimatico to javafx.fxml;
     exports it.uninsubria.controller.parametroclimatico;
 

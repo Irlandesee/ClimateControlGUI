@@ -11,7 +11,6 @@ import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
-import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
@@ -31,7 +30,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.http.protocol.RequestUserAgent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -83,17 +81,18 @@ public class MainWindowController{
     private Properties props;
 
     private Stage mainWindowStage;
-    private SceneController sceneController;
+    private Stage loginStage;
+    private Stage registrazioneStage;
+    private Stage operatoreStage;
+    private LoginViewController loginViewController;
+    private RegistrazioneController registrazioneController;
+    private ParametroClimaticoController parametroClimaticoController;
+    private OperatoreViewController operatoreViewController;
+
     private final Client client;
 
     public MainWindowController(Stage stage, Client client){
         this.client = client;
-        //set up the controllers
-        sceneController = new SceneController(this);
-        sceneController.setLoginViewController(new LoginViewController(sceneController));
-        sceneController.setOperatoreViewController(new OperatoreViewController(sceneController));
-        sceneController.setParametroClimaticoController(new ParametroClimaticoController(sceneController));
-        sceneController.setRegistrazioneController(new RegistrazioneController(sceneController));
 
         this.mainWindowStage = stage;
         mainWindowStage.setMinHeight(800);
@@ -102,10 +101,14 @@ public class MainWindowController{
         props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
-
-        client.start();
-
+        createControllers();
         initAlerts();
+        client.start();
+    }
+
+    private void createControllers(){
+        loginViewController = new LoginViewController(this, client);
+        registrazioneController = new RegistrazioneController(this, client);
     }
 
     @FXML
@@ -160,14 +163,22 @@ public class MainWindowController{
         this.cmAlert.setContentText("centro in input non valido");
     }
 
+    public LoginViewController getLoginViewController(){
+        return this.loginViewController;
+    }
+
+    public RegistrazioneController getRegistrazioneController(){
+        return this.registrazioneController;
+    }
+
 
     @FXML
     public void login(ActionEvent actionEvent) {
         try{
             mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
-            fxmlLoader.setController(sceneController.getLoginViewController());
-            Stage loginStage = new Stage();
+            fxmlLoader.setController(getLoginViewController());
+            loginStage = new Stage();
             Scene scene = new Scene(fxmlLoader.load(), 400, 300);
             loginStage.setScene(scene);
             loginStage.show();
@@ -345,7 +356,7 @@ public class MainWindowController{
 
                             try{
                                Stage pcDialogStage = new Stage();
-                               PcDialog pcDialogController = new PcDialog(sceneController, pc, nomeCentro, nomeArea);
+                               PcDialog pcDialogController = new PcDialog(pc, nomeCentro, nomeArea);
                                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/pc-dialog.fxml"));
                                fxmlLoader.setController(pcDialogController);
                                Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
@@ -905,7 +916,7 @@ public class MainWindowController{
                     }
                     try{
                         Stage cmDialogStage = new Stage();
-                        CmDialog cmDialogController = new CmDialog(sceneController, areeInteresseAssociateAlCentro);
+                        CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
                         fxmlLoader.setController(cmDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load());
@@ -947,12 +958,21 @@ public class MainWindowController{
         client.addRequest(loginRequest);
         Response response = client.getResponse(loginRequest.getRequestId());
         Operatore o = (Operatore) response.getResult();
-        if(o != null){
+        if(o == null){
+            return false;
+        }else{
             mainWindowStage.close();
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
+                operatoreStage = new Stage();
+                fxmlLoader.setController(new OperatoreViewController(operatoreStage, this, client));
+                Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
+                operatoreStage.setScene(scene);
+                operatoreStage.setTitle("operatoreView");
+                operatoreStage.show();
+            }catch(IOException ioe){ioe.printStackTrace();}
             return true;
         }
-
-        return false;
     }
 
     private boolean requestSignUp(String codFisc, String email){

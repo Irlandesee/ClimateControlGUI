@@ -1,6 +1,5 @@
 package it.uninsubria.controller.dialog;
 
-import it.uninsubria.controller.scene.SceneController;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.stage.Stage;
 
 public class PcDialog {
 
-    private final SceneController sceneController;
     private final ParametroClimatico pc;
     private final String nomeCentro;
     private final String nomeArea;
@@ -21,8 +19,7 @@ public class PcDialog {
     public Label nomeAreaLabel;
     public Label nomeCentroLabel;
     public ListView<Label> valoriList;
-    public PcDialog(SceneController sceneController, ParametroClimatico pc, String nomeCentro, String nomeArea){
-        this.sceneController = sceneController;
+    public PcDialog(ParametroClimatico pc, String nomeCentro, String nomeArea){
         this.pc = pc;
         this.nomeCentro = nomeCentro;
         this.nomeArea = nomeArea;
