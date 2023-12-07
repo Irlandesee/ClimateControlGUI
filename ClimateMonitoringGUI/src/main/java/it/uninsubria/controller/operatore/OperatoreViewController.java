@@ -10,6 +10,7 @@ import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
+import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
@@ -97,6 +98,8 @@ public class OperatoreViewController {
     private final MainWindowController mainWindowController;
 
     private final ParametroClimaticoController parametroClimaticoController;
+    //private final RegistrazioneController registrazioneController;
+
 
     public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
         this.mainWindowController = mainWindowController;
@@ -106,6 +109,7 @@ public class OperatoreViewController {
 
         this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
+        //this.registrazioneController = new RegistrazioneController(this);
 
         props = new Properties();
         props.put("user", "postgres");
@@ -740,10 +744,10 @@ public class OperatoreViewController {
 
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
         try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml")); //watch out for this line of code
-            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml"));
+            loader.setController(parametroClimaticoController);
             Stage pcStage = new Stage();
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(loader.load(), 800, 400);
             pcStage.setScene(scene);
             pcStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
@@ -887,10 +891,11 @@ public class OperatoreViewController {
 
     public void handleRegistraOperatore(ActionEvent actionEvent){
         try{
-            Parent root = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml")); //watch out for this line of code
+            FXMLLoader loader = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
+            //loader.setController()
             //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             Stage registrazioneStage = new Stage();
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(loader.load(), 800, 600);
             registrazioneStage.setScene(scene);
             registrazioneStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}

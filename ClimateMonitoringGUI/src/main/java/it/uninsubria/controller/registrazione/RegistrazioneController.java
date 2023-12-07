@@ -2,6 +2,7 @@ package it.uninsubria.controller.registrazione;
 
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.mainscene.MainWindowController;
+import it.uninsubria.controller.operatore.OperatoreViewController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -26,7 +27,9 @@ public class RegistrazioneController {
     private Alert registrationFailed;
     private Alert registrationSuccess;
 
+    //private final OperatoreViewController operatoreViewController;
     private final MainWindowController mainWindowController;
+
     public RegistrazioneController(MainWindowController mainWindowController){
         this.mainWindowController = mainWindowController;
     }
