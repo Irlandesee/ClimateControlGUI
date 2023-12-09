@@ -766,6 +766,10 @@ public class OperatoreViewController {
 
     public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){
 
+        tableView.refresh();
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+
         //show centri di monitoraggio already present in the database
         TableColumn nomeColumn = new TableColumn("denominazione");
         nomeColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
@@ -776,12 +780,22 @@ public class OperatoreViewController {
         tableView.getColumns().addAll(nomeColumn, comuneColumn, countryColumn);
 
         //populate the tableView
-        /**
-        List< CentroMonitoraggio> centriPresenti = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
-        centriPresenti.forEach(centro -> {
-            tableView.getItems().add(centro);
-        });
-         **/
+        Request requestCentriPresenti;
+        try{
+            requestCentriPresenti = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    null);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            //mre.printStackTrace();
+            return;
+        }
+        client.addRequest(requestCentriPresenti);
+        Response responseCentriPresenti = client.getResponse(client.getClientId());
+        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriPresenti.getResult();
+        centriMonitoraggio.forEach(cm -> tableView.getItems().add(cm));
 
         //aree interesse?
         tableView.setRowFactory(tv -> {
@@ -795,11 +809,26 @@ public class OperatoreViewController {
                     LinkedList<String> nomiAree = new LinkedList<String>();
                     for(String id: cmAree){
                         //query the db to get the areas names
-                        /**
-                        String denominazione = queryHandler.selectObjectWithCond("denominazione", QueryHandler.Tables.AREA_INTERESSE, "areaid", id)
-                                .get(0);
+                        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+                        params.replace(RequestFactory.objectKey, "denominazione");
+                        params.replace(RequestFactory.condKey, "areaid");
+                        params.replace(RequestFactory.fieldKey, id);
+                        Request requestDenominazione;
+                        try{
+                            requestDenominazione = RequestFactory.buildRequest(
+                                client.getClientId(),
+                                ServerInterface.RequestType.selectObjWithCond,
+                                ServerInterface.Tables.AREA_INTERESSE,
+                                params
+                            );
+                        }catch(MalformedRequestException mre){
+                            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                            return;
+                        }
+                        client.addRequest(requestDenominazione);
+                        Response responseDenominazione = client.getResponse(requestDenominazione.getRequestId());
+                        String denominazione = responseDenominazione.getResult().toString();
                         nomiAree.add(denominazione);
-                         **/
                     }
                     //Create a new window containing the cms details
                     try {
