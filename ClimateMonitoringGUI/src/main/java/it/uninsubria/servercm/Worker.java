@@ -760,6 +760,8 @@ public class Worker extends Thread{
                         operatore);
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
+
+
         //Login has failed
         return new Response(
                 clientId,

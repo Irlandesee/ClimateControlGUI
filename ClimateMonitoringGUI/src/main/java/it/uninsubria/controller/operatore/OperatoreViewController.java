@@ -3,6 +3,7 @@ package it.uninsubria.controller.operatore;
 import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.city.City;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
@@ -32,6 +33,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class OperatoreViewController {
 
@@ -101,11 +103,15 @@ public class OperatoreViewController {
     //private final RegistrazioneController registrazioneController;
 
 
+    private final Logger logger;
+
     public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
         this.mainWindowController = mainWindowController;
         this.mainWindowStage = mainWindowStage;
         this.operatoreWindowStage = operatoreWindowStage;
         this.client = client;
+
+        this.logger = Logger.getLogger("OperatoreWindow");
 
         this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
@@ -771,6 +777,7 @@ public class OperatoreViewController {
         tableView.getItems().clear();
 
         //show centri di monitoraggio already present in the database
+        /**
         TableColumn nomeColumn = new TableColumn("denominazione");
         nomeColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
         TableColumn comuneColumn = new TableColumn("comune");
@@ -845,6 +852,53 @@ public class OperatoreViewController {
             });
             return row;
         });
+         **/
+        Request citiesRequest;
+        Request centriMonitoraggioRequest;
+
+        try{
+            citiesRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CITY,
+                    null);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage());
+            return;
+        }
+
+        client.addRequest(citiesRequest);
+        Response responseCities = client.getResponse(citiesRequest.getRequestId());
+
+        try{
+            centriMonitoraggioRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    null
+            );
+
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(centriMonitoraggioRequest);
+        Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+
+        List<City> citiesWithoutCm = new LinkedList<City>();
+        List<City> cities = (List<City>) responseCities.getResult();
+        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
+        for(CentroMonitoraggio cm : centriMonitoraggio){
+            citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
+        }
+        TableColumn nomeColumn = new TableColumn("denominazione");
+        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
+        tableView.getColumns().addAll(nomeColumn, countryColumn);
+
+        citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
+
 
         this.paramBox = new VBox(10);
         nomeCentroField = new TextField("Nome centro");
@@ -901,27 +955,59 @@ public class OperatoreViewController {
         //indefinita di aree di interesse -> si cancella in automatico
         //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
 
-        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){centroMonitoraggioAlert.showAndWait();}
+        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){centroMonitoraggioAlert.showAndWait(); return;}
 
-        LinkedList<String> l = new LinkedList<String>();
-        for(String nome: areeInteresseBox.getText().split("\n"))
+        List<String> l = new LinkedList<String>();
+        for(String nome: areeInteresseBox.getText().split("\n")){
             l.add(nome.trim());
-
-        areaInteresseCMField.clear();
-        /**
-        boolean res = queryHandler.executeInsertCentroMonitoraggio(nomeCentro, comuneCentro, statoCentro, l);
-        if(res){
-            System.out.println("CM inserito");
-            new Alert(Alert.AlertType.CONFIRMATION).showAndWait();
-            clearCMFields();
         }
-         **/
+
+        StringBuilder areaList = new StringBuilder();
+        if(l.size() == 1){
+            areaList.append(l.get(0));
+        }else{
+            for(int i = 0; i < l.size(); i++){
+                if(i == l.size() - 1)
+                    areaList.append(l.get(i));
+                else
+                    areaList.append(l.get(i)).append(",");
+            }
+        }
+
+        String params = "{%s}, {%s}, {%s}".formatted(nomeCentro, comuneCentro, statoCentro);
+        logger.info(params);
+        logger.info(areaList.toString());
+        areaInteresseCMField.clear();
+        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO);
+        Request insertCmRequest;
+        try{
+            insertCmRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    insertParams);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(insertCmRequest);
+        Response res = client.getResponse(insertCmRequest.getRequestId());
+        boolean result = (boolean)res.getResult();
+        if(result){
+            new Alert(Alert.AlertType.CONFIRMATION, "inserimento completato").showAndWait();
+        }
+        else{
+            new Alert(Alert.AlertType.ERROR, "errore nell'inserimento ").showAndWait();
+        }
+
+        clearCMFields();
+
     }
 
     public void handleRegistraOperatore(ActionEvent actionEvent){
         try{
-            FXMLLoader loader = FXMLLoader.load(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
-            //loader.setController()
+            FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
+            //loader.setController(new RegistrazioneController(mainWindowController));
             //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
             Stage registrazioneStage = new Stage();
             Scene scene = new Scene(loader.load(), 800, 600);
