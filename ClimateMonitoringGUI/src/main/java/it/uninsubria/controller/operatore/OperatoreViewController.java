@@ -27,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -47,6 +48,11 @@ public class OperatoreViewController {
     public BorderPane borderPane;
     public VBox contentBox;
     public VBox paramBox;
+    //Inserimento area interesse
+    private TextField tFilterCountry;
+    private Button visualizeCityData;
+    private Button visualizeAiData;
+    private Button visualizeCmData;
 
     //per area interesse
     private TextField tDenominazione;
@@ -207,7 +213,6 @@ public class OperatoreViewController {
     }
 
     private void prepTableAreaInteresse(){
-
         tableView.getItems().clear();
         tableView.getColumns().clear();
         tableView.refresh();
@@ -766,6 +771,10 @@ public class OperatoreViewController {
         tLongitudine = new TextField("Longitudine");
         Button inserisciAreaButton = new Button("inserisciArea");
         inserisciAreaButton.setOnAction(this::executeInsertAreaInteresse);
+        tFilterCountry = new TextField("Filtra per stato");
+        tFilterCountry.setOnMouseClicked(mouseClicked -> tFilterCountry.clear());
+        visualizeCityData = new Button("Visualizza data");
+        visualizeCityData.setOnAction(this::visualizeData);
 
         paramBox = new VBox(4);
         paramBox.getChildren().add(tDenominazione);
@@ -773,6 +782,8 @@ public class OperatoreViewController {
         paramBox.getChildren().add(tLatitudine);
         paramBox.getChildren().add(tLongitudine);
         paramBox.getChildren().add(inserisciAreaButton);
+        paramBox.getChildren().add(tFilterCountry);
+        paramBox.getChildren().add(visualizeCityData);
         this.borderPane.setRight(paramBox);
 
         TableColumn nomeColumn = new TableColumn("denominazione");
@@ -800,22 +811,160 @@ public class OperatoreViewController {
             return row;
         });
 
-        Request reqCity;
-        try{
-            reqCity = RequestFactory.buildRequest(
-                    client.getClientId(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CITY,
-                    null);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
-        }
-        client.addRequest(reqCity);
-        Response responseCity = client.getResponse(reqCity.getRequestId());
-        List<City> cities = (List<City>)responseCity.getResult();
-        cities.forEach(city -> tableView.getItems().add(city));
+    }
 
+    private void visualizeData(ActionEvent event){
+        tableView.getItems().clear();
+        Request request;
+        Object source = event.getSource();
+        if(source == visualizeCityData){
+            if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
+                try{
+                    request = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.CITY,
+                            null);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+            }else{
+                try{
+                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    params.replace(RequestFactory.condKey, "country");
+                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    request = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.CITY,
+                            params);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                client.addRequest(request);
+                Response responseCity = client.getResponse(request.getRequestId());
+                List<City> cities = (List<City>)responseCity.getResult();
+                cities.forEach(city -> tableView.getItems().add(city));
+            }
+        }else if(source == visualizeAiData){
+            if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
+                try{
+                    request = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            null
+                    );
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+            }else{
+                try{
+                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    params.replace(RequestFactory.condKey, "stato");
+                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    request = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            params
+                    );
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+
+                }
+                client.addRequest(request);
+                Response responseAreaInteresse = client.getResponse(request.getRequestId());
+                List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAreaInteresse.getResult();
+                areeInteresse.forEach(ai -> tableView.getItems().add(ai));
+            }
+        }else if(source == visualizeCmData){
+            if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
+                Request citiesRequest;
+                Request centriMonitoraggioRequest;
+                try{
+                    citiesRequest = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.CITY,
+                            null);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                    return;
+                }
+
+                client.addRequest(citiesRequest);
+                Response responseCities = client.getResponse(citiesRequest.getRequestId());
+
+                try{
+                    centriMonitoraggioRequest = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                            null
+                    );
+
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                client.addRequest(centriMonitoraggioRequest);
+                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+
+                List<City> citiesWithoutCm = new LinkedList<City>();
+                List<City> cities = (List<City>) responseCities.getResult();
+                List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
+                for(CentroMonitoraggio cm : centriMonitoraggio){
+                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
+                }
+
+                citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
+            }else{
+                Request centriMonitoraggioRequest;
+                try{
+                    centriMonitoraggioRequest = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                            null
+                    );
+
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                client.addRequest(centriMonitoraggioRequest);
+                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+                List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>)responseCentriMonitoraggio.getResult();
+                try{
+                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    params.replace(RequestFactory.condKey, "country");
+                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    request = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.CITY,
+                            params);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                client.addRequest(request);
+                Response responseCity = client.getResponse(request.getRequestId());
+                List<City> cities = (List<City>)responseCity.getResult();
+                List<City> citiesWithoutCm = new LinkedList<City>();
+                for(CentroMonitoraggio cm : centriMonitoraggio){
+                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
+                }
+
+                citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
+
+            }
+        }
     }
 
     private void executeInsertAreaInteresse(ActionEvent event){
@@ -830,6 +979,17 @@ public class OperatoreViewController {
 
     @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
+        paramBox.getChildren().clear();
+
+        tFilterCountry = new TextField("Filtra per stato");
+        tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
+        visualizeAiData = new Button("Visualizza data");
+        visualizeAiData.setOnAction(this::visualizeData);
+        paramBox.getChildren().add(tFilterCountry);
+        paramBox.getChildren().add(visualizeAiData);
+        this.borderPane.setRight(paramBox);
+
+        prepTableAreaInteresse();
         try{
             FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml"));
             loader.setController(parametroClimaticoController);
@@ -852,53 +1012,14 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         tableView.refresh();
 
-        Request citiesRequest;
-        Request centriMonitoraggioRequest;
-
-        try{
-            citiesRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CITY,
-                    null);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage());
-            return;
-        }
-
-        client.addRequest(citiesRequest);
-        Response responseCities = client.getResponse(citiesRequest.getRequestId());
-
-        try{
-            centriMonitoraggioRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    null
-            );
-
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
-        }
-        client.addRequest(centriMonitoraggioRequest);
-        Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
-
-        List<City> citiesWithoutCm = new LinkedList<City>();
-        List<City> cities = (List<City>) responseCities.getResult();
-        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
-        for(CentroMonitoraggio cm : centriMonitoraggio){
-            citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
-        }
         TableColumn nomeColumn = new TableColumn("denominazione");
         nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
         TableColumn countryColumn = new TableColumn("stato");
         countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
         tableView.getColumns().addAll(nomeColumn, countryColumn);
 
-        citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
 
-        this.paramBox = new VBox(10);
+        this.paramBox = new VBox();
         nomeCentroField = new TextField("Nome centro");
         nomeCentroField.setOnMouseClicked((event) -> nomeCentroField.clear());
         comuneField = new TextField("Comune centro");
@@ -915,6 +1036,10 @@ public class OperatoreViewController {
         inserisciCM.setOnAction((event) -> executeInsertCMQuery());
         clearCM = new Button("Pulisci");
         clearCM.setOnAction((event) -> clearCMFields());
+        tFilterCountry = new TextField("Filtra per stato");
+        tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
+        visualizeCmData = new Button("Visualizza data");
+        visualizeCmData.setOnAction(this::visualizeData);
 
         paramBox.getChildren().add(nomeCentroField);
         paramBox.getChildren().add(comuneField);
@@ -924,6 +1049,8 @@ public class OperatoreViewController {
         paramBox.getChildren().add(inserisciArea);
         paramBox.getChildren().add(inserisciCM);
         paramBox.getChildren().add(clearCM);
+        paramBox.getChildren().add(tFilterCountry);
+        paramBox.getChildren().add(visualizeCmData);
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow();
