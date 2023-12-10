@@ -210,7 +210,7 @@ public class OperatoreViewController {
 
         tableView.getItems().clear();
         tableView.getColumns().clear();
-        System.out.println("table view column size in prepAreaInteresse: "+ tableView.getColumns().size());
+        tableView.refresh();
 
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
@@ -427,6 +427,7 @@ public class OperatoreViewController {
         System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.refresh();
 
 
         TableColumn dateColumn = new TableColumn("Data");
@@ -600,6 +601,11 @@ public class OperatoreViewController {
 
 
     private void handleRicercaPc(ActionEvent event){
+
+        tableView.getItems().clear();
+        tableView.getColumns().clear();
+        tableView.refresh();
+
         String denomAiCercata = tAreaInteresse.getText();
         String denomCmCercato = tCentroMonitoraggio.getText();
         LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
@@ -748,6 +754,81 @@ public class OperatoreViewController {
 
     }
 
+    @FXML
+    public void handleInserisciAreaInteresse(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
+
+        tDenominazione = new TextField("Denominazione");
+        tStato = new TextField("stato");
+        tLatitudine = new TextField("Latitudine");
+        tLongitudine = new TextField("Longitudine");
+        Button inserisciAreaButton = new Button("inserisciArea");
+        inserisciAreaButton.setOnAction(this::executeInsertAreaInteresse);
+
+        paramBox = new VBox(4);
+        paramBox.getChildren().add(tDenominazione);
+        paramBox.getChildren().add(tStato);
+        paramBox.getChildren().add(tLatitudine);
+        paramBox.getChildren().add(tLongitudine);
+        paramBox.getChildren().add(inserisciAreaButton);
+        this.borderPane.setRight(paramBox);
+
+        TableColumn nomeColumn = new TableColumn("denominazione");
+        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
+        TableColumn latitudineColumn = new TableColumn("latitudine");
+        latitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("latitude"));
+        TableColumn longitudineColumn = new TableColumn("longitudine");
+        longitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("longitude"));
+        tableView.getColumns().addAll(nomeColumn, countryColumn, latitudineColumn, longitudineColumn);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    City c = (City) row.getItem();
+                    tDenominazione.setText(c.getAsciiName());
+                    tStato.setText(c.getCountry());
+                    tLatitudine.setText(String.valueOf(c.getLatitude()));
+                    tLongitudine.setText(String.valueOf(c.getLongitude()));
+                }
+            });
+
+            return row;
+        });
+
+        Request reqCity;
+        try{
+            reqCity = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CITY,
+                    null);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(reqCity);
+        Response responseCity = client.getResponse(reqCity.getRequestId());
+        List<City> cities = (List<City>)responseCity.getResult();
+        cities.forEach(city -> tableView.getItems().add(city));
+
+    }
+
+    private void executeInsertAreaInteresse(ActionEvent event){
+        String denom = tDenominazione.getText();
+        String stato = tStato.getText();
+        float latitudine = Float.parseFloat(tLatitudine.getText());
+        float longitudine = Float.parseFloat(tLongitudine.getText());
+        String params = "{%s}, {%s}, {%s}, {%s}".formatted(denom, stato, latitudine, longitudine);
+        logger.info(params);
+        //TODO
+    }
+
+    @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
         try{
             FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml"));
@@ -765,94 +846,12 @@ public class OperatoreViewController {
         return false;
     }
 
-
-    public void executeRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String email, String password, String centroAfferenza){
-        //TODO
-    }
-
     public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){
 
-        tableView.refresh();
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.refresh();
 
-        //show centri di monitoraggio already present in the database
-        /**
-        TableColumn nomeColumn = new TableColumn("denominazione");
-        nomeColumn.setCellValueFactory(new PropertyValueFactory<>("denominazione"));
-        TableColumn comuneColumn = new TableColumn("comune");
-        comuneColumn.setCellValueFactory(new PropertyValueFactory<>("comune"));
-        TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<>("country"));
-        tableView.getColumns().addAll(nomeColumn, comuneColumn, countryColumn);
-
-        //populate the tableView
-        Request requestCentriPresenti;
-        try{
-            requestCentriPresenti = RequestFactory.buildRequest(
-                    client.getClientId(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    null);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            //mre.printStackTrace();
-            return;
-        }
-        client.addRequest(requestCentriPresenti);
-        Response responseCentriPresenti = client.getResponse(client.getClientId());
-        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriPresenti.getResult();
-        centriMonitoraggio.forEach(cm -> tableView.getItems().add(cm));
-
-        //aree interesse?
-        tableView.setRowFactory(tv -> {
-            TableRow row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if(event.getClickCount() == 2 && (!row.isEmpty())){
-                    CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
-                    System.out.println("Item double clicked: "+c);
-                    //show cm details
-                    LinkedList<String> cmAree = c.getAreeInteresseIdAssociate();
-                    LinkedList<String> nomiAree = new LinkedList<String>();
-                    for(String id: cmAree){
-                        //query the db to get the areas names
-                        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-                        params.replace(RequestFactory.objectKey, "denominazione");
-                        params.replace(RequestFactory.condKey, "areaid");
-                        params.replace(RequestFactory.fieldKey, id);
-                        Request requestDenominazione;
-                        try{
-                            requestDenominazione = RequestFactory.buildRequest(
-                                client.getClientId(),
-                                ServerInterface.RequestType.selectObjWithCond,
-                                ServerInterface.Tables.AREA_INTERESSE,
-                                params
-                            );
-                        }catch(MalformedRequestException mre){
-                            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                            return;
-                        }
-                        client.addRequest(requestDenominazione);
-                        Response responseDenominazione = client.getResponse(requestDenominazione.getRequestId());
-                        String denominazione = responseDenominazione.getResult().toString();
-                        nomiAree.add(denominazione);
-                    }
-                    //Create a new window containing the cms details
-                    try {
-                        Stage cmDialogStage = new Stage();
-                        CmDialog cmDialogController = new CmDialog(nomiAree);
-                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
-                        fxmlLoader.setController(cmDialogController);
-                        Scene dialogScene = new Scene(fxmlLoader.load(), 400, 300);
-                        cmDialogStage.setScene(dialogScene);
-                        cmDialogStage.show();
-                    }catch(IOException ioe){ioe.printStackTrace();}
-
-                }
-            });
-            return row;
-        });
-         **/
         Request citiesRequest;
         Request centriMonitoraggioRequest;
 
@@ -899,7 +898,6 @@ public class OperatoreViewController {
 
         citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
 
-
         this.paramBox = new VBox(10);
         nomeCentroField = new TextField("Nome centro");
         nomeCentroField.setOnMouseClicked((event) -> nomeCentroField.clear());
@@ -926,6 +924,19 @@ public class OperatoreViewController {
         paramBox.getChildren().add(inserisciArea);
         paramBox.getChildren().add(inserisciCM);
         paramBox.getChildren().add(clearCM);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    City c = (City) row.getItem();
+                    nomeCentroField.setText(c.getAsciiName()+"Centro");
+                    comuneField.setText(c.getAsciiName());
+                    statoCMField.setText(c.getCountry());
+                }
+            });
+            return row;
+        });
 
         this.borderPane.setRight(paramBox);
 
@@ -1004,16 +1015,12 @@ public class OperatoreViewController {
 
     }
 
-    public void handleRegistraOperatore(ActionEvent actionEvent){
-        try{
-            FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
-            //loader.setController(new RegistrazioneController(mainWindowController));
-            //Stage stage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
-            Stage registrazioneStage = new Stage();
-            Scene scene = new Scene(loader.load(), 800, 600);
-            registrazioneStage.setScene(scene);
-            registrazioneStage.show();
-        }catch(IOException ioe){ioe.printStackTrace();}
+    public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
+        //TODO
+    }
+
+    private void executeAbilitaNuovoOperatore(String codfisc, String email){
+        //TODO
     }
 
     public void handleVisualizzaGrafici(ActionEvent event){
@@ -1084,6 +1091,7 @@ public class OperatoreViewController {
     public void handleVisualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.refresh();
         //tableView.setRowFactory(null);
         Request requestCentro = null;
         try{
