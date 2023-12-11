@@ -13,11 +13,13 @@ import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +32,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.w3c.dom.events.MouseEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -86,6 +89,10 @@ public class OperatoreViewController {
 
     //visualizzazione grafici
     private Button btnRicercaArea;
+    //abilita utente
+    private TextField tEmailField;
+    private TextField tCodFiscField;
+    private Button buttonAbilitaOp; //abilita alla registrazione
 
     //alerts
     private Alert coordAlert;
@@ -1143,10 +1150,52 @@ public class OperatoreViewController {
     }
 
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
-        //TODO
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
+
+        tEmailField = new TextField("user id");
+        tCodFiscField = new TextField("codice fiscale");
+        buttonAbilitaOp = new Button("Abilita");
+        buttonAbilitaOp.setOnAction(this::executeAbilitaNuovoOperatore);
+
+        paramBox = new VBox();
+        paramBox.getChildren().add(tEmailField);
+        paramBox.getChildren().add(tCodFiscField);
+        paramBox.getChildren().add(buttonAbilitaOp);
+
+        this.borderPane.setRight(paramBox);
+
+        TableColumn<OperatoreAutorizzato, String> userColumn = new TableColumn<OperatoreAutorizzato, String>("email");
+        userColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
+        TableColumn<OperatoreAutorizzato, String> codFiscColumn = new TableColumn<OperatoreAutorizzato, String>("codice fiscale");
+        codFiscColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
+
+        tableView.setRowFactory(null);
+
+        Request opAutorizzatiRequest;
+        try{
+            opAutorizzatiRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.OP_AUTORIZZATO,
+                    null
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage());
+            return;
+        }
+
+        client.addRequest(opAutorizzatiRequest);
+        Response response = client.getResponse(opAutorizzatiRequest.getRequestId());
+        List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
+
+        tableView.getColumns().addAll(userColumn, codFiscColumn);
+        opAutorizzati.forEach(op -> tableView.getItems().add(op));
+
     }
 
-    private void executeAbilitaNuovoOperatore(String codfisc, String email){
+    private void executeAbilitaNuovoOperatore(ActionEvent event){
         //TODO
     }
 

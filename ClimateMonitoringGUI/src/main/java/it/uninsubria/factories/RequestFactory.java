@@ -176,6 +176,10 @@ public class RequestFactory {
                 params.put(passwordKey, "");
                 params.put(centroAfferenzaKey, "");
             }
+            case OP_AUTORIZZATO -> {
+                params.put(codFiscOpKey, "");
+                params.put(emailOpKey, "");
+            }
             default -> {return null;}
         }
         return params;

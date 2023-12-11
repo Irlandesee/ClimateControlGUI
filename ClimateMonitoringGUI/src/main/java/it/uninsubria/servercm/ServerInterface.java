@@ -64,6 +64,7 @@ public interface ServerInterface {
     int executeSignUpParamsLength = 7;
     int insertPcParamsLength = 12;
     int insertCmParamsLength = 4;
+    int insertAuthOpParamsLength = 2;
     int insertOpParamsLength = 7;
     int insertAiParamsLength = 5;
     int insertNpcParamsLength = 7;

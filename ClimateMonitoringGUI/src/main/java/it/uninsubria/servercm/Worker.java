@@ -119,6 +119,13 @@ public class Worker extends Thread{
                             res = insertOperatore(request);
                         }
                     }
+                    case OP_AUTORIZZATO -> {
+                        if(request.getParams().size() < ServerInterface.insertAuthOpParamsLength){
+                            res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
+                        }else{
+                            res = insertOperatoreAutorizzato(request);
+                        }
+                    }
                     case NOTA_PARAM_CLIMATICO -> {
                         if(request.getParams().size() < ServerInterface.insertNpcParamsLength){
                             res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
@@ -803,6 +810,27 @@ public class Worker extends Thread{
                 ResponseType.insertKo,
                 Tables.OPERATORE,
                 false);
+    }
+
+    public Response insertOperatoreAutorizzato(Request request){
+        Map<String, String> params = request.getParams();
+        String email = params.get(RequestFactory.emailOpKey);
+        String codFisc = params.get(RequestFactory.codFiscOpKey);
+        String query = "insert into operatore_autorizzati(codice_fiscale, email) values('%s','%s')".formatted(codFisc, email);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int res = stat.executeUpdate();
+            if(res == 1){
+                return new Response(
+                        clientId,
+                        requestId,
+                        responseId,
+                        ResponseType.insertOk,
+                        Tables.OP_AUTORIZZATO,
+                        true);
+            }
+        }catch (SQLException sqlException){sqlException.printStackTrace();}
+        return new Response(clientId, requestId, responseId, ResponseType.insertKo, Tables.OP_AUTORIZZATO, false);
+
     }
 
     public Response insertCentroMonitoraggio(Request request){
