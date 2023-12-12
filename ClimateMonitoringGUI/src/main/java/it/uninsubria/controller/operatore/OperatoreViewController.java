@@ -19,6 +19,7 @@ import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import it.uninsubria.util.IDGenerator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -773,9 +774,13 @@ public class OperatoreViewController {
         tableView.refresh();
 
         tDenominazione = new TextField("Denominazione");
-        tStato = new TextField("stato");
+        tDenominazione.setOnMouseClicked(e -> tDenominazione.clear());
+        tStato = new TextField("Stato");
+        tStato.setOnMouseClicked(e -> tStato.clear());
         tLatitudine = new TextField("Latitudine");
+        tLatitudine.setOnMouseClicked(e -> tLatitudine.clear());
         tLongitudine = new TextField("Longitudine");
+        tLongitudine.setOnMouseClicked(e -> tLongitudine.clear());
         Button inserisciAreaButton = new Button("inserisciArea");
         inserisciAreaButton.setOnAction(this::executeInsertAreaInteresse);
         tFilterCountry = new TextField("Filtra per stato");
@@ -820,9 +825,15 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     *
+     * @param event
+     */
+
     private void visualizeData(ActionEvent event){
         tableView.getItems().clear();
         Request request;
+        Request requestAi;
         Object source = event.getSource();
         if(source == visualizeCityData){
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
@@ -852,7 +863,30 @@ public class OperatoreViewController {
                 }
                 client.addRequest(request);
                 Response responseCity = client.getResponse(request.getRequestId());
-                List<City> cities = (List<City>)responseCity.getResult();
+                Map<String, String> paramsAiRequest = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                paramsAiRequest.replace(RequestFactory.condKey, "stato");
+                paramsAiRequest.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                try{
+                    requestAi  = RequestFactory.buildRequest(
+                            client.getClientId(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            paramsAiRequest
+                    );
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                client.addRequest(requestAi);
+                Response responseAi = client.getResponse(requestAi.getRequestId());
+                List<City> cities = (List<City>) responseCity.getResult();
+                List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAi.getResult();
+                for(AreaInteresse area : areeInteresse){
+                    cities = cities
+                                .stream()
+                                .filter(city -> !city.getAsciiName().equals(area.getDenominazione()))
+                                .toList();
+                }
                 cities.forEach(city -> tableView.getItems().add(city));
             }
         }else if(source == visualizeAiData){
@@ -870,14 +904,14 @@ public class OperatoreViewController {
                 }
             }else{
                 try{
-                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    params.replace(RequestFactory.condKey, "stato");
-                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    Map<String, String> paramsCityRequest = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    paramsCityRequest.replace(RequestFactory.condKey, "stato");
+                    paramsCityRequest.replace(RequestFactory.fieldKey, tFilterCountry.getText());
                     request = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
-                            params
+                            paramsCityRequest
                     );
                 }catch(MalformedRequestException mre){
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
@@ -977,11 +1011,54 @@ public class OperatoreViewController {
     private void executeInsertAreaInteresse(ActionEvent event){
         String denom = tDenominazione.getText();
         String stato = tStato.getText();
-        float latitudine = Float.parseFloat(tLatitudine.getText());
-        float longitudine = Float.parseFloat(tLongitudine.getText());
-        String params = "{%s}, {%s}, {%s}, {%s}".formatted(denom, stato, latitudine, longitudine);
-        logger.info(params);
-        //TODO
+        String latitudine = tLatitudine.getText();
+        String longitudine = tLongitudine.getText();
+
+        if(denom.isEmpty() || denom.equals("Denominazione")){
+            new Alert(Alert.AlertType.ERROR, "Denominazione non valida!");
+        }else if(stato.isEmpty() || stato.equals("Stato")){
+            new Alert(Alert.AlertType.ERROR, "Stato non valido!");
+        }else if(latitudine.isEmpty() || latitudine.equals("Latitudine")){
+            new Alert(Alert.AlertType.ERROR, "Latitudine non valida!");
+        }else if(longitudine.isEmpty() || longitudine.equals("Longitudine")){
+            new Alert(Alert.AlertType.ERROR, "Longitudine non valida!");
+        }
+
+        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE);
+        insertParams.replace(RequestFactory.areaIdKey, IDGenerator.generateID());
+        insertParams.replace(RequestFactory.denominazioneAreaKey, denom);
+        insertParams.replace(RequestFactory.statoAreaKey, stato);
+        insertParams.replace(RequestFactory.latitudineKey, latitudine);
+        insertParams.replace(RequestFactory.longitudineKey, longitudine);
+        Request insertRequest;
+        try{
+            insertRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    insertParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(insertRequest);
+        Response insertResponse = client.getResponse(insertRequest.getClientId());
+        Object obj = insertResponse.getResult();
+        if(obj instanceof String){
+            new Alert(Alert.AlertType.ERROR, ServerInterface.DUPLICATE_ITEM).showAndWait();
+        }else{
+            boolean res = (boolean)insertResponse.getResult();
+            if(res){
+                new Alert(Alert.AlertType.CONFIRMATION, ServerInterface.SUCCESSFULL_INSERT).showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, ServerInterface.UNSUCCESSFULL_INSERT).showAndWait();
+            }
+        }
+        tDenominazione.setText("Denominazione");
+        tStato.setText("Stato");
+        tLatitudine.setText("Latitudine");
+        tLongitudine.setText("Longitudine");
     }
 
     @FXML

@@ -75,6 +75,9 @@ public interface ServerInterface {
     String NEXT = "NEXT";
     String ID = "ID";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
+    String SUCCESSFULL_INSERT = "SUCCESSFUL_INSERT";
+    String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";
+    String DUPLICATE_ITEM = "DUPLICATE_ITEM";
 
     //public void quit() throws IOException;
     void sendRequest(Request r);

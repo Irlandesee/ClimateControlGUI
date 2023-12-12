@@ -2,6 +2,7 @@ package it.uninsubria.servercm;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
+import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
@@ -19,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class Worker extends Thread{
 
@@ -31,8 +33,10 @@ public class Worker extends Thread{
     private final String dbUrl;
     private final Properties props;
     private Connection conn;
+    private Logger logger;
 
     public Worker(String workerId, String dbUrl, Properties props, ServerCm server){
+        logger = Logger.getLogger(workerId);
         this.workerId = workerId;
         this.setName(workerId);
         this.server = server;
@@ -932,16 +936,39 @@ public class Worker extends Thread{
         String longitudine = params.get(RequestFactory.longitudineKey);
         String query = "insert into area_interesse(areaid, denominazione, stato, latitudine, longitudine) values ('%s', '%s', '%s', '%s', '%s')";
         query = query.formatted(areaId, denominazione, stato, latitudine, longitudine);
-        try(PreparedStatement stat = conn.prepareStatement(query)){
-            int res = stat.executeUpdate();
-            if(res == 1){
+        //Query the database to check if this ai already exists
+
+        String checkQuery =
+                String.format("select areaid from area_interesse where denominazione = '%s' and stato = '%s' and latitudine = '%s' and longitudine = '%s'",
+                        denominazione, stato, latitudine, longitudine);
+        logger.info(checkQuery);
+        try(PreparedStatement checkStat = conn.prepareStatement(checkQuery)){
+            ResultSet rSet = checkStat.executeQuery();
+            boolean checkResult = rSet.next();
+            System.out.println(checkResult);
+            if(!checkResult){
+                try(PreparedStatement stat = conn.prepareStatement(query)){
+                    int res = stat.executeUpdate();
+                    logger.info(String.valueOf(res));
+                    if(res == 1){
+                        return new Response(
+                                clientId,
+                                requestId,
+                                responseId,
+                                ResponseType.insertOk,
+                                Tables.AREA_INTERESSE,
+                                true
+                        );
+                    }
+                }catch(SQLException sqle){sqle.printStackTrace();}
+            }else{
                 return new Response(
                         clientId,
                         requestId,
                         responseId,
-                        ResponseType.insertOk,
+                        ResponseType.insertKo,
                         Tables.AREA_INTERESSE,
-                        true
+                        ServerInterface.DUPLICATE_ITEM
                 );
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
