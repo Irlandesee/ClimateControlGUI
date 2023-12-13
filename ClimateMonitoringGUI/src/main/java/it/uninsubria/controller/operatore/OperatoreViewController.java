@@ -1063,8 +1063,12 @@ public class OperatoreViewController {
 
     @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
-        paramBox.getChildren().clear();
+        //TODO: Aggiungere un modo per vedere i centri di monitoraggio:
+        //magari con un bottone ceh switcha attraverso le tableview?
+        //Un bottone fa visualizzare i centri, schiacciando l'altro si vedono
+        //le area di interesse
 
+        paramBox = new VBox();
         tFilterCountry = new TextField("Filtra per stato");
         tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
         visualizeAiData = new Button("Visualizza data");
@@ -1085,9 +1089,102 @@ public class OperatoreViewController {
 
     }
 
-    public boolean executeInsertPCQuery(String nomeArea, String centroMon, LocalDate pubdate, short[] paramValues, String[] notes){
-        //TODO
-        return false;
+    public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
+        System.out.println(nomeArea);
+        System.out.println(centroMon);
+        Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
+        reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
+        reqAreaIdParams.replace(RequestFactory.fieldKey, nomeArea);
+        Request requestAreaId;
+        try{
+            requestAreaId = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    reqAreaIdParams);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(requestAreaId);
+        Response respAreaId = client.getResponse(requestAreaId.getRequestId());
+
+        Map<String, String> reqCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        reqCentroIdParams.replace(RequestFactory.objectKey, "centroid");
+        reqCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
+        reqCentroIdParams.replace(RequestFactory.fieldKey, centroMon);
+        Request requestCentroId;
+        try{
+            requestCentroId = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    reqCentroIdParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(requestCentroId);
+        Response respCentroId = client.getResponse(requestCentroId.getRequestId());
+        /**
+         * TODO:
+         * NullPointerException se non c'e' risultato... add checks...
+         * **/
+        String areaId = respAreaId.getResult().toString();
+        String centroId = respCentroId.getResult().toString();
+        logger.info(areaId);
+        logger.info(centroId);
+
+        Request insertNotaRequest;
+        try{
+            insertNotaRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
+                    notaInsertParams);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(insertNotaRequest);
+        Response responseNota = client.getResponse(insertNotaRequest.getRequestId());
+
+
+        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
+        insertParams.replace(RequestFactory.parameterIdKey, parameterId);
+        insertParams.replace(RequestFactory.areaIdKey, areaId);
+        insertParams.replace(RequestFactory.centroIdKey, centroId);
+        insertParams.replace(RequestFactory.pubDateKey, pubdate.toString());
+        insertParams.replace(RequestFactory.notaIdKey, notaId);
+        insertParams.replace(RequestFactory.valoreVentoKey, paramValues.get(RequestFactory.valoreVentoKey));
+        insertParams.replace(RequestFactory.valoreUmiditaKey, paramValues.get(RequestFactory.valoreUmiditaKey));
+        insertParams.replace(RequestFactory.valorePressioneKey, paramValues.get(RequestFactory.valorePressioneKey));
+        insertParams.replace(RequestFactory.valorePrecipitazioniKey, paramValues.get(RequestFactory.valorePrecipitazioniKey));
+        insertParams.replace(RequestFactory.valoreTemperaturaKey, paramValues.get(RequestFactory.valoreTemperaturaKey));
+        insertParams.replace(RequestFactory.valoreAltGhiacciaiKey, paramValues.get(RequestFactory.valoreAltGhiacciaiKey));
+        insertParams.replace(RequestFactory.valoreMassaGhiacciaiKey, paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
+
+        Request insertPcRequest;
+        try{
+            insertPcRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.PARAM_CLIMATICO,
+                    insertParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(insertPcRequest);
+        Response insertPcResponse = client.getResponse(insertPcRequest.getRequestId());
+        if((boolean) insertPcResponse.getResult()){
+            new Alert(Alert.AlertType.CONFIRMATION, ServerInterface.SUCCESSFULL_INSERT).showAndWait();
+        }else{
+            new Alert(Alert.AlertType.ERROR, ServerInterface.UNSUCCESSFULL_INSERT).showAndWait();
+        }
     }
 
     public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){

@@ -2,6 +2,9 @@ package it.uninsubria.controller.parametroclimatico;
 
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.operatore.OperatoreViewController;
+import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.servercm.ServerInterface;
+import it.uninsubria.util.IDGenerator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -12,8 +15,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 public class ParametroClimaticoController {
+
+
     public TextField areaInteresseField;
     public TextField cmField;
     public DatePicker pubDatePicker;
@@ -85,8 +91,8 @@ public class ParametroClimaticoController {
         short tempValue;
         short altGhiacciaiValue;
         short massaGhiacciaiValue;
-        short[] paramValues = new short[7];
-        String[] notes = new String[7];
+        Map<String, String> paramValues = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
+        Map<String, String> notes = RequestFactory.buildInsertParams(ServerInterface.Tables.NOTA_PARAM_CLIMATICO);
 
         if(nomeArea.isEmpty() || centroMon.isEmpty()){
             nomeOrCentroError.showAndWait();
@@ -168,20 +174,21 @@ public class ParametroClimaticoController {
             }else{
                 massaGhiacciaiValue = Short.MIN_VALUE;
             }
-            paramValues[0] = ventoValue;
-            paramValues[1] = umiditaValue;
-            paramValues[2] = pressioneValue;
-            paramValues[3] = precipitazioniValue;
-            paramValues[4] = tempValue;
-            paramValues[5] = altGhiacciaiValue;
-            paramValues[6] = massaGhiacciaiValue;
-            notes[0] = notaVento;
-            notes[1] = notaUmidita;
-            notes[2] = notaPressione;
-            notes[3] = notaPrecipitazioni;
-            notes[4] = notaTemperatura;
-            notes[5] = notaAltGhiacciai;
-            notes[6] = notaMassaGhiacciai;
+            paramValues.replace(RequestFactory.valoreVentoKey, String.valueOf(ventoValue));
+            paramValues.replace(RequestFactory.valoreUmiditaKey, String.valueOf(umiditaValue));
+            paramValues.replace(RequestFactory.valorePressioneKey, String.valueOf(pressioneValue));
+            paramValues.replace(RequestFactory.valorePrecipitazioniKey, String.valueOf(precipitazioniValue));
+            paramValues.replace(RequestFactory.valoreTemperaturaKey, String.valueOf(tempValue));
+            paramValues.replace(RequestFactory.valoreAltGhiacciaiKey, String.valueOf(altGhiacciaiValue));
+            paramValues.replace(RequestFactory.valoreMassaGhiacciaiKey, String.valueOf(massaGhiacciaiValue));
+
+            notes.replace(RequestFactory.notaVentoKey, notaVento);
+            notes.replace(RequestFactory.notaPressione, notaPressione);
+            notes.replace(RequestFactory.notaUmidita, notaUmidita);
+            notes.replace(RequestFactory.notaPrecipitazioni, notaPrecipitazioni);
+            notes.replace(RequestFactory.notaTemperatura, notaTemperatura);
+            notes.replace(RequestFactory.notaAltGhiacciai, notaAltGhiacciai);
+            notes.replace(RequestFactory.notaMassaGhiacciai, notaMassaGhiacciai);
         }catch(NumberFormatException nfe){
             nfe.printStackTrace();
             pcAlert.showAndWait();
@@ -189,14 +196,9 @@ public class ParametroClimaticoController {
         }
 
         //query the db
-        try {
-            boolean res = operatoreViewController.executeInsertPCQuery(nomeArea, centroMon, pubDate, paramValues, notes);
-            if(res){
-                new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo");
-            }else{
-                new Alert(Alert.AlertType.ERROR, "L'inserimento ha fallito!");
-            }
-        }catch(NullPointerException npe){System.out.println("NullPointerException while executing insertPC query");}
+        String parameterId = IDGenerator.generateID();
+        String notaId = IDGenerator.generateID();
+        operatoreViewController.executeInsertPCQuery(parameterId, nomeArea, centroMon, pubDate, paramValues, notaId, notes);
         clearValoriFields();
     }
 

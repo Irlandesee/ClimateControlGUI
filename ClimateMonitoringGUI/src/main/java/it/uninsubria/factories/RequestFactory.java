@@ -50,6 +50,13 @@ public class RequestFactory {
     public static final String notaPrecipitazioni = "notaPrecipitazioni";
     public static final String notaAltGhiacciai = "notaAltGhiacciai";
     public static final String notaMassaGhiacciai = "notaMassaGhiacciai";
+    public static final int posVento = 0;
+    public static final int posUmidita = 1;
+    public static final int posPressione= 2;
+    public static final int posPrecipitazioni = 3;
+    public static final int posTemperatura = 4;
+    public static final int posAltGhiacciai = 5;
+    public static final int posMassaGhiacciai = 6;
 
     public static Request buildRequest(String clientId, ServerInterface.RequestType requestType, ServerInterface.Tables table, Map<String, String> params) throws MalformedRequestException{
         switch(requestType){
