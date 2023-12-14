@@ -11,7 +11,6 @@ import it.uninsubria.controller.dialog.GraphDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
-import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
@@ -20,20 +19,15 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.util.IDGenerator;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.w3c.dom.events.MouseEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -115,9 +109,8 @@ public class OperatoreViewController {
 
     private final ParametroClimaticoController parametroClimaticoController;
     //private final RegistrazioneController registrazioneController;
-
-
     private final Logger logger;
+    private ServerInterface.Tables tableShown;
 
     public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
         this.mainWindowController = mainWindowController;
@@ -184,9 +177,82 @@ public class OperatoreViewController {
         }
     }
 
-    public void handleRicercaAreaInteresse(ActionEvent actionEvent){
+    private void prepTableCity(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.refresh();
+        tableShown = ServerInterface.Tables.CITY;
+
+
+        TableColumn nomeColumn = new TableColumn("denominazione");
+        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
+        TableColumn latitudineColumn = new TableColumn("latitudine");
+        latitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("latitude"));
+        TableColumn longitudineColumn = new TableColumn("longitudine");
+        longitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("longitude"));
+        tableView.getColumns().addAll(nomeColumn, countryColumn, latitudineColumn, longitudineColumn);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    City c = (City) row.getItem();
+                    tDenominazione.setText(c.getAsciiName());
+                    tStato.setText(c.getCountry());
+                    tLatitudine.setText(String.valueOf(c.getLatitude()));
+                    tLongitudine.setText(String.valueOf(c.getLongitude()));
+                }
+            });
+
+            return row;
+        });
+    }
+
+    private void prepTableCentroMonitoraggio(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
+        tableShown = ServerInterface.Tables.CENTRO_MONITORAGGIO;
+
+        TableColumn nomeColumn = new TableColumn("denominazione");
+        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
+        TableColumn countryColumn = new TableColumn("stato");
+        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
+        tableView.getColumns().addAll(nomeColumn, countryColumn);
+
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    City c = (City) row.getItem();
+                    nomeCentroField.setText(c.getAsciiName()+"Centro");
+                    comuneField.setText(c.getAsciiName());
+                    statoCMField.setText(c.getCountry());
+                }
+            });
+            return row;
+        });
+
+    }
+
+    private void prepTableOperatore(){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
+        TableColumn<OperatoreAutorizzato, String> userColumn = new TableColumn<OperatoreAutorizzato, String>("email");
+        userColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
+        TableColumn<OperatoreAutorizzato, String> codFiscColumn = new TableColumn<OperatoreAutorizzato, String>("codice fiscale");
+        codFiscColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
+
+        tableView.setRowFactory(null);
+        tableView.getColumns().addAll(userColumn, codFiscColumn);
+
+    }
+
+
+    public void handleRicercaAreaInteresse(ActionEvent actionEvent){
         prepTableAreaInteresse();
         this.paramBox = new VBox(10);
         //denominazione, stato, latitudine, longitudine
@@ -224,6 +290,7 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         tableView.getColumns().clear();
         tableView.refresh();
+        tableShown = ServerInterface.Tables.AREA_INTERESSE;
 
         TableColumn denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
@@ -441,6 +508,7 @@ public class OperatoreViewController {
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
+        tableShown = ServerInterface.Tables.PARAM_CLIMATICO;
 
 
         TableColumn dateColumn = new TableColumn("Data");
@@ -772,6 +840,8 @@ public class OperatoreViewController {
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
+        tableShown = ServerInterface.Tables.CITY;
+        prepTableCity();
 
         tDenominazione = new TextField("Denominazione");
         tDenominazione.setOnMouseClicked(e -> tDenominazione.clear());
@@ -798,30 +868,6 @@ public class OperatoreViewController {
         paramBox.getChildren().add(visualizeCityData);
         this.borderPane.setRight(paramBox);
 
-        TableColumn nomeColumn = new TableColumn("denominazione");
-        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
-        TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
-        TableColumn latitudineColumn = new TableColumn("latitudine");
-        latitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("latitude"));
-        TableColumn longitudineColumn = new TableColumn("longitudine");
-        longitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("longitude"));
-        tableView.getColumns().addAll(nomeColumn, countryColumn, latitudineColumn, longitudineColumn);
-
-        tableView.setRowFactory(tv -> {
-            TableRow row = new TableRow();
-            row.setOnMouseClicked(event -> {
-                if(event.getClickCount() == 2 && (!row.isEmpty())){
-                    City c = (City) row.getItem();
-                    tDenominazione.setText(c.getAsciiName());
-                    tStato.setText(c.getCountry());
-                    tLatitudine.setText(String.valueOf(c.getLatitude()));
-                    tLongitudine.setText(String.valueOf(c.getLongitude()));
-                }
-            });
-
-            return row;
-        });
 
     }
 
@@ -836,6 +882,9 @@ public class OperatoreViewController {
         Request requestAi;
         Object source = event.getSource();
         if(source == visualizeCityData){
+            if(tableShown != ServerInterface.Tables.CITY){
+                prepTableCity();
+            }
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
@@ -890,6 +939,9 @@ public class OperatoreViewController {
                 cities.forEach(city -> tableView.getItems().add(city));
             }
         }else if(source == visualizeAiData){
+            if(tableShown != ServerInterface.Tables.AREA_INTERESSE){
+                prepTableAreaInteresse();
+            }
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
@@ -924,6 +976,9 @@ public class OperatoreViewController {
                 areeInteresse.forEach(ai -> tableView.getItems().add(ai));
             }
         }else if(source == visualizeCmData){
+            if(tableShown != ServerInterface.Tables.CENTRO_MONITORAGGIO){
+                prepTableCentroMonitoraggio();
+            }
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 Request citiesRequest;
                 Request centriMonitoraggioRequest;
@@ -1071,10 +1126,13 @@ public class OperatoreViewController {
         paramBox = new VBox();
         tFilterCountry = new TextField("Filtra per stato");
         tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
-        visualizeAiData = new Button("Visualizza data");
+        visualizeAiData = new Button("Visualizza aree");
         visualizeAiData.setOnAction(this::visualizeData);
+        visualizeCmData = new Button("Visualizza centri");
+        visualizeCmData.setOnAction(this::visualizeCmData);
         paramBox.getChildren().add(tFilterCountry);
         paramBox.getChildren().add(visualizeAiData);
+        paramBox.getChildren().add(visualizeCmData);
         this.borderPane.setRight(paramBox);
 
         prepTableAreaInteresse();
@@ -1089,9 +1147,41 @@ public class OperatoreViewController {
 
     }
 
+    private void visualizeCmData(ActionEvent event){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.setRowFactory(null);
+        tableView.refresh();
+        Request cmRequest;
+        try{
+            cmRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    null
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage());
+            return;
+        }
+        client.addRequest(cmRequest);
+        Response response = client.getResponse(client.getClientId());
+        List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) response.getResult();
+        TableColumn<CentroMonitoraggio, String> nomeCentroColumn = new TableColumn<CentroMonitoraggio, String>("Nome");
+        nomeCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+        TableColumn<CentroMonitoraggio, String> statoCentroColumn = new TableColumn<CentroMonitoraggio, String>("Stato");
+        statoCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("country"));
+        tableView.getColumns().addAll(nomeCentroColumn, statoCentroColumn);
+
+        centri.forEach(centro -> tableView.getItems().add(centro));
+    }
+
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
-        System.out.println(nomeArea);
-        System.out.println(centroMon);
+        logger.info("nome area: "+ nomeArea);
+        logger.info("Noem centro: " + centroMon);
+        logger.info("Parameterid: " +parameterId);
+        logger.info("Notaid:  "+ notaId);
+
         Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
         reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
         reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
@@ -1132,12 +1222,21 @@ public class OperatoreViewController {
          * TODO:
          * NullPointerException se non c'e' risultato... add checks...
          * **/
+        if(respAreaId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
+            new Alert(Alert.AlertType.INFORMATION, ServerInterface.ResponseType.NoSuchElement.label);
+            return;
+        }
+        if(respCentroId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
+            new Alert(Alert.AlertType.INFORMATION, ServerInterface.ResponseType.NoSuchElement.label);
+            return;
+        }
         String areaId = respAreaId.getResult().toString();
         String centroId = respCentroId.getResult().toString();
         logger.info(areaId);
         logger.info(centroId);
 
         Request insertNotaRequest;
+        notaInsertParams.replace(RequestFactory.notaIdKey, notaId);
         try{
             insertNotaRequest = RequestFactory.buildRequest(
                     client.getClientId(),
@@ -1146,6 +1245,7 @@ public class OperatoreViewController {
                     notaInsertParams);
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            logger.info("Mre costruzione insertNota");
             return;
         }
         client.addRequest(insertNotaRequest);
@@ -1176,6 +1276,7 @@ public class OperatoreViewController {
             );
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            logger.info("Mre costruzione insertPc");
             return;
         }
         client.addRequest(insertPcRequest);
@@ -1188,17 +1289,7 @@ public class OperatoreViewController {
     }
 
     public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){
-
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        tableView.refresh();
-
-        TableColumn nomeColumn = new TableColumn("denominazione");
-        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
-        TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
-        tableView.getColumns().addAll(nomeColumn, countryColumn);
-
+        prepTableCentroMonitoraggio();
 
         this.paramBox = new VBox();
         nomeCentroField = new TextField("Nome centro");
@@ -1233,18 +1324,6 @@ public class OperatoreViewController {
         paramBox.getChildren().add(tFilterCountry);
         paramBox.getChildren().add(visualizeCmData);
 
-        tableView.setRowFactory(tv -> {
-            TableRow row = new TableRow();
-            row.setOnMouseClicked(event -> {
-                if(event.getClickCount() == 2 && (!row.isEmpty())){
-                    City c = (City) row.getItem();
-                    nomeCentroField.setText(c.getAsciiName()+"Centro");
-                    comuneField.setText(c.getAsciiName());
-                    statoCMField.setText(c.getCountry());
-                }
-            });
-            return row;
-        });
 
         this.borderPane.setRight(paramBox);
 
@@ -1324,9 +1403,6 @@ public class OperatoreViewController {
     }
 
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        tableView.refresh();
 
         tEmailField = new TextField("user id");
         tCodFiscField = new TextField("codice fiscale");
@@ -1340,12 +1416,6 @@ public class OperatoreViewController {
 
         this.borderPane.setRight(paramBox);
 
-        TableColumn<OperatoreAutorizzato, String> userColumn = new TableColumn<OperatoreAutorizzato, String>("email");
-        userColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
-        TableColumn<OperatoreAutorizzato, String> codFiscColumn = new TableColumn<OperatoreAutorizzato, String>("codice fiscale");
-        codFiscColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
-
-        tableView.setRowFactory(null);
 
         Request opAutorizzatiRequest;
         try{
@@ -1364,7 +1434,6 @@ public class OperatoreViewController {
         Response response = client.getResponse(opAutorizzatiRequest.getRequestId());
         List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
 
-        tableView.getColumns().addAll(userColumn, codFiscColumn);
         opAutorizzati.forEach(op -> tableView.getItems().add(op));
 
     }
@@ -1443,7 +1512,7 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         tableView.refresh();
         //tableView.setRowFactory(null);
-        Request requestCentro = null;
+        Request requestCentro;
         try{
             requestCentro = RequestFactory.buildRequest(
                     client.getClientId(),

@@ -194,8 +194,6 @@ public class ParametroClimaticoController {
             pcAlert.showAndWait();
             return;
         }
-
-        //query the db
         String parameterId = IDGenerator.generateID();
         String notaId = IDGenerator.generateID();
         operatoreViewController.executeInsertPCQuery(parameterId, nomeArea, centroMon, pubDate, paramValues, notaId, notes);

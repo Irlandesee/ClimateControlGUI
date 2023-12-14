@@ -128,6 +128,14 @@ public class RequestFactory {
                             return new Request(clientId, requestType, table, params);
                         }
                     }
+                    case NOTA_PARAM_CLIMATICO -> {
+                        if(params.keySet().size() < ServerInterface.insertNpcParamsLength){
+                            throw new MalformedRequestException(paramLengthError);
+                        }else{
+                            return new Request(clientId, requestType, table, params);
+                        }
+
+                    }
                 }
             }
         }

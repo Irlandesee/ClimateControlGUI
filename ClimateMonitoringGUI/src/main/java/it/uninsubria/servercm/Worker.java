@@ -892,8 +892,8 @@ public class Worker extends Thread{
         String valoreAltGhiacciai = params.get(RequestFactory.valoreAltGhiacciaiKey);
         String valoreMassaGhiacciai = params.get(RequestFactory.valoreMassaGhiacciaiKey);
         String query =
-                "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
-                        "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+                "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, notaid, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
+                        "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
         query = query.formatted(
                 parameterId,
                 centroId,
