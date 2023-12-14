@@ -882,8 +882,9 @@ public class Worker extends Thread{
         Map<String, String> params = request.getParams();
         String parameterId = params.get(RequestFactory.parameterIdKey);
         String centroId = params.get(RequestFactory.centroIdKey);
-        String areaId = params.get(RequestFactory.pubDateKey);
+        String areaId = params.get(RequestFactory.areaIdKey);
         String notaId = params.get(RequestFactory.notaIdKey);
+        String pubDate = params.get(RequestFactory.pubDateKey);
         String valoreVento = params.get(RequestFactory.valoreVentoKey);
         String valoreUmidita = params.get(RequestFactory.valoreUmiditaKey);
         String valorePressione = params.get(RequestFactory.valorePressioneKey);
@@ -894,10 +895,12 @@ public class Worker extends Thread{
         String query =
                 "insert into parametro_climatico(parameterid, centroid, areaid, pubdate, notaid, valore_vento, valore_umidita, valore_pressione, valore_temperatura, valore_precipitazioni, valore_alt_ghiacciai, valore_massa_ghiacciai) " +
                         "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+        //12
         query = query.formatted(
                 parameterId,
                 centroId,
                 areaId,
+                pubDate,
                 notaId,
                 valoreVento,
                 valoreUmidita,
