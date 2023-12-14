@@ -265,13 +265,13 @@ public class OperatoreViewController {
         this.tLongitudine = new TextField("longitudine");
         this.tLongitudine.setOnMouseClicked((event) -> {this.tLongitudine.clear();});
         this.btnRicercaAreaPerDenom = new Button("Ricerca per nome");
+        this.btnRicercaAreaPerDenom.setOnAction(this::visualizeAiData);
         this.btnRicercaAreaPerStato = new Button("Ricerca per stato");
+        this.btnRicercaAreaPerStato.setOnAction(this::visualizeAiData);
         this.btnRicercaAreaCoord = new Button("Ricerca Coord");
+        this.btnRicercaAreaCoord.setOnAction(this::visualizeAiData);
 
-        this.btnRicercaAreaPerDenom.setOnAction(event -> {
-            ricercaAreaPerDenom();
-        });
-
+        this.btnRicercaAreaPerDenom.setOnAction(event -> {ricercaAreaPerDenom();});
         btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
 
         this.btnRicercaAreaCoord.setOnAction(event -> {handleRicercaAreaPerCoordinate();});
@@ -292,16 +292,16 @@ public class OperatoreViewController {
         tableView.refresh();
         tableShown = ServerInterface.Tables.AREA_INTERESSE;
 
-        TableColumn denomColumn = new TableColumn("denominazione");
+        TableColumn<AreaInteresse, String> denomColumn = new TableColumn<AreaInteresse, String>("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
         denomColumn.setMinWidth(120);
-        TableColumn countryColumn = new TableColumn("stato");
+        TableColumn<AreaInteresse, String> countryColumn = new TableColumn<AreaInteresse, String>("stato");
         countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
         countryColumn.setMinWidth(100);
-        TableColumn latColumn = new TableColumn("latitudine");
+        TableColumn<AreaInteresse, String> latColumn = new TableColumn<AreaInteresse, String>("latitudine");
         latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
         latColumn.setMinWidth(100);
-        TableColumn longColumn = new TableColumn("longitudine");
+        TableColumn<AreaInteresse, String> longColumn = new TableColumn<AreaInteresse, String>("longitudine");
         longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
         longColumn.setMinWidth(100);
 
@@ -367,6 +367,7 @@ public class OperatoreViewController {
         });
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
+
 
     private void showAreeInserite(){
         Request request = null;
@@ -511,21 +512,21 @@ public class OperatoreViewController {
         tableShown = ServerInterface.Tables.PARAM_CLIMATICO;
 
 
-        TableColumn dateColumn = new TableColumn("Data");
+        TableColumn<ParametroClimatico, LocalDate> dateColumn = new TableColumn<ParametroClimatico, LocalDate>("Data");
         dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
-        TableColumn ventoColumn = new TableColumn("Vento");
+        TableColumn<ParametroClimatico, Short> ventoColumn = new TableColumn<ParametroClimatico, Short>("Vento");
         ventoColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("ventoValue"));
-        TableColumn umiditaColumn = new TableColumn("Umidita");
+        TableColumn<ParametroClimatico, Short> umiditaColumn = new TableColumn<ParametroClimatico, Short>("Umidita");
         umiditaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("umiditaValue"));
-        TableColumn pressioneColumn = new TableColumn("Pressione");
+        TableColumn<ParametroClimatico, Short> pressioneColumn = new TableColumn<ParametroClimatico, Short>("Pressione");
         pressioneColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("pressioneValue"));
-        TableColumn temperaturaColumn = new TableColumn("Temperatura");
+        TableColumn<ParametroClimatico, Short> temperaturaColumn = new TableColumn<ParametroClimatico, Short>("Temperatura");
         temperaturaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("temperaturaValue"));
-        TableColumn precipitazioniColumn = new TableColumn("Precipitazioni");
+        TableColumn<ParametroClimatico, Short> precipitazioniColumn = new TableColumn<ParametroClimatico, Short>("Precipitazioni");
         precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("precipitazioniValue"));
-        TableColumn altitudineColumn = new TableColumn("Altitudine ghiacciai");
+        TableColumn<ParametroClimatico, Short> altitudineColumn = new TableColumn<ParametroClimatico, Short>("Altitudine ghiacciai");
         altitudineColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("altitudineValue"));
-        TableColumn massaColumn = new TableColumn("Massa ghiacciai");
+        TableColumn<ParametroClimatico, Short> massaColumn = new TableColumn<ParametroClimatico, Short>("Massa ghiacciai");
         massaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("massaValue"));
 
         tableView.getColumns().addAll(dateColumn, ventoColumn, umiditaColumn,
@@ -871,10 +872,46 @@ public class OperatoreViewController {
 
     }
 
-    /**
-     *
-     * @param event
-     */
+    //TODO: group visualize data methods in a better way?
+    private void visualizeAiData(ActionEvent event){
+        Object source = event.getSource();
+        if(source == btnRicercaAreaPerDenom){
+
+        }else if(source == btnRicercaAreaPerStato){
+
+        }else if(source == btnRicercaAreaCoord){
+
+        }
+    }
+
+    private void visualizeCmData(ActionEvent event){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.setRowFactory(null);
+        tableView.refresh();
+        Request cmRequest;
+        try{
+            cmRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAll,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    null
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage());
+            return;
+        }
+        client.addRequest(cmRequest);
+        Response response = client.getResponse(client.getClientId());
+        List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) response.getResult();
+        TableColumn<CentroMonitoraggio, String> nomeCentroColumn = new TableColumn<CentroMonitoraggio, String>("Nome");
+        nomeCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+        TableColumn<CentroMonitoraggio, String> statoCentroColumn = new TableColumn<CentroMonitoraggio, String>("Stato");
+        statoCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("country"));
+        tableView.getColumns().addAll(nomeCentroColumn, statoCentroColumn);
+
+        centri.forEach(centro -> tableView.getItems().add(centro));
+    }
 
     private void visualizeData(ActionEvent event){
         tableView.getItems().clear();
@@ -1147,34 +1184,6 @@ public class OperatoreViewController {
 
     }
 
-    private void visualizeCmData(ActionEvent event){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        tableView.setRowFactory(null);
-        tableView.refresh();
-        Request cmRequest;
-        try{
-            cmRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    null
-            );
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage());
-            return;
-        }
-        client.addRequest(cmRequest);
-        Response response = client.getResponse(client.getClientId());
-        List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) response.getResult();
-        TableColumn<CentroMonitoraggio, String> nomeCentroColumn = new TableColumn<CentroMonitoraggio, String>("Nome");
-        nomeCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-        TableColumn<CentroMonitoraggio, String> statoCentroColumn = new TableColumn<CentroMonitoraggio, String>("Stato");
-        statoCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("country"));
-        tableView.getColumns().addAll(nomeCentroColumn, statoCentroColumn);
-
-        centri.forEach(centro -> tableView.getItems().add(centro));
-    }
 
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
