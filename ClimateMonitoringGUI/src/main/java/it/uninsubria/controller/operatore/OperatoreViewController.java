@@ -1222,12 +1222,22 @@ public class OperatoreViewController {
          * TODO:
          * NullPointerException se non c'e' risultato... add checks...
          * **/
-        if(respAreaId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
-            new Alert(Alert.AlertType.INFORMATION, ServerInterface.ResponseType.NoSuchElement.label);
+        if(respAreaId.getRespType() != ServerInterface.ResponseType.Object){
+            ServerInterface.ResponseType responseType = respAreaId.getRespType();
+            if(responseType == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
+            }else if(responseType == ServerInterface.ResponseType.Error){
+                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.Error.label).showAndWait();
+            }
             return;
         }
-        if(respCentroId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
-            new Alert(Alert.AlertType.INFORMATION, ServerInterface.ResponseType.NoSuchElement.label);
+        if(respCentroId.getRespType() != ServerInterface.ResponseType.Object){
+            ServerInterface.ResponseType responseType = respAreaId.getRespType();
+            if(responseType == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
+            }else if(responseType == ServerInterface.ResponseType.Error){
+                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.Error.label).showAndWait();
+            }
             return;
         }
         String areaId = respAreaId.getResult().toString();
@@ -1250,7 +1260,10 @@ public class OperatoreViewController {
         }
         client.addRequest(insertNotaRequest);
         Response responseNota = client.getResponse(insertNotaRequest.getRequestId());
-
+        if(responseNota.getRespType() == ServerInterface.ResponseType.insertKo){
+            new Alert(Alert.AlertType.ERROR, "errore inserimento nota").showAndWait();
+            return;
+        }
 
         Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
         insertParams.replace(RequestFactory.parameterIdKey, parameterId);
@@ -1281,10 +1294,14 @@ public class OperatoreViewController {
         }
         client.addRequest(insertPcRequest);
         Response insertPcResponse = client.getResponse(insertPcRequest.getRequestId());
-        if((boolean) insertPcResponse.getResult()){
-            new Alert(Alert.AlertType.CONFIRMATION, ServerInterface.SUCCESSFULL_INSERT).showAndWait();
+        if(insertPcResponse.getRespType() == ServerInterface.ResponseType.insertKo){
+            new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
         }else{
-            new Alert(Alert.AlertType.ERROR, ServerInterface.UNSUCCESSFULL_INSERT).showAndWait();
+            if((boolean) insertPcResponse.getResult()){
+                new Alert(Alert.AlertType.CONFIRMATION, ServerInterface.SUCCESSFULL_INSERT).showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
+            }
         }
     }
 
