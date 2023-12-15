@@ -841,12 +841,21 @@ public class Worker extends Thread{
         Map<String, String> params = request.getParams();
         String centroId = IDGenerator.generateID();
         //String,String,String,String
-        String tmp =  params.get(RequestFactory.listAiKey);
-        String[] idAreeInteresseAssociate = tmp.split(",");
-        int idListSize = idAreeInteresseAssociate.length;
+        String[] nomiAree =  params.get(RequestFactory.listAiKey).split(",");
+        List<String> idAreeInteresseAssociate = new LinkedList<String>();
+        for(String denominazione : nomiAree){
+            String query = "select areaid from area_interesse where denominazione = '%s'".formatted(denominazione);
+            try(PreparedStatement stat = conn.prepareStatement(query)){
+                ResultSet rSet = stat.executeQuery();
+                while(rSet.next()){
+                    idAreeInteresseAssociate.add(rSet.getString("areaid"));
+                }
+            }catch(SQLException sqle){sqle.printStackTrace();}
+        }
+        int idListSize = idAreeInteresseAssociate.size();
         StringBuilder ids = new StringBuilder();
         for(int i = 0; i < idListSize; i++){
-            ids.append(idAreeInteresseAssociate[i]);
+            ids.append(idAreeInteresseAssociate.get(i));
             if(i < idListSize - 1)
                 ids.append(",");
         }

@@ -28,6 +28,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.http.protocol.RequestExpectContinue;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -890,16 +891,34 @@ public class OperatoreViewController {
         tableView.setRowFactory(null);
         tableView.refresh();
         Request cmRequest;
-        try{
-            cmRequest = RequestFactory.buildRequest(
+        String country = tFilterCountry.getText();
+        if(country.isEmpty()){
+            try{
+                cmRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null
             );
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage());
-            return;
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                return;
+            }
+        }else{
+            try{
+                Map<String, String> cmParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                cmParams.replace(RequestFactory.condKey, "country");
+                cmParams.replace(RequestFactory.fieldKey, country);
+                cmRequest = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.selectAllWithCond,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        cmParams
+                );
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                return;
+            }
         }
         client.addRequest(cmRequest);
         Response response = client.getResponse(client.getClientId());
@@ -1403,6 +1422,10 @@ public class OperatoreViewController {
         logger.info(areaList.toString());
         areaInteresseCMField.clear();
         Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO);
+        insertParams.replace(RequestFactory.nomeCentroKey, nomeCentro);
+        insertParams.replace(RequestFactory.comuneCentroKey, comuneCentro);
+        insertParams.replace(RequestFactory.countryCentroKey, statoCentro);
+        insertParams.replace(RequestFactory.listAiKey, areaList.toString());
         Request insertCmRequest;
         try{
             insertCmRequest = RequestFactory.buildRequest(
@@ -1423,9 +1446,7 @@ public class OperatoreViewController {
         else{
             new Alert(Alert.AlertType.ERROR, "errore nell'inserimento ").showAndWait();
         }
-
         clearCMFields();
-
     }
 
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
@@ -1534,6 +1555,7 @@ public class OperatoreViewController {
 
     @FXML
     public void handleVisualizzaCentri(){
+        paramBox.getChildren().clear();
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
