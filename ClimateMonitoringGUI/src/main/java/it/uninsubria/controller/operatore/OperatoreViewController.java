@@ -1450,11 +1450,31 @@ public class OperatoreViewController {
     }
 
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
 
-        tEmailField = new TextField("user id");
+        tEmailField = new TextField("email");
         tCodFiscField = new TextField("codice fiscale");
         buttonAbilitaOp = new Button("Abilita");
         buttonAbilitaOp.setOnAction(this::executeAbilitaNuovoOperatore);
+
+        TableColumn<OperatoreAutorizzato, String> emailColumn = new TableColumn<OperatoreAutorizzato, String>();
+        emailColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
+        TableColumn<OperatoreAutorizzato, String> codiceFiscaleColumn = new TableColumn<OperatoreAutorizzato, String>();
+        codiceFiscaleColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
+        tableView.getColumns().addAll(emailColumn, codiceFiscaleColumn);
+        tableView.setRowFactory(tv -> {
+            TableRow row = new TableRow();
+            row.setOnMouseClicked(event -> {
+                if(event.getClickCount() == 2 && (!row.isEmpty())){
+                    OperatoreAutorizzato op = (OperatoreAutorizzato) row.getItem();
+                    tEmailField.setText(op.getEmail());
+                    tCodFiscField.setText(op.getCodFiscale());
+                }
+            });
+            return row;
+        });
 
         paramBox = new VBox();
         paramBox.getChildren().add(tEmailField);
@@ -1462,7 +1482,6 @@ public class OperatoreViewController {
         paramBox.getChildren().add(buttonAbilitaOp);
 
         this.borderPane.setRight(paramBox);
-
 
         Request opAutorizzatiRequest;
         try{
@@ -1486,8 +1505,45 @@ public class OperatoreViewController {
     }
 
     private void executeAbilitaNuovoOperatore(ActionEvent event){
-        //TODO
+        String email = tEmailField.getText();
+        String codFisc = tCodFiscField.getText();
+        if(email.isEmpty() || codFisc.isEmpty() || email.equals("email") || codFisc.equals("codice fiscale")){
+            new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
+            return;
+        }
+        Map<String, String> insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO);
+        insertAuthOpParams.replace(RequestFactory.emailOpKey, email);
+        insertAuthOpParams.replace(RequestFactory.codFiscOpKey, codFisc);
+        Request insertAuthOpRequest;
+        try{
+            insertAuthOpRequest = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.OP_AUTORIZZATO,
+                    insertAuthOpParams);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(insertAuthOpRequest);
+        Response res = client.getResponse(insertAuthOpRequest.getRequestId());
+        //TODO: Test, add better checks, refresh table view in order to show the newly inserted op
+        if((boolean)res.getResult()){
+            new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo").showAndWait();
+        }else{
+            new Alert(Alert.AlertType.ERROR, "L'inserimento non ha avuto successo").showAndWait();
+        }
+
     }
+
+
+    /**
+     * TODO:
+     * -> inserire area esistente a un centro monitoraggio esistente, bottone?
+     * -> Completare ricerca area interesse...
+     * -> Completare visualizza parametro climatico
+     * -> tableview builder?
+     */
 
     public void handleVisualizzaGrafici(ActionEvent event){
         tableView.getColumns().clear();
