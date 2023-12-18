@@ -40,7 +40,8 @@
                 <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleVisualizzaParametriClimatici"/>
                 <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#handleVisualizzaGrafici"/>
                 <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#handleVisualizzaCentri"/>
-                <Button text="Inserisci Area Interesse" fx:id="buttonInserisciAreaInteresse" onAction="#handleInserisciAreaInteresse"/>
+                <Button text="Inserisci Nuova Area Interesse" fx:id="buttonInserisciAreaInteresse" onAction="#handleInserisciAreaInteresse"/>
+                <Button text="Aggiungi Area a centro" fx:id="buttonAggiungiArea" onAction="#handleAggiungiAreaACentro"/>
                 <Button text="Inserisci Parametro climatico" fx:id="buttonInserisciParametri" onAction="#handleInserisciParametriClimatici"/>
                 <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleInserisciCentroMonitoraggio"/>
                 <Button text="Abilita nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleAbilitaNuovoOperatore"/>

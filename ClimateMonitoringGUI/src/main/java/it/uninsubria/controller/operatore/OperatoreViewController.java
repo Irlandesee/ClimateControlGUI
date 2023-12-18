@@ -41,6 +41,7 @@ public class OperatoreViewController {
     public Button buttonVisualizzaParametri;
     public Button buttonInserisciParametri;
     public Button buttonInserisciCentroMonitoraggio;
+    public Button buttonAggiungiArea;
     public Button buttonRegistraOp;
 
     public TableView tableView;
@@ -1174,11 +1175,6 @@ public class OperatoreViewController {
 
     @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
-        //TODO: Aggiungere un modo per vedere i centri di monitoraggio:
-        //magari con un bottone ceh switcha attraverso le tableview?
-        //Un bottone fa visualizzare i centri, schiacciando l'altro si vedono
-        //le area di interesse
-
         paramBox = new VBox();
         tFilterCountry = new TextField("Filtra per stato");
         tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
@@ -1186,9 +1182,7 @@ public class OperatoreViewController {
         visualizeAiData.setOnAction(this::visualizeData);
         visualizeCmData = new Button("Visualizza centri");
         visualizeCmData.setOnAction(this::visualizeCmData);
-        paramBox.getChildren().add(tFilterCountry);
-        paramBox.getChildren().add(visualizeAiData);
-        paramBox.getChildren().add(visualizeCmData);
+        paramBox.getChildren().addAll(tFilterCountry, visualizeAiData, visualizeCmData);
         this.borderPane.setRight(paramBox);
 
         prepTableAreaInteresse();
@@ -1545,6 +1539,106 @@ public class OperatoreViewController {
      * -> tableview builder?
      */
 
+    @FXML
+    public void handleAggiungiAreaACentro(ActionEvent event){
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        this.paramBox = new VBox();
+        this.tAreaInteresse = new TextField("Nome Area");
+        this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
+        this.tCentroMonitoraggio = new TextField("Nome Centro");
+        this.visualizeAiData = new Button("Visualizza aree");
+        this.visualizeAiData.setOnAction(this::visualizeData);
+        this.visualizeCmData = new Button("Visualizza centri");
+        this.visualizeCmData.setOnAction(this::visualizeCmData);
+        this.tCentroMonitoraggio.setOnMouseClicked(e -> this.tCentroMonitoraggio.clear());
+        Button aggiungi = new Button("Aggiungi");
+        aggiungi.setOnAction(this::aggiungiAreaCentro);
+
+        this.paramBox.getChildren().addAll(tAreaInteresse, tCentroMonitoraggio, visualizeAiData, visualizeCmData);
+
+    }
+
+    private void aggiungiAreaCentro(ActionEvent event){
+        String denomAi = tAreaInteresse.getText();
+        String denomCm = tCentroMonitoraggio.getText();
+        if(denomAi.isEmpty() || denomCm.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "Stringhe inserite non valide!");
+            return;
+        }
+        //check se l'area esiste
+        Map<String, String> paramsCheckAi = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        paramsCheckAi.replace(RequestFactory.objectKey, "areaid");
+        paramsCheckAi.replace(RequestFactory.condKey, "denominazione");
+        paramsCheckAi.replace(RequestFactory.fieldKey, denomAi);
+        Request requestAi;
+        try{
+            requestAi = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    paramsCheckAi);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(requestAi);
+        Response responseAi = client.getResponse(requestAi.getRequestId());
+        String areaId = responseAi.getResult().toString();
+        if(areaId.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "Area non esistente").showAndWait();
+            return;
+        }
+
+        //check se il centro esiste
+        Map<String, String> paramsCheckCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        paramsCheckCm.replace(RequestFactory.objectKey, "areaid");
+        paramsCheckCm.replace(RequestFactory.condKey, "nomecentro");
+        paramsCheckCm.replace(RequestFactory.fieldKey, denomCm);
+        Request requestCm;
+        try{
+            requestCm = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAllWithCond,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    paramsCheckCm
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(requestCm);
+        Response responseCm = client.getResponse(requestCm.getRequestId());
+        String centroId = responseCm.getResult().toString();
+        if(centroId.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "Centro non esistente").showAndWait();
+            return;
+        }
+
+
+        //Check se l'area e' gia presente nell'array del centro
+        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.insert);
+        Request req;
+        try{
+            req = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.insert,
+                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                    params
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(req);
+        Response response = client.getResponse(req.getRequestId());
+
+
+
+
+    }
+
+    @FXML
     public void handleVisualizzaGrafici(ActionEvent event){
         tableView.getColumns().clear();
         tableView.getItems().clear();
