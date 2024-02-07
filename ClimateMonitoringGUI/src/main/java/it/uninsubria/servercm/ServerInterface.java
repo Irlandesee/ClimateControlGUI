@@ -28,6 +28,7 @@ public interface ServerInterface {
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond"),
         executeLogin("executeLogin"),
+        executeUpdateAi("executeUpdateAi"),
         insert("insert"),
         requestSignUp("requestSignUp"),
         executeSignUp("executeSignUp");
@@ -46,6 +47,8 @@ public interface ServerInterface {
         insertKo("insertKo"),
         loginOk("loginOk"),
         loginKo("loginKo"),
+        updateOk("updateOk"),
+        updateKo("updateKo"),
         requestSignUpOk("requestSignUpOk"),
         requestSignUpKo("requestSignUpKo"),
         executeSignUpOk("executeSignUpOk"),
@@ -68,6 +71,7 @@ public interface ServerInterface {
     int insertOpParamsLength = 7;
     int insertAiParamsLength = 5;
     int insertNpcParamsLength = 7;
+    int executeUpdateParamsLength = 2;
 
     //int insertAiParamsLength ;
 

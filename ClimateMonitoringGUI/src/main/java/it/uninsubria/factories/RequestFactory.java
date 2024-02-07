@@ -98,6 +98,14 @@ public class RequestFactory {
                     return new Request(clientId, requestType, table, params);
                 }
             }
+            case executeUpdateAi -> {
+                if(params.keySet().size() < ServerInterface.executeUpdateParamsLength){
+                    throw new MalformedRequestException(paramLengthError);
+                }
+                else{
+                    return new Request(clientId, requestType, table, params);
+                }
+            }
             case insert -> {
                 switch (table){
                     case AREA_INTERESSE -> {
@@ -224,6 +232,10 @@ public class RequestFactory {
             case executeLogin -> {
                 params.put("user", "");
                 params.put("password", "");
+            }
+            case executeUpdateAi -> {
+                params.put(areaIdKey, "");
+                params.put(centroIdKey, "");
             }
             case executeSignUp -> {
                 params.put(codFiscOpKey, "");

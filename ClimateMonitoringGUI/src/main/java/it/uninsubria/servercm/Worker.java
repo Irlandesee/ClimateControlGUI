@@ -93,6 +93,13 @@ public class Worker extends Thread{
                     res = executeLogin(request);
                 }
             }
+            case executeUpdateAi -> {
+                if(request.getParams().size() < ServerInterface.executeUpdateParamsLength){
+                    res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
+                }else{
+                    res = executeUpdateAi(request);
+                }
+            }
             case executeSignUp -> {
                 if(request.getParams().size() < ServerInterface.executeSignUpParamsLength){
                     res = new Response(clientId, requestId, responseId, ResponseType.Error, request.getTable(), null);
@@ -752,6 +759,35 @@ public class Worker extends Thread{
             }
         }
         return new Response(clientId, requestId, responseId, ResponseType.Error, req.getTable(), null);
+    }
+
+    public Response executeUpdateAi(Request request){
+        String areaId  = request.getParams().get(RequestFactory.areaIdKey);
+        String centroId = request.getParams().get(RequestFactory.centroIdKey);
+        String query = "update centro_monitoraggio set aree_interesse_ids = array_append(aree_interesse_ids, '%s') where centroid = '%s'"
+                .formatted(areaId, centroId);
+        try(PreparedStatement stat = conn.prepareStatement(query)){
+            int success = stat.executeUpdate();
+            if(success == 1){
+                return new Response(
+                        clientId,
+                        requestId,
+                        responseId,
+                        ResponseType.updateOk,
+                        Tables.CENTRO_MONITORAGGIO,
+                        1);
+            }
+        }catch(SQLException sqle){
+            sqle.printStackTrace();}
+
+        return new Response(
+                clientId,
+                requestId,
+                responseId,
+                ResponseType.updateKo,
+                Tables.CENTRO_MONITORAGGIO,
+               -1
+        );
     }
 
     public Response executeLogin(Request request){
