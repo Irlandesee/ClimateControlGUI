@@ -6,6 +6,8 @@ import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
+import it.uninsubria.controller.dialog.CmDialog;
+import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
@@ -19,11 +21,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -168,6 +170,208 @@ public class TableViewBuilder {
 
         return row;
     }
+
+    /**
+     * Params (From: ParametroClimatico)
+     * "denominazione"
+     * "AREA_INTERESSE"
+     * "areaid"
+     * areaid: String
+     *
+     * Params(From: ParametroClimatico)
+     * "nomecentro"
+     * "CENTRO_MONITORAGGIO"
+     * "centroid"
+     * centroid: String
+     */
+    public static TableRow getRowPc(Client client){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(
+                event -> {
+                    if(event.getClickCount() == 2 && (!row.isEmpty())){
+                        ParametroClimatico pc = (ParametroClimatico) row.getItem();
+
+                        Map<String, String> paramsReqDenom =
+                                RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
+                        if(paramsReqDenom != null){
+                            paramsReqDenom.replace(RequestFactory.objectKey, "denominazione");
+                            paramsReqDenom.replace(RequestFactory.joinKey, ServerInterface.Tables.AREA_INTERESSE.label);
+                            paramsReqDenom.replace(RequestFactory.condKey, "parameterid");
+                            paramsReqDenom.replace(RequestFactory.fieldKey, pc.getParameterId());
+                        }
+
+                        Request requestDenominazione = null;
+                        try {
+                            requestDenominazione = RequestFactory
+                                    .buildRequest(
+                                            client.getClientId(),
+                                            ServerInterface.RequestType.selectObjJoinWithCond,
+                                            ServerInterface.Tables.PARAM_CLIMATICO,
+                                            paramsReqDenom);
+                        } catch (MalformedRequestException e) {
+                            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        Map<String, String> paramsReqNomeCentro = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
+                        if(paramsReqNomeCentro != null){
+                            paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
+                            paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
+                            paramsReqNomeCentro.replace(RequestFactory.condKey, "parameterid");
+                            paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getParameterId());
+                        }
+                        Request requestNomeCentro = null;
+                        try{
+                            requestNomeCentro = RequestFactory
+                                    .buildRequest(
+                                            client.getClientId(),
+                                            ServerInterface.RequestType.selectObjJoinWithCond,
+                                            ServerInterface.Tables.PARAM_CLIMATICO,
+                                            paramsReqNomeCentro
+                                    );
+
+                        }catch(MalformedRequestException e){
+                            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                            e.printStackTrace();
+                            return;
+
+                        }
+                        client.addRequest(requestDenominazione);
+                        client.addRequest(requestNomeCentro);
+
+                        Response respDenom = null;
+                        Response respNomeCentro = null;
+                        if(requestDenominazione != null && requestNomeCentro != null){
+                            respDenom = client.getResponse(requestDenominazione.getRequestId());
+                            respNomeCentro = client.getResponse(requestNomeCentro.getRequestId());
+
+                        }
+
+                        if(respDenom == null || respNomeCentro == null){
+                            new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
+                            return;
+                        }
+
+                        String nomeArea = "";
+                        String nomeCentro = "";
+
+                        if(respDenom.getRespType().equals(ServerInterface.ResponseType.Object) &&
+                                respDenom.getTable().equals(ServerInterface.Tables.AREA_INTERESSE)){
+                            nomeArea = respDenom.getResult().toString();
+                        }else{
+                            nomeArea = "Error while retrieving denominazione area";
+                        }
+                        if(respNomeCentro.getRespType().equals(ServerInterface.ResponseType.Object)
+                                && respNomeCentro.getTable().equals(ServerInterface.Tables.CENTRO_MONITORAGGIO)){
+                            nomeCentro = respNomeCentro.getResult().toString();
+                        }else{
+                            nomeCentro = "Error while retrieving denominazione centro";
+                        }
+
+                        try{
+                            Stage pcDialogStage = new Stage();
+                            PcDialog pcDialogController = new PcDialog(pc, nomeCentro, nomeArea);
+                            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/pc-dialog.fxml"));
+                            fxmlLoader.setController(pcDialogController);
+                            Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
+                            pcDialogStage.setScene(dialogScene);
+                            pcDialogStage.show();
+                        }catch(IOException ioe){ioe.printStackTrace();}
+                    }
+                }
+        );
+
+        return row;
+    }
+
+    public static TableRow getRowFactoryOpAbilitaOperatore(TextField tEmailField, TextField tCodFiscField){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if(event.getClickCount() == 2 &&  (!row.isEmpty())){
+                OperatoreAutorizzato op = (OperatoreAutorizzato) row.getItem();
+                tEmailField.setText(op.getEmail());
+                tCodFiscField.setText(op.getCodFiscale());
+            }
+        });
+        return row;
+    }
+
+    public static TableRow getRowFactoryHandleVisualizzaCentri(Client client){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if(event.getClickCount() == 2 && !(row.isEmpty())){
+                CentroMonitoraggio cm = (CentroMonitoraggio) row.getItem();
+                List<String> areeId = cm.getAreeInteresseIdAssociate();
+                List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
+                for(String areaId : areeId){
+                    Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+                    reqAiParams.replace(RequestFactory.condKey, "areaid");
+                    reqAiParams.replace(RequestFactory.fieldKey, areaId);
+                    Request requestAi;
+                    try{
+                        requestAi = RequestFactory.buildRequest(
+                                client.getClientId(),
+                                ServerInterface.RequestType.selectAllWithCond,
+                                ServerInterface.Tables.AREA_INTERESSE,
+                                reqAiParams
+                        );
+                    }catch(MalformedRequestException mre){
+                        new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                        mre.printStackTrace();
+                        return;
+                    }
+
+                    client.addRequest(requestAi);
+                    Response responseAi = client.getResponse(requestAi.getRequestId());
+                    if(responseAi == null){
+                        new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
+                        return;
+                    }
+                    List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
+                    responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
+                }
+                try{
+                    Stage cmDialogStage = new Stage();
+                    CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
+                    FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                    fxmlLoader.setController(cmDialogController);
+                    Scene dialogScene = new Scene(fxmlLoader.load());
+                    cmDialogStage.setScene(dialogScene);
+                    cmDialogStage.show();
+                }catch(IOException ioe){ioe.printStackTrace();}
+            }
+        });
+        return row;
+    }
+
+    public static TableRow getRowFactoryPrepTableCity(TextField tDenominazione, TextField tStato, TextField tLatitudine, TextField tLongitudine){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if(event.getClickCount() == 2 && (!row.isEmpty())){
+                City c = (City) row.getItem();
+                tDenominazione.setText(c.getAsciiName());
+                tStato.setText(c.getCountry());
+                tLatitudine.setText(String.valueOf(c.getLatitude()));
+                tLongitudine.setText(String.valueOf(c.getLongitude()));
+            }
+        });
+        return row;
+    }
+
+    public static TableRow getRowFactoryPrepTableCentroMonitoraggio(TextField nomeCentroField, TextField comuneField, TextField statoCmField){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if(event.getClickCount() == 2 && (!row.isEmpty())){
+                City c = (City) row.getItem();
+                nomeCentroField.setText(c.getAsciiName()+"Centro");
+                comuneField.setText(c.getAsciiName());
+                statoCmField.setText(c.getCountry());
+            }
+        });
+        return row;
+    }
+
 
 
 }
