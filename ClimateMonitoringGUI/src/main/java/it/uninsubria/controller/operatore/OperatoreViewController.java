@@ -18,6 +18,7 @@ import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import it.uninsubria.util.IDGenerator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -183,17 +184,7 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         tableView.refresh();
         tableShown = ServerInterface.Tables.CITY;
-
-
-        TableColumn nomeColumn = new TableColumn("denominazione");
-        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("asciiName"));
-        TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
-        TableColumn latitudineColumn = new TableColumn("latitudine");
-        latitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("latitude"));
-        TableColumn longitudineColumn = new TableColumn("longitudine");
-        longitudineColumn.setCellValueFactory(new PropertyValueFactory<City, String>("longitude"));
-        tableView.getColumns().addAll(nomeColumn, countryColumn, latitudineColumn, longitudineColumn);
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCity());
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow();
@@ -217,12 +208,8 @@ public class OperatoreViewController {
         tableView.setRowFactory(null);
         tableView.refresh();
         tableShown = ServerInterface.Tables.CENTRO_MONITORAGGIO;
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
 
-        TableColumn nomeColumn = new TableColumn("denominazione");
-        nomeColumn.setCellValueFactory(new PropertyValueFactory<City, String>("denominazione"));
-        TableColumn countryColumn = new TableColumn("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<City, String>("country"));
-        tableView.getColumns().addAll(nomeColumn, countryColumn);
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow();
@@ -243,13 +230,8 @@ public class OperatoreViewController {
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
-        TableColumn<OperatoreAutorizzato, String> userColumn = new TableColumn<OperatoreAutorizzato, String>("email");
-        userColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
-        TableColumn<OperatoreAutorizzato, String> codFiscColumn = new TableColumn<OperatoreAutorizzato, String>("codice fiscale");
-        codFiscColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
-
         tableView.setRowFactory(null);
-        tableView.getColumns().addAll(userColumn, codFiscColumn);
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsOp());
 
     }
 
@@ -267,15 +249,11 @@ public class OperatoreViewController {
         this.tLongitudine = new TextField("longitudine");
         this.tLongitudine.setOnMouseClicked((event) -> {this.tLongitudine.clear();});
         this.btnRicercaAreaPerDenom = new Button("Ricerca per nome");
-        this.btnRicercaAreaPerDenom.setOnAction(this::visualizeAiData);
         this.btnRicercaAreaPerStato = new Button("Ricerca per stato");
-        this.btnRicercaAreaPerStato.setOnAction(this::visualizeAiData);
         this.btnRicercaAreaCoord = new Button("Ricerca Coord");
-        this.btnRicercaAreaCoord.setOnAction(this::visualizeAiData);
 
-        this.btnRicercaAreaPerDenom.setOnAction(event -> {ricercaAreaPerDenom();});
-        btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
-
+        this.btnRicercaAreaPerDenom.setOnAction(event -> {handleRicercaAreaPerDenominazione();});
+        this.btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
         this.btnRicercaAreaCoord.setOnAction(event -> {handleRicercaAreaPerCoordinate();});
         paramBox.getChildren().add(tDenominazione);
         paramBox.getChildren().add(tStato);
@@ -294,20 +272,7 @@ public class OperatoreViewController {
         tableView.refresh();
         tableShown = ServerInterface.Tables.AREA_INTERESSE;
 
-        TableColumn<AreaInteresse, String> denomColumn = new TableColumn<AreaInteresse, String>("denominazione");
-        denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
-        denomColumn.setMinWidth(120);
-        TableColumn<AreaInteresse, String> countryColumn = new TableColumn<AreaInteresse, String>("stato");
-        countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
-        countryColumn.setMinWidth(100);
-        TableColumn<AreaInteresse, String> latColumn = new TableColumn<AreaInteresse, String>("latitudine");
-        latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
-        latColumn.setMinWidth(100);
-        TableColumn<AreaInteresse, String> longColumn = new TableColumn<AreaInteresse, String>("longitudine");
-        longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
-        longColumn.setMinWidth(100);
-
-        tableView.getColumns().addAll(denomColumn, countryColumn, latColumn, longColumn);
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow<>();
@@ -322,7 +287,7 @@ public class OperatoreViewController {
                         requestParams.replace(RequestFactory.condKey, "areaid");
                         requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
                     }
-                    Request req;
+                    Request req = null;
                     try{
                         req = RequestFactory.buildRequest(
                                 client.getClientId(),
@@ -414,12 +379,18 @@ public class OperatoreViewController {
         if(response.getRespType() == ServerInterface.ResponseType.List
             && response.getTable() == ServerInterface.Tables.CENTRO_MONITORAGGIO){
             List<CentroMonitoraggio> res = (List<CentroMonitoraggio>) response.getResult();
-            prepTableCentroMonitoraggio();
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            tableView.setRowFactory(null);
+            tableView.refresh();
+
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
+
             res.forEach(centroMonitoraggio -> tableView.getItems().add(centroMonitoraggio));
         }
     }
 
-    private void ricercaAreaPerDenom(){
+    private void handleRicercaAreaPerDenominazione(){
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
@@ -537,26 +508,8 @@ public class OperatoreViewController {
         tableView.refresh();
         tableShown = ServerInterface.Tables.PARAM_CLIMATICO;
 
-
-        TableColumn<ParametroClimatico, LocalDate> dateColumn = new TableColumn<ParametroClimatico, LocalDate>("Data");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
-        TableColumn<ParametroClimatico, Short> ventoColumn = new TableColumn<ParametroClimatico, Short>("Vento");
-        ventoColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("ventoValue"));
-        TableColumn<ParametroClimatico, Short> umiditaColumn = new TableColumn<ParametroClimatico, Short>("Umidita");
-        umiditaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("umiditaValue"));
-        TableColumn<ParametroClimatico, Short> pressioneColumn = new TableColumn<ParametroClimatico, Short>("Pressione");
-        pressioneColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("pressioneValue"));
-        TableColumn<ParametroClimatico, Short> temperaturaColumn = new TableColumn<ParametroClimatico, Short>("Temperatura");
-        temperaturaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("temperaturaValue"));
-        TableColumn<ParametroClimatico, Short> precipitazioniColumn = new TableColumn<ParametroClimatico, Short>("Precipitazioni");
-        precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("precipitazioniValue"));
-        TableColumn<ParametroClimatico, Short> altitudineColumn = new TableColumn<ParametroClimatico, Short>("Altitudine ghiacciai");
-        altitudineColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("altitudineValue"));
-        TableColumn<ParametroClimatico, Short> massaColumn = new TableColumn<ParametroClimatico, Short>("Massa ghiacciai");
-        massaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("massaValue"));
-
-        tableView.getColumns().addAll(dateColumn, ventoColumn, umiditaColumn,
-                pressioneColumn, temperaturaColumn, precipitazioniColumn, altitudineColumn, massaColumn);
+        tableView.getColumns().addAll(TableViewBuilder.getDateColumn());
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow<>();
@@ -858,8 +811,11 @@ public class OperatoreViewController {
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
+        }else if(event.getSource() == tglRicercaAreaCm){
+            /**
+             * Si effettua la ricerca intersecando i risultati
+             */
         }
-
     }
 
     @FXML
@@ -951,12 +907,7 @@ public class OperatoreViewController {
         client.addRequest(cmRequest);
         Response response = client.getResponse(client.getClientId());
         List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) response.getResult();
-        TableColumn<CentroMonitoraggio, String> nomeCentroColumn = new TableColumn<CentroMonitoraggio, String>("Nome");
-        nomeCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-        TableColumn<CentroMonitoraggio, String> statoCentroColumn = new TableColumn<CentroMonitoraggio, String>("Stato");
-        statoCentroColumn.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("country"));
-        tableView.getColumns().addAll(nomeCentroColumn, statoCentroColumn);
-
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
         centri.forEach(centro -> tableView.getItems().add(centro));
     }
 
@@ -1480,11 +1431,7 @@ public class OperatoreViewController {
         buttonAbilitaOp = new Button("Abilita");
         buttonAbilitaOp.setOnAction(this::executeAbilitaNuovoOperatore);
 
-        TableColumn<OperatoreAutorizzato, String> emailColumn = new TableColumn<OperatoreAutorizzato, String>();
-        emailColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("email"));
-        TableColumn<OperatoreAutorizzato, String> codiceFiscaleColumn = new TableColumn<OperatoreAutorizzato, String>();
-        codiceFiscaleColumn.setCellValueFactory(new PropertyValueFactory<OperatoreAutorizzato, String>("codFiscale"));
-        tableView.getColumns().addAll(emailColumn, codiceFiscaleColumn);
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsOp());
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow();
             row.setOnMouseClicked(event -> {
@@ -1763,6 +1710,7 @@ public class OperatoreViewController {
 
     @FXML
     public void handleVisualizzaCentri(){
+        //TODO: nullpointerexception se parambox non è stata inizializzata
         paramBox.getChildren().clear();
         tableView.getColumns().clear();
         tableView.getItems().clear();
@@ -1784,9 +1732,8 @@ public class OperatoreViewController {
         Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
 
         List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
-        TableColumn denomCentro = new TableColumn("Denominazione");
-        denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-        tableView.getColumns().add(denomCentro);
+
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
 
         centriMonitoraggio.forEach(cm -> {
             tableView.getItems().add(cm);
