@@ -467,11 +467,6 @@ public class OperatoreViewController {
 
 
     private void handleRicercaPc(ActionEvent event){
-
-        tableView.getItems().clear();
-        tableView.getColumns().clear();
-        tableView.refresh();
-
         String denomAiCercata = tAreaInteresse.getText();
         String denomCmCercato = tCentroMonitoraggio.getText();
         LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
@@ -547,7 +542,10 @@ public class OperatoreViewController {
                         parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
                     });
                 }
-                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
+                parametriClimatici.forEach((pc) -> {
+                    System.out.println(pc);
+                    tableView.getItems().add(pc);
+                });
             }
         }
         //ricerca cm
@@ -599,9 +597,7 @@ public class OperatoreViewController {
                 Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
 
-                tableView
-                        .getItems()
-                        .clear();
+                tableView.getItems().clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
