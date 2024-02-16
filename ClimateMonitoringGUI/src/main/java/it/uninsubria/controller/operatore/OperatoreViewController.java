@@ -180,12 +180,13 @@ public class OperatoreViewController {
     }
 
     private void prepTableCity(){
+
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
         tableShown = ServerInterface.Tables.CITY;
-        tableView.getColumns().addAll(TableViewBuilder.getColumnsCity());
 
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCity());
         tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryPrepTableCity(tDenominazione, tStato, tLatitudine, tLongitudine));
     }
 
@@ -809,9 +810,8 @@ public class OperatoreViewController {
                 areeInteresse.forEach(ai -> tableView.getItems().add(ai));
             }
         }else if(source == visualizeCmData){
-            if(tableShown != ServerInterface.Tables.CENTRO_MONITORAGGIO){
-                prepTableCentroMonitoraggio();
-            }
+            prepTableCity();
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryVisualizeCmData(nomeCentroField, comuneField, statoCMField));
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 Request citiesRequest;
                 Request centriMonitoraggioRequest;
@@ -1498,8 +1498,10 @@ public class OperatoreViewController {
 
     @FXML
     public void handleVisualizzaCentri(){
-        //TODO: nullpointerexception se parambox non è stata inizializzata
-        paramBox.getChildren().clear();
+        //Test for a NullPointerException when paramBox is not initialized
+        if(paramBox != null && !paramBox.getChildren().isEmpty())
+            paramBox.getChildren().clear();
+
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();

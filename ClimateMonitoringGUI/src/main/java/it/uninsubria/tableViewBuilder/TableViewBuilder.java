@@ -49,7 +49,7 @@ public class TableViewBuilder {
     public static List<TableColumn<CentroMonitoraggio, String>> getColumnsCm(){
         List<TableColumn<CentroMonitoraggio, String>> res = new LinkedList<TableColumn<CentroMonitoraggio, String>>();
         String[] columnNames = {"denominazione", "stato"};
-        String[] propertyNames = {"asciiName", "country"};
+        String[] propertyNames = {"denominazione", "country"};
         int i = 0;
         for(String columnName : columnNames){
             TableColumn<CentroMonitoraggio, String> column = new TableColumn<CentroMonitoraggio, String>(columnName);
@@ -63,7 +63,7 @@ public class TableViewBuilder {
 
     public static List<TableColumn<City, String>> getColumnsCity(){
         List<TableColumn<City, String>> res = new LinkedList<TableColumn<City, String>>();
-        String[] columnNames = {"denominazione", "stato", "latitudine", "longitudine"};
+        String[] columnNames = {"asciiName", "country", "latitude", "longitude"};
         String[] propertyNames = {"asciiName", "country", "latitude", "longitude"};
         int i = 0;
         for(String columnName : columnNames){
@@ -367,6 +367,19 @@ public class TableViewBuilder {
                 nomeCentroField.setText(c.getAsciiName()+"Centro");
                 comuneField.setText(c.getAsciiName());
                 statoCmField.setText(c.getCountry());
+            }
+        });
+        return row;
+    }
+
+    public static TableRow getRowFactoryVisualizeCmData(TextField nomeCentroField, TextField comuneField, TextField statoCMField){
+        TableRow row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if(event.getClickCount() == 2 && (!row.isEmpty())){
+                City c = (City) row.getItem();
+                nomeCentroField.setText(c.getAsciiName()+"Centro");
+                comuneField.setText(c.getAsciiName());
+                statoCMField.setText(c.getCountry());
             }
         });
         return row;
