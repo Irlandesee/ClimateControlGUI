@@ -575,6 +575,10 @@ public class OperatoreViewController {
                 client.addRequest(requestCentroId);
                 Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
                 List<String> result = (List<String>)responseCentroId.getResult(); //returns multiple...
+                if(result.isEmpty()){
+                    new Alert(Alert.AlertType.ERROR, "Centro non esistente o non valido").showAndWait();
+                    return;
+                }
                 String centroId = result.get(0);
                 System.out.println(centroId);
 
@@ -612,6 +616,7 @@ public class OperatoreViewController {
             }
         }else if(event.getSource() == tglRicercaAreaCm){
             /**
+             * TODO:
              * Si effettua la ricerca intersecando i risultati
              */
         }
@@ -649,23 +654,6 @@ public class OperatoreViewController {
         paramBox.getChildren().add(tFilterCountry);
         paramBox.getChildren().add(visualizeCityData);
         this.borderPane.setRight(paramBox);
-    }
-
-    //TODO: group visualize data methods in a better way?
-    private void visualizeAiData(ActionEvent event){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        tableView.setRowFactory(null);
-        tableView.refresh();
-
-        Object source = event.getSource();
-        if(source == btnRicercaAreaPerDenom){
-
-        }else if(source == btnRicercaAreaPerStato){
-
-        }else if(source == btnRicercaAreaCoord){
-
-        }
     }
 
     private void visualizeCmData(ActionEvent event){

@@ -16,8 +16,7 @@
     <top>
         <BorderPane styleClass="header-section">
             <left>
-                <!--><Label fx:id="header-text" text="ClimateMonitoring App"/><!-->
-                <Label fx:id="loggedInLabel"/>
+                <Label id="header-text" text="Climate Monitoring App"/>
             </left>
             <right>
                 <Button fx:id="loginButton" text="Account" onAction="#handleLogin" contentDisplay="LEFT">
@@ -52,7 +51,9 @@
     </right>
     <bottom>
         <HBox id="footer-section">
-            <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            <children>
+                <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            </children>
         </HBox>
     </bottom>
     <stylesheets>

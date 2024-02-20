@@ -19,6 +19,7 @@ import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -227,137 +228,10 @@ public class MainWindowController{
         tableView.getItems().clear();
 
 
-        TableColumn dateColumn = new TableColumn("Data");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
-        TableColumn ventoColumn = new TableColumn("Vento");
-        ventoColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("ventoValue"));
-        TableColumn umiditaColumn = new TableColumn("Umidita");
-        umiditaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("umiditaValue"));
-        TableColumn pressioneColumn = new TableColumn("Pressione");
-        pressioneColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("pressioneValue"));
-        TableColumn temperaturaColumn = new TableColumn("Temperatura");
-        temperaturaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("temperaturaValue"));
-        TableColumn precipitazioniColumn = new TableColumn("Precipitazioni");
-        precipitazioniColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("precipitazioniValue"));
-        TableColumn altitudineColumn = new TableColumn("Altitudine ghiacciai");
-        altitudineColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("altitudineValue"));
-        TableColumn massaColumn = new TableColumn("Massa ghiacciai");
-        massaColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, Short>("massaValue"));
+        tableView.getColumns().add(TableViewBuilder.getDateColumn());
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
+        tableView.setRowFactory(tv -> TableViewBuilder.getRowPc(client));
 
-        tableView.getColumns().addAll(dateColumn, ventoColumn, umiditaColumn,
-                pressioneColumn, temperaturaColumn, precipitazioniColumn, altitudineColumn, massaColumn);
-
-        tableView.setRowFactory(tv -> {
-            TableRow row = new TableRow<>();
-            row.setOnMouseClicked(
-                    event -> {
-                        if(event.getClickCount() == 2 && (!row.isEmpty())){
-                            ParametroClimatico pc = (ParametroClimatico) row.getItem();
-                            System.out.println("item clicked" + pc.getPubDate());
-                            /**
-                             * Params (From: ParametroClimatico)
-                             * "denominazione"
-                             * "AREA_INTERESSE"
-                             * "areaid"
-                             * areaid: String
-                             */
-                            Map<String, String> paramsReqDenom =
-                                    RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                            if(paramsReqDenom != null){
-                                paramsReqDenom.replace(RequestFactory.objectKey, "denominazione");
-                                paramsReqDenom.replace(RequestFactory.joinKey, ServerInterface.Tables.AREA_INTERESSE.label);
-                                paramsReqDenom.replace(RequestFactory.condKey, "parameterid");
-                                paramsReqDenom.replace(RequestFactory.fieldKey, pc.getParameterId());
-                            }
-
-                            Request requestDenominazione = null;
-                            try {
-                                requestDenominazione = RequestFactory
-                                        .buildRequest(
-                                                client.getClientId(),
-                                                ServerInterface.RequestType.selectObjJoinWithCond,
-                                                ServerInterface.Tables.PARAM_CLIMATICO,
-                                                paramsReqDenom);
-                            } catch (MalformedRequestException e) {
-                                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
-                                e.printStackTrace();
-                                return;
-                            }
-                            /**
-                             * Params(From: ParametroClimatico)
-                             * "nomecentro"
-                             * "CENTRO_MONITORAGGIO"
-                             * "centroid"
-                             * centroid: String
-                             */
-                            Map<String, String> paramsReqNomeCentro = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                            if(paramsReqNomeCentro != null){
-                                paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
-                                paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                                paramsReqNomeCentro.replace(RequestFactory.condKey, "parameterid");
-                                paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getParameterId());
-                            }
-                            Request requestNomeCentro = null;
-                            try{
-                                requestNomeCentro = RequestFactory
-                                        .buildRequest(
-                                                client.getClientId(),
-                                                ServerInterface.RequestType.selectObjJoinWithCond,
-                                                ServerInterface.Tables.PARAM_CLIMATICO,
-                                                paramsReqNomeCentro
-                                        );
-
-                            }catch(MalformedRequestException e){
-                                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
-                                e.printStackTrace();
-                                return;
-
-                            }
-
-                            client.addRequest(requestDenominazione);
-                            client.addRequest(requestNomeCentro);
-
-                            Response respDenom = null;
-                            Response respNomeCentro = null;
-                            if(requestDenominazione != null && requestNomeCentro != null){
-                                respDenom = client.getResponse(requestDenominazione.getRequestId());
-                                respNomeCentro = client.getResponse(requestNomeCentro.getRequestId());
-
-                            }
-
-                            if(respDenom == null || respNomeCentro == null){
-                                new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
-                                return;
-                            }
-
-                            String nomeArea = "";
-                            String nomeCentro = "";
-
-                            if(respDenom.getRespType().equals(ServerInterface.ResponseType.Object) && respDenom.getTable().equals(ServerInterface.Tables.AREA_INTERESSE)){
-                                nomeArea = respDenom.getResult().toString();
-                            }else{
-                                nomeArea = "Error while retrieving denominazione area";
-                            }
-                            if(respNomeCentro.getRespType().equals(ServerInterface.ResponseType.Object) && respNomeCentro.getTable().equals(ServerInterface.Tables.CENTRO_MONITORAGGIO)){
-                                nomeCentro = respNomeCentro.getResult().toString();
-                            }else{
-                                nomeCentro = "Error while retrieving denominazione centro";
-                            }
-
-                            try{
-                               Stage pcDialogStage = new Stage();
-                               PcDialog pcDialogController = new PcDialog(pc, nomeCentro, nomeArea);
-                               FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/pc-dialog.fxml"));
-                               fxmlLoader.setController(pcDialogController);
-                               Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
-                               pcDialogStage.setScene(dialogScene);
-                               pcDialogStage.show();
-                            }catch(IOException ioe){ioe.printStackTrace();}
-                        }
-                    }
-            );
-            return row;
-        });
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
 

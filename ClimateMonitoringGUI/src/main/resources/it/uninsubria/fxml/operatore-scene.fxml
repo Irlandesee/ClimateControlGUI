@@ -17,8 +17,7 @@
     <top>
         <BorderPane styleClass="header-section">
             <left>
-                <!--><Label fx:id="header-text" text="ClimateMonitoring App"/><!-->
-                <Label fx:id="loggedInLabel"/>
+                <Label id="header-text" text="ClimateMonitoring App"/>
             </left>
             <right>
                 <Button fx:id="exitButton" text="exit" onAction="#exit" contentDisplay="LEFT">
@@ -50,7 +49,6 @@
     </left>
     <center>
         <VBox styleClass="content-section" fx:id="contentBox">
-            <Label id="content-header" fx:id="labelData" text="Data"/>
             <TableView fx:id="tableView"/>
         </VBox>
     </center>
@@ -58,7 +56,9 @@
     </right>
     <bottom>
         <HBox id="footer-section">
-            <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            <children>
+                <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            </children>
         </HBox>
     </bottom>
     <stylesheets>
