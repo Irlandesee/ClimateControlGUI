@@ -5,10 +5,7 @@ import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.clientCm.Client;
-import it.uninsubria.controller.dialog.AiDialog;
-import it.uninsubria.controller.dialog.CmDialog;
-import it.uninsubria.controller.dialog.GraphDialog;
-import it.uninsubria.controller.dialog.PcDialog;
+import it.uninsubria.controller.dialog.*;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.factories.RequestFactory;
@@ -81,7 +78,7 @@ public class OperatoreViewController {
     private TextField statoCMField;
     private TextField areaInteresseCMField;
     private TextArea areeInteresseBox;
-    private Button inserisciArea;
+    private Button inserisciCentro;
     private Button inserisciCM;
     private Button clearCM;
 
@@ -215,6 +212,7 @@ public class OperatoreViewController {
     public void handleRicercaAreaInteresse(ActionEvent actionEvent){
         prepTableAreaInteresse();
         this.paramBox = new VBox(10);
+        paramBox.getStyleClass().add("param-box");
         //denominazione, stato, latitudine, longitudine
         this.tDenominazione = new TextField("nome");
         this.tDenominazione.setOnMouseClicked((event) -> {this.tDenominazione.clear();});
@@ -439,6 +437,7 @@ public class OperatoreViewController {
         prepTableParamClimatici();
 
         this.paramBox = new VBox(10);
+        this.paramBox.getStyleClass().add("param-box");
         this.tAreaInteresse = new TextField("AreaInteresse");
         this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
         this.tCentroMonitoraggio = new TextField("CentroMonitoraggio");
@@ -646,6 +645,7 @@ public class OperatoreViewController {
         visualizeCityData.setOnAction(this::visualizeData);
 
         paramBox = new VBox(4);
+        paramBox.getStyleClass().add("param-box");
         paramBox.getChildren().add(tDenominazione);
         paramBox.getChildren().add(tStato);
         paramBox.getChildren().add(tLatitudine);
@@ -940,6 +940,7 @@ public class OperatoreViewController {
     @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
         paramBox = new VBox();
+        paramBox.getStyleClass().add("param-box");
         tFilterCountry = new TextField("Filtra per stato");
         tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
         visualizeAiData = new Button("Visualizza aree");
@@ -1095,50 +1096,33 @@ public class OperatoreViewController {
         prepTableCentroMonitoraggio();
 
         this.paramBox = new VBox();
-        nomeCentroField = new TextField("Nome centro");
-        nomeCentroField.setOnMouseClicked((event) -> nomeCentroField.clear());
-        comuneField = new TextField("Comune centro");
-        comuneField.setOnMouseClicked((event) -> comuneField.clear());
-        statoCMField = new TextField("Stato centro");
-        statoCMField.setOnMouseClicked((event) -> statoCMField.clear());
-        areaInteresseCMField = new TextField("Area interesse");
-        areaInteresseCMField.setOnMouseClicked((event) -> areaInteresseCMField.clear());
-        areeInteresseBox = new TextArea();
-        areeInteresseBox.setEditable(false);
-        inserisciArea = new Button("Inserisci Area");
-        inserisciArea.setOnAction((event) -> addAreaToBox());
-        inserisciCM = new Button("Inserisci CM");
-        inserisciCM.setOnAction((event) -> executeInsertCMQuery());
-        clearCM = new Button("Pulisci");
-        clearCM.setOnAction((event) -> clearCMFields());
+        paramBox.getStyleClass().add("param-box");
         tFilterCountry = new TextField("Filtra per stato");
         tFilterCountry.setOnMouseClicked(e -> tFilterCountry.clear());
+        inserisciCentro = new Button("Aggiungi centro");
+        inserisciCentro.setOnAction((event) -> addAreaToBox());
         visualizeCmData = new Button("Visualizza data");
         visualizeCmData.setOnAction(this::visualizeData);
 
-        paramBox.getChildren().add(nomeCentroField);
-        paramBox.getChildren().add(comuneField);
-        paramBox.getChildren().add(statoCMField);
-        paramBox.getChildren().add(areaInteresseCMField);
-        paramBox.getChildren().add(areeInteresseBox);
-        paramBox.getChildren().add(inserisciArea);
-        paramBox.getChildren().add(inserisciCM);
-        paramBox.getChildren().add(clearCM);
+        paramBox.getChildren().add(inserisciCentro);
         paramBox.getChildren().add(tFilterCountry);
         paramBox.getChildren().add(visualizeCmData);
-
 
         this.borderPane.setRight(paramBox);
 
     }
 
     private void addAreaToBox(){
-        String nomeArea = areaInteresseCMField.getText();
-        if(!nomeArea.isEmpty()){
-            String text = areeInteresseBox.getText();
-            text += nomeArea + "\n";
-            areeInteresseBox.setText(text);
-        }
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/add-area-centro-scene.fxml"));
+        AddAreaToCentroBoxDialog addAreaController = new AddAreaToCentroBoxDialog(this);
+        fxmlLoader.setController(addAreaController);
+        try{
+            Scene scene = new Scene(fxmlLoader.load(), 400, 600);
+            stage.setTitle("Aggiungi area a centro");
+            stage.setScene(scene);
+            stage.show();
+        }catch(IOException ioe){ioe.printStackTrace();}
     }
 
     private void clearCMFields(){
@@ -1148,18 +1132,10 @@ public class OperatoreViewController {
         areaInteresseCMField.clear();
     }
 
-    private void executeInsertCMQuery(){
-        String nomeCentro = nomeCentroField.getText();
-        String comuneCentro = comuneField.getText();
-        String statoCentro = statoCMField.getText();
-        //Area interesse è campo particolare, si possono inserire una quantita
-        //indefinita di aree di interesse -> si cancella in automatico
-        //solo areaInteresseCentro, per pulire tutto si usa clearCMFields()
-
-        if(nomeCentro.isEmpty() || comuneCentro.isEmpty() || statoCentro.isEmpty()){centroMonitoraggioAlert.showAndWait(); return;}
+    public void executeInsertCMQuery(String nomeCentro, String comuneCentro, String statoCentro, String areeAssociate){
 
         List<String> l = new LinkedList<String>();
-        for(String nome: areeInteresseBox.getText().split("\n")){
+        for(String nome: areeAssociate.split("\n")){
             l.add(nome.trim());
         }
 
@@ -1221,6 +1197,7 @@ public class OperatoreViewController {
         tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryOpAbilitaOperatore(tEmailField, tCodFiscField));
 
         paramBox = new VBox();
+        paramBox.getStyleClass().add("param-box");
         paramBox.getChildren().add(tEmailField);
         paramBox.getChildren().add(tCodFiscField);
         paramBox.getChildren().add(buttonAbilitaOp);
@@ -1280,20 +1257,12 @@ public class OperatoreViewController {
 
     }
 
-
-    /**
-     * TODO:
-     * -> inserire area esistente a un centro monitoraggio esistente, bottone?
-     * -> Completare ricerca area interesse...
-     * -> Completare visualizza parametro climatico
-     * -> tableview builder?
-     */
-
     @FXML
     public void handleAggiungiAreaACentro(ActionEvent event){
         tableView.getColumns().clear();
         tableView.getItems().clear();
         this.paramBox = new VBox();
+        paramBox.getStyleClass().add("param-box");
         this.tAreaInteresse = new TextField("Nome Area");
         this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
         this.tCentroMonitoraggio = new TextField("Nome Centro");
@@ -1426,6 +1395,7 @@ public class OperatoreViewController {
         prepTableAreaInteresse();
         showAreeInserite();
         this.paramBox = new VBox(2);
+        paramBox.getStyleClass().add("param-box");
         this.tAreaInteresse = new TextField("Nome Area");
         this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
         this.btnRicercaArea = new Button("Ricerca area");

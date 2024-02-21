@@ -20,6 +20,7 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
+import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -190,6 +191,7 @@ public class MainWindowController{
         tableView.getItems().clear();
         prepTableAreaInteresse();
         this.paramBox = new VBox(10);
+        paramBox.getStyleClass().add("param-box");
         //denominazione, stato, latitudine, longitudine
         this.tDenominazione = new TextField("nome");
         this.tDenominazione.setOnMouseClicked((event) -> {this.tDenominazione.clear();});
@@ -226,7 +228,6 @@ public class MainWindowController{
         System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
         tableView.getItems().clear();
-
 
         tableView.getColumns().add(TableViewBuilder.getDateColumn());
         tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
@@ -478,6 +479,7 @@ public class MainWindowController{
         prepTableParamClimatici();
 
         this.paramBox = new VBox(10);
+        paramBox.getStyleClass().add("param-box");
         this.tAreaInteresse = new TextField("AreaInteresse");
         this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
         this.tCentroMonitoraggio = new TextField("CentroMonitoraggio");
@@ -510,6 +512,7 @@ public class MainWindowController{
         prepTableAreaInteresse();
         showAreeInserite();
         this.paramBox = new VBox(2);
+        this.paramBox.getStyleClass().add("param-box");
         this.tAreaInteresse = new TextField("Nome Area");
         this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
         this.btnRicercaArea = new Button("Ricerca area");

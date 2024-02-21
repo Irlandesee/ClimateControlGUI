@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<BorderPane
+    xmlns="http://javafx.com/javafx"
+    xmlns:fx="http://javafx.com/fxml"
+    prefHeight="600.0" prefWidth="300.0">
+    <top>
+        <Label>Aggiungi area a: </Label>
+        <Label fx:id="nomeCentroLabel"/>
+    </top>
+    <center>
+        <GridPane styleClass="content-section">
+            <TextField fx:id="inputNomeCentroField"
+                GridPane.columnIndex="0" GridPane.rowIndex="0">Nome del centro</TextField>
+            <TextField fx:id="inputComuneCentroField"
+                GridPane.columnIndex="0" GridPane.rowIndex="1">Comune del centro</TextField>
+            <TextField fx:id="inputStatoCmField"
+                GridPane.columnIndex="0" GridPane.rowIndex="2">Stato del centro</TextField>
+            <TextField fx:id="inputAreaTextField"
+                GridPane.columnIndex="0" GridPane.rowIndex="3">Nome dell'area</TextField>
+            <TextArea fx:id="areeInteresseBox" editable="false"
+                GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <Button fx:id="addAreaToBoxButton" onAction="#handleAddAreaToBox"
+                GridPane.columnIndex="0" GridPane.rowIndex="5">Aggiungi Area</Button>
+            <Button fx:id="removeAreaFromBoxButton" onAction="#handleRemoveAreaFromBox"
+                GridPane.columnIndex="0" GridPane.rowIndex="6">Rimuovi Area</Button>
+            <Button fx:id="clearButton" onAction="#clearFields"
+                GridPane.columnIndex="0" GridPane.rowIndex="7">Pulisci campi</Button>
+            <Button fx:id="doneButton" onAction="#handleDone"
+                GridPane.columnIndex="0" GridPane.rowIndex="8">Done</Button>
+        </GridPane>
+    </center>
+    <stylesheets>
+        <URL value="@../stylesheets/add-area-centro-scene.css"/>
+    </stylesheets>
+
+</BorderPane>

@@ -62,6 +62,6 @@
         </HBox>
     </bottom>
     <stylesheets>
-        <URL value="@../stylesheets/operatore-window.css"/>
+        <URL value="@../stylesheets/main-window.css"/>
     </stylesheets>
 </BorderPane>
