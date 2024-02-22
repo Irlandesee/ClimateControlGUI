@@ -26,11 +26,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -165,10 +167,12 @@ public class MainWindowController{
     @FXML
     public void handleLogin(ActionEvent actionEvent) {
         try{
-            //mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            //mainWindowStage = ;
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
             fxmlLoader.setController(getLoginViewController());
             loginStage = new Stage();
+            loginStage.initOwner((Stage)((Node) actionEvent.getSource()).getScene().getWindow());
+            loginStage.initModality(Modality.WINDOW_MODAL);
             Scene scene = new Scene(fxmlLoader.load(), 400, 300);
             loginStage.setScene(scene);
             loginStage.show();
