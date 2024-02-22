@@ -4,7 +4,7 @@
 }
 
 .content-section{
-    -fx-padding: 10 20 10 10;
+    -fx-padding: 10 10 10 10;
     -fx-min-width: 300px;
     -fx-max-width: 300px;
     -fx-wrap-text: true;

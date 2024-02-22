@@ -29,11 +29,6 @@ public class AddAreaToCentroBoxDialog {
         inputAreaTextField = new TextField("Area associata al centro");
         areeInteresseBox = new TextArea();
 
-        inputNomeCentroField.setOnMouseClicked(e -> inputNomeCentroField.clear());
-        inputComuneCentroField.setOnMouseClicked(e -> inputComuneCentroField.clear());
-        inputStatoCmField.setOnMouseClicked(e -> inputStatoCmField.clear());
-        inputAreaTextField.setOnMouseClicked(e -> inputAreaTextField.clear());
-
         this.operatoreViewController = operatoreViewController;
     }
 
@@ -64,7 +59,6 @@ public class AddAreaToCentroBoxDialog {
         }
 
     }
-
     @FXML
     public void clearFields(){
         inputNomeCentroField.clear();
@@ -72,11 +66,6 @@ public class AddAreaToCentroBoxDialog {
         inputStatoCmField.clear();
         inputAreaTextField.clear();
         areeInteresseBox.clear();
-
-        inputNomeCentroField.setText("Nome del centro");
-        inputComuneCentroField.setText("Comune del centro");
-        inputStatoCmField.setText("Stato del centro");
-        inputAreaTextField.setText("Nome aree associata");
 
     }
 
@@ -96,7 +85,5 @@ public class AddAreaToCentroBoxDialog {
 
         operatoreViewController.executeInsertCMQuery(nomeCentro, comuneCentro, statoCentro, areeAssociate);
     }
-
-
 
 }

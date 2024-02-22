@@ -1125,13 +1125,6 @@ public class OperatoreViewController {
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
-    private void clearCMFields(){
-        nomeCentroField.clear();
-        comuneField.clear();
-        statoCMField.clear();
-        areaInteresseCMField.clear();
-    }
-
     public void executeInsertCMQuery(String nomeCentro, String comuneCentro, String statoCentro, String areeAssociate){
 
         List<String> l = new LinkedList<String>();
@@ -1150,11 +1143,41 @@ public class OperatoreViewController {
                     areaList.append(l.get(i)).append(",");
             }
         }
+        //Controlla che il comune inserito sia associato allo stato corretto
+        Map<String, String> comuneParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+        comuneParams.replace(RequestFactory.fieldKey, comuneCentro);
+        comuneParams.replace(RequestFactory.condKey, "ascii_name");
+
+        Request reqStato = null;
+        try{
+            reqStato = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAllWithCond,
+                    ServerInterface.Tables.CITY,
+                    comuneParams);
+
+        }catch(MalformedRequestException mre){
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(reqStato);
+        Response responseStato = client.getResponse(reqStato.getRequestId());
+        List<City> cities = (List<City>) responseStato.getResult();
+        System.out.println(cities.size());
+        if(cities.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "Stato non corrisponde").showAndWait();
+        }else{
+            City c = cities.get(0);
+            System.out.println(c);
+            if(!c.getCountry().equals(statoCentro)){
+                new Alert(Alert.AlertType.CONFIRMATION, "Stato non corrisponde").showAndWait();
+                return;
+            }
+        }
 
         String params = "{%s}, {%s}, {%s}".formatted(nomeCentro, comuneCentro, statoCentro);
         logger.info(params);
         logger.info(areaList.toString());
-        areaInteresseCMField.clear();
         Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO);
         insertParams.replace(RequestFactory.nomeCentroKey, nomeCentro);
         insertParams.replace(RequestFactory.comuneCentroKey, comuneCentro);
@@ -1180,7 +1203,6 @@ public class OperatoreViewController {
         else{
             new Alert(Alert.AlertType.ERROR, "errore nell'inserimento ").showAndWait();
         }
-        clearCMFields();
     }
 
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){

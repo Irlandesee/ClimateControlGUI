@@ -20,7 +20,7 @@
             <TextField fx:id="inputStatoCmField"
                 GridPane.columnIndex="0" GridPane.rowIndex="2">Stato del centro</TextField>
             <TextField fx:id="inputAreaTextField"
-                GridPane.columnIndex="0" GridPane.rowIndex="3">Nome dell'area</TextField>
+                GridPane.columnIndex="0" GridPane.rowIndex="3">Area associata al centro</TextField>
             <TextArea fx:id="areeInteresseBox" editable="false"
                 GridPane.columnIndex="0" GridPane.rowIndex="4"/>
             <Button fx:id="addAreaToBoxButton" onAction="#handleAddAreaToBox"
