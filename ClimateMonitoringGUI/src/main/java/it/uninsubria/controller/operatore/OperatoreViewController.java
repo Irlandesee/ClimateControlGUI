@@ -119,6 +119,7 @@ public class OperatoreViewController {
 
         this.logger = Logger.getLogger("OperatoreWindow");
 
+        this.operatoreWindowStage.setMinHeight(800);
         this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
         //this.registrazioneController = new RegistrazioneController(this);
@@ -538,9 +539,7 @@ public class OperatoreViewController {
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
-                    });
+                    parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> {
                     System.out.println(pc);

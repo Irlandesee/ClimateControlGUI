@@ -21,6 +21,7 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -124,17 +125,6 @@ public class MainWindowController{
     public void initialize(){
         //table view
         showAreeInserite();
-    }
-
-    static TableView<String[]> createTable(String[] columnNames){
-        TableView<String[]> table = new TableView<String[]>();
-        for(int i = 0; i < columnNames.length; i++){
-            final int index = i;
-            TableColumn<String[], String> column = new TableColumn<String[], String>(columnNames[i]);
-            column.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue()[index]));
-            table.getColumns().add(column);
-        }
-        return table;
     }
 
     private void initAlerts(){
@@ -392,7 +382,6 @@ public class MainWindowController{
                 mre.printStackTrace();
                 return;
             }
-
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
 
@@ -487,7 +476,6 @@ public class MainWindowController{
         this.tglDatePicker = new ToggleButton("Ricerca con data");
         this.startDatePicker = new DatePicker();
         this.endDatePicker = new DatePicker();
-        this.tglRicercaAreaCm = new ToggleButton("Ricerca entrambi");
         this.btnRicercaPcArea = new Button("Ricerca per area");
         this.btnRicercaPcArea.setOnAction(this::handleRicercaPc);
         this.btnRicercaPcCm = new Button("Ricerca Per Cm");
@@ -498,7 +486,6 @@ public class MainWindowController{
         paramBox.getChildren().add(tglDatePicker);
         paramBox.getChildren().add(startDatePicker);
         paramBox.getChildren().add(endDatePicker);
-        paramBox.getChildren().add(tglRicercaAreaCm);
         paramBox.getChildren().add(btnRicercaPcArea);
         paramBox.getChildren().add(btnRicercaPcCm);
         this.borderPane.setRight(paramBox);
@@ -647,9 +634,7 @@ public class MainWindowController{
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
-                    });
+                    parametriClimatici.removeIf(parametroClimatico -> isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }

@@ -29,6 +29,12 @@ public class AddAreaToCentroBoxDialog {
         inputAreaTextField = new TextField("Area associata al centro");
         areeInteresseBox = new TextArea();
 
+        inputNomeCentroField.setOnMouseClicked((mouseClicked) -> this.inputNomeCentroField.clear());
+        inputComuneCentroField.setOnMouseClicked((mouseClicked) -> this.inputComuneCentroField.clear());
+        inputStatoCmField.setOnMouseClicked((mouseClicked) -> this.inputStatoCmField.clear());
+        inputAreaTextField.setOnMouseClicked((mouseClicked) -> this.inputAreaTextField.clear());
+
+
         this.operatoreViewController = operatoreViewController;
     }
 
