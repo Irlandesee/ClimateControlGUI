@@ -1,8 +1,12 @@
 package it.uninsubria.city;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class City {
+public class City implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String geonameID;
     private String asciiName;

@@ -1,0 +1,33 @@
+.root{
+    -fx-font-size: 14px;
+    -fx-background-color: #ffffff;
+}
+
+.content-section{
+    -fx-padding: 10 10 10 10;
+    -fx-min-width: 300px;
+    -fx-max-width: 300px;
+    -fx-wrap-text: true;
+}
+
+.content-section TextField{
+    -fx-min-height: 50px;
+    -fx-max-height: 50px;
+    -fx-padding: 1px;
+
+}
+
+.content-section TextArea{
+    -fx-min-height: 200px;
+    -fx-max-height: 200px;
+}
+
+.content-section Button{
+    -fx-cursor: hand;
+    -fx-min-width: 300px;
+    -fx-max-width: 300px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 1px;
+
+}

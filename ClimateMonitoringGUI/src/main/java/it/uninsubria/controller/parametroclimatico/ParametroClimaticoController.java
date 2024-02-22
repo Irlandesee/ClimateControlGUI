@@ -1,6 +1,10 @@
 package it.uninsubria.controller.parametroclimatico;
 
-import it.uninsubria.controller.scene.SceneController;
+import it.uninsubria.clientCm.Client;
+import it.uninsubria.controller.operatore.OperatoreViewController;
+import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.servercm.ServerInterface;
+import it.uninsubria.util.IDGenerator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -11,13 +15,14 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 public class ParametroClimaticoController {
 
 
     public TextField areaInteresseField;
     public TextField cmField;
-    public DatePicker pubDate;
+    public DatePicker pubDatePicker;
     public TextField ventoField;
     public TextField notaVentoField;
     public TextField umiditaField;
@@ -39,10 +44,9 @@ public class ParametroClimaticoController {
     private Alert nomeOrCentroError;
     private Alert invalidDateError;
     private Alert pcAlert;
-
-    private SceneController sceneController;
-    public ParametroClimaticoController(SceneController sceneController){
-        this.sceneController = sceneController;
+    private OperatoreViewController operatoreViewController;
+    public ParametroClimaticoController(OperatoreViewController operatoreViewController){
+        this.operatoreViewController = operatoreViewController;
     }
     
     @FXML
@@ -64,7 +68,7 @@ public class ParametroClimaticoController {
     public void insericiPC(ActionEvent actionEvent) {
         String nomeArea = areaInteresseField.getText();
         String centroMon = cmField.getText();
-        LocalDate pubdate = pubDate.getValue();
+        LocalDate pubDate = pubDatePicker.getValue();
         String ventoTmp = ventoField.getText();
         String notaVento = notaVentoField.getText();
         String umiditaTmp = umiditaField.getText();
@@ -87,87 +91,112 @@ public class ParametroClimaticoController {
         short tempValue;
         short altGhiacciaiValue;
         short massaGhiacciaiValue;
+        Map<String, String> paramValues = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
+        Map<String, String> notes = RequestFactory.buildInsertParams(ServerInterface.Tables.NOTA_PARAM_CLIMATICO);
 
         if(nomeArea.isEmpty() || centroMon.isEmpty()){
             nomeOrCentroError.showAndWait();
+            return;
         }
         LocalDate startDateTmp = LocalDate.of(1900, 1, 1);
         LocalDate endDateTmp = LocalDate.of(2100, 1, 1);
         //pubdate check
-        if(pubdate.isBefore(startDateTmp) || pubdate.isAfter(endDateTmp))
+        if(pubDate != null){
+            if(pubDate.isBefore(startDateTmp) || pubDate.isAfter(endDateTmp)){
+                invalidDateError.showAndWait();
+                return;
+            }
+        }else{
             invalidDateError.showAndWait();
-        if(!ventoTmp.isEmpty()){
-            ventoValue = Short.parseShort(ventoTmp);
-            if(ventoValue <= 0 || ventoValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            ventoValue = Short.MIN_VALUE;
+            return;
         }
-        if(!umiditaTmp.isEmpty()){
-            umiditaValue = Short.parseShort(umiditaTmp);
-            if(umiditaValue <= 0 || umiditaValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            umiditaValue = Short.MIN_VALUE;
-        }
-        if(!pressioneTmp.isEmpty()){
-            pressioneValue = Short.parseShort(pressioneTmp);
-            if(pressioneValue <= 0 || pressioneValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            pressioneValue = Short.MIN_VALUE;
-        }
-        if(!precipitazioniTmp.isEmpty()){
-            precipitazioniValue = Short.parseShort(precipitazioniTmp);
-            if(precipitazioniValue <= 0 || precipitazioniValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            precipitazioniValue = Short.MIN_VALUE;
-        }
-        if(!temperaturaTmp.isEmpty()){
-            tempValue = Short.parseShort(temperaturaTmp);
-            if(tempValue < 0 || tempValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            tempValue = Short.MIN_VALUE;
-        }
-        if(!altGhiacciaiTmp.isEmpty()){
-            altGhiacciaiValue = Short.parseShort(altGhiacciaiTmp);
-            if(altGhiacciaiValue < 0 || altGhiacciaiValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            altGhiacciaiValue = Short.MIN_VALUE;
-        }
-        if(!massaGhiacciaiTmp.isEmpty()){
-            massaGhiacciaiValue = Short.parseShort(massaGhiacciaiTmp);
-            if(massaGhiacciaiValue <= 0 || massaGhiacciaiValue > 5)
-                pcAlert.showAndWait();
-        }else{
-            massaGhiacciaiValue = Short.MIN_VALUE;
-        }
-        short[] paramValues = new short[7];
-        String[] notes = new String[7];
-        paramValues[0] = ventoValue;
-        paramValues[1] = umiditaValue;
-        paramValues[2] = pressioneValue;
-        paramValues[3] = precipitazioniValue;
-        paramValues[4] = tempValue;
-        paramValues[5] = altGhiacciaiValue;
-        paramValues[6] = massaGhiacciaiValue;
-        notes[0] = notaVento;
-        notes[1] = notaUmidita;
-        notes[2] = notaPressione;
-        notes[3] = notaPrecipitazioni;
-        notes[4] = notaTemperatura;
-        notes[5] = notaAltGhiacciai;
-        notes[6] = notaMassaGhiacciai;
+        try{
+            if(!ventoTmp.isEmpty()){
+                ventoValue = Short.parseShort(ventoTmp);
+                if(ventoValue <= 0 || ventoValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                ventoValue = Short.MIN_VALUE;
+            }
+            if(!umiditaTmp.isEmpty()){
+                umiditaValue = Short.parseShort(umiditaTmp);
+                if(umiditaValue <= 0 || umiditaValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                umiditaValue = Short.MIN_VALUE;
+            }
+            if(!pressioneTmp.isEmpty()){
+                pressioneValue = Short.parseShort(pressioneTmp);
+                if(pressioneValue <= 0 || pressioneValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                pressioneValue = Short.MIN_VALUE;
+            }
+            if(!precipitazioniTmp.isEmpty()){
+                precipitazioniValue = Short.parseShort(precipitazioniTmp);
+                if(precipitazioniValue <= 0 || precipitazioniValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                precipitazioniValue = Short.MIN_VALUE;
+            }
+            if(!temperaturaTmp.isEmpty()){
+                tempValue = Short.parseShort(temperaturaTmp);
+                if(tempValue < 0 || tempValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                tempValue = Short.MIN_VALUE;
+            }
+            if(!altGhiacciaiTmp.isEmpty()){
+                altGhiacciaiValue = Short.parseShort(altGhiacciaiTmp);
+                if(altGhiacciaiValue < 0 || altGhiacciaiValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                altGhiacciaiValue = Short.MIN_VALUE;
+            }
+            if(!massaGhiacciaiTmp.isEmpty()){
+                massaGhiacciaiValue = Short.parseShort(massaGhiacciaiTmp);
+                if(massaGhiacciaiValue <= 0 || massaGhiacciaiValue > 5){
+                    pcAlert.showAndWait();
+                    return;
+                }
+            }else{
+                massaGhiacciaiValue = Short.MIN_VALUE;
+            }
+            paramValues.replace(RequestFactory.valoreVentoKey, String.valueOf(ventoValue));
+            paramValues.replace(RequestFactory.valoreUmiditaKey, String.valueOf(umiditaValue));
+            paramValues.replace(RequestFactory.valorePressioneKey, String.valueOf(pressioneValue));
+            paramValues.replace(RequestFactory.valorePrecipitazioniKey, String.valueOf(precipitazioniValue));
+            paramValues.replace(RequestFactory.valoreTemperaturaKey, String.valueOf(tempValue));
+            paramValues.replace(RequestFactory.valoreAltGhiacciaiKey, String.valueOf(altGhiacciaiValue));
+            paramValues.replace(RequestFactory.valoreMassaGhiacciaiKey, String.valueOf(massaGhiacciaiValue));
 
-        //query the db
-        try {
-            sceneController
-                    .getOperatoreViewController()
-                    .executeInsertPCQuery(nomeArea, centroMon, pubdate, paramValues, notes);
-        }catch(NullPointerException npe){System.out.println("NullPointerException while executing insertPC query");}
+            notes.replace(RequestFactory.notaVentoKey, notaVento);
+            notes.replace(RequestFactory.notaPressione, notaPressione);
+            notes.replace(RequestFactory.notaUmidita, notaUmidita);
+            notes.replace(RequestFactory.notaPrecipitazioni, notaPrecipitazioni);
+            notes.replace(RequestFactory.notaTemperatura, notaTemperatura);
+            notes.replace(RequestFactory.notaAltGhiacciai, notaAltGhiacciai);
+            notes.replace(RequestFactory.notaMassaGhiacciai, notaMassaGhiacciai);
+        }catch(NumberFormatException nfe){
+            nfe.printStackTrace();
+            pcAlert.showAndWait();
+            return;
+        }
+        String parameterId = IDGenerator.generateID();
+        String notaId = IDGenerator.generateID();
+        operatoreViewController.executeInsertPCQuery(parameterId, nomeArea, centroMon, pubDate, paramValues, notaId, notes);
         clearValoriFields();
     }
 
@@ -193,8 +222,8 @@ public class ParametroClimaticoController {
     private void clearAllFields(){
         areaInteresseField.clear();
         cmField.clear();
-        pubDate.getEditor().clear();
-        pubDate.setValue(null);
+        pubDatePicker.getEditor().clear();
+        pubDatePicker.setValue(null);
         clearValoriFields();
     }
 

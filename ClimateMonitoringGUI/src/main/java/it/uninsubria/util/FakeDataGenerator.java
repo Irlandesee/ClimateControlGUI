@@ -4,18 +4,14 @@ import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
 import it.uninsubria.parametroClimatico.NotaParametro;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -27,14 +23,12 @@ import org.json.JSONObject;
 
 public class FakeDataGenerator{
 
-    private final QueryHandler queryHandler;
     private final LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
     private final LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
     private final LocalDate endDate = LocalDate.of(2022, 12, 31);
     private final String apiUrl = "https://api.random.org/json-rpc/4/invoke";
 
-    public FakeDataGenerator(QueryHandler queryHandler){
-        this.queryHandler = queryHandler;
+    public FakeDataGenerator(){
     }
 
     public List<String> getRandomStrings(int numberOfItems, int itemLength, String apiKey){
@@ -154,10 +148,11 @@ public class FakeDataGenerator{
         return setParamValues(pc);
     }
 
+    /**
     public List<ParametroClimatico> generateParamClimatici(int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
-        List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
-        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
+        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
         Random rand = new Random();
         for(int i = 0; i < numberOfItems; i++){
             String areaId = areeInteresseInDb
@@ -172,8 +167,8 @@ public class FakeDataGenerator{
     //Genera parametri climatici relativi a un anno specifico
     public List<ParametroClimatico> generateParamClimaticiGivenYear(int year, int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
-        List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.tables.AREA_INTERESSE);
-        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<AreaInteresse> areeInteresseInDb = queryHandler.selectAll(QueryHandler.Tables.AREA_INTERESSE);
+        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
         for(int i = 0; i < numberOfItems; i++){
             String areaId = areeInteresseInDb
                     .get(
@@ -191,7 +186,7 @@ public class FakeDataGenerator{
 
     public List<ParametroClimatico> generateParamClimaticiGivenYearArea(int year, String areaId, int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
-        List<CentroMonitoraggio> centroMonitoraggiInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<CentroMonitoraggio> centroMonitoraggiInDb = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
 
         for(int i = 0; i < numberOfItems; i++){
             String centroId = centroMonitoraggiInDb
@@ -206,7 +201,7 @@ public class FakeDataGenerator{
     //Genera parametri climatici relativi a un mese specifico
     public List<ParametroClimatico> genPcAreaGivenMonthYear(String areaId, int month, int year, int numberOfItems){
         List<ParametroClimatico> result = new LinkedList<ParametroClimatico>();
-        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.tables.CENTRO_MONITORAGGIO);
+        List<CentroMonitoraggio> centroMonitoraggioInDb = queryHandler.selectAll(QueryHandler.Tables.CENTRO_MONITORAGGIO);
         for(int i = 0; i < numberOfItems; i++){
             String centroId =
                     centroMonitoraggioInDb
@@ -219,7 +214,7 @@ public class FakeDataGenerator{
 
     public List<AreaInteresse> generateAreeInteressse(int numberOfItems){
         List<AreaInteresse> result = new LinkedList<AreaInteresse>();
-        List<City> cities = queryHandler.selectAll(QueryHandler.tables.CITY);
+        List<City> cities = queryHandler.selectAll(QueryHandler.Tables.CITY);
         for(int i = 0; i < numberOfItems; i++){
             City c = cities.get(ThreadLocalRandom.current().nextInt(cities.size()));
             result.add(new AreaInteresse(
@@ -234,7 +229,7 @@ public class FakeDataGenerator{
 
     public List<CentroMonitoraggio> generateCentroMonitoraggio(int numberOfItems){
         List<CentroMonitoraggio> result = new LinkedList<CentroMonitoraggio>();
-        List<City> cities = queryHandler.selectAll(QueryHandler.tables.CITY);
+        List<City> cities = queryHandler.selectAll(QueryHandler.Tables.CITY);
         for(int i = 0; i < numberOfItems; i++){
             City c = cities.get(ThreadLocalRandom.current().nextInt(cities.size()));
             List<AreaInteresse> randomAree =
@@ -270,5 +265,6 @@ public class FakeDataGenerator{
         }
         return result;
     }
+     **/
 
 }

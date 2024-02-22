@@ -1,13 +1,13 @@
 package it.uninsubria.controller.loginview;
 
 import it.uninsubria.MainWindow;
-import it.uninsubria.controller.scene.SceneController;
-import javafx.application.Platform;
+import it.uninsubria.clientCm.Client;
+import it.uninsubria.controller.mainscene.MainWindowController;
+import it.uninsubria.controller.operatore.OperatoreViewController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -26,13 +26,9 @@ public class LoginViewController {
 
     private Alert invalidUserNameOrPassword;
     private Alert loggedIn;
-
-    private boolean loggedIN;
-
-    private final SceneController sceneController;
-    public LoginViewController(SceneController sceneController){
-        this.sceneController = sceneController;
-
+    private final MainWindowController mainWindowController;
+    public LoginViewController(MainWindowController mainWindowController){
+        this.mainWindowController = mainWindowController;
     }
 
     @FXML
@@ -50,7 +46,7 @@ public class LoginViewController {
     public void registra(ActionEvent actionEvent) {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
-            fxmlLoader.setController(sceneController.getRegistrazioneController());
+            fxmlLoader.setController(mainWindowController.getRegistrazioneController());
             Scene scene = new Scene(fxmlLoader.load(), 800, 400);
             Stage registrazioneStage = (Stage)((Node) actionEvent
                     .getSource())
@@ -67,34 +63,18 @@ public class LoginViewController {
         if(userID.isEmpty() && password.isEmpty()) {invalidUserNameOrPassword.showAndWait();}
         else{
             try{
-                boolean loginQueryValue= sceneController
-                        .getMainWindowController()
-                        .onExecuteLoginQuery(userID, password);
-                if(loginQueryValue){
-                    //then switch to OperatoreView
+                boolean loginResult = mainWindowController.onExecuteLoginQuery(userID, password);
+                if(loginResult){
                     loggedIn.showAndWait();
-                    Stage loginStage = (Stage)((Node) actionEvent
-                            .getSource())
-                            .getScene()
-                            .getWindow();
-                    if(loginStage != null) loginStage.close();
-                    try {
-                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
-                        fxmlLoader.setController(sceneController.getOperatoreViewController());
-                        Scene scene = new Scene(fxmlLoader.load(), 800, 480);
-                        Stage operatoreStage = new Stage();
-                        operatoreStage.setTitle("OperatoreView");
-                        operatoreStage.setScene(scene);
-                        operatoreStage.show();
-                    }catch(IOException ioe){ioe.printStackTrace();}
-                }else{
+                    Stage s = (Stage) ((Node)actionEvent.getSource()).getScene().getWindow();
+                    if(s != null) s.close();
+                }
+                else{
                     invalidUserNameOrPassword.showAndWait();
                 }
-
             }catch(NullPointerException npe){npe.printStackTrace();}
         }
     }
-
 
     public void cancel(ActionEvent actionEvent) {
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();

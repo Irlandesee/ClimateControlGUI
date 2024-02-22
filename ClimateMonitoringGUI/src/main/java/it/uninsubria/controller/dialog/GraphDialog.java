@@ -1,8 +1,13 @@
 package it.uninsubria.controller.dialog;
 
+import it.uninsubria.clientCm.Client;
+import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.graphbuilder.GraphBuilder;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
+import it.uninsubria.request.MalformedRequestException;
+import it.uninsubria.request.Request;
+import it.uninsubria.response.Response;
+import it.uninsubria.servercm.ServerInterface;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -17,7 +22,6 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 import java.util.*;
 
 public class GraphDialog {
@@ -63,7 +67,7 @@ public class GraphDialog {
     @FXML
     public ListView listViewDati;
 
-    private final QueryHandler queryHandler;
+    private final Client client;
 
     private List<ParametroClimatico> params;
     private final String areaId;
@@ -72,26 +76,49 @@ public class GraphDialog {
     private final int defaultYear = 1900;
     private final int defaultMonth = 1;
 
-    public GraphDialog(QueryHandler queryHandler, String areaId,  List<ParametroClimatico> params){
-        this.queryHandler = queryHandler;
+    public GraphDialog(Client client, String areaId, List<ParametroClimatico> params){
+        this.client = client;
         this.params = params;
         this.areaId = areaId;
         denomArea = getDenomArea();
     }
 
-    public GraphDialog(QueryHandler queryHandler, String areaId){
-        this.queryHandler = queryHandler;
+    public GraphDialog(Client client, String areaId){
+        this.client = client;
         this.areaId = areaId;
         this.denomArea = getDenomArea();
         this.params = new LinkedList<ParametroClimatico>();
     }
 
     private String getDenomArea(){
-        return queryHandler.selectObjectWithCond(
-                "denominazione",
-                QueryHandler.tables.AREA_INTERESSE,
-                "areaid",
-                areaId).get(0);
+
+        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
+        params.replace(RequestFactory.objectKey, "denominazione");
+        params.replace(RequestFactory.condKey, "areaid");
+        params.replace(RequestFactory.fieldKey, areaId);
+
+        Request request = null;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    params
+            );
+
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+        }
+        client.addRequest(request);
+        Response response = client.getResponse(request.getClientId());
+        String denominazione = "";
+        if(response.getRespType() == ServerInterface.ResponseType.Object
+                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
+            denominazione = response.getResult().toString();
+        }
+
+        return denominazione;
     }
 
     @FXML
@@ -134,7 +161,25 @@ public class GraphDialog {
 
             monthlyTempLineChart.getData().add(series);
         }else{
-            params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+            Map<String, String> requestParameters = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+            requestParameters.replace(RequestFactory.condKey, "areaid");
+            requestParameters.replace(RequestFactory.fieldKey, areaId);
+            Request request = null;
+            try{
+                request = RequestFactory.buildRequest(
+                        client.getClientId(),
+                        ServerInterface.RequestType.selectAllWithCond,
+                        ServerInterface.Tables.PARAM_CLIMATICO,
+                        requestParameters
+                );
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                mre.printStackTrace();
+                return;
+            }
+            client.addRequest(request);
+            Response response = client.getResponse(request.getRequestId());
+            params = (List<ParametroClimatico>) response.getResult();
 
             for(ParametroClimatico p : params){
                 listViewDati.getItems().add(p.getPubDate());
@@ -211,7 +256,25 @@ public class GraphDialog {
             return;
         }
         int year = Integer.parseInt(yearFilterText);
-        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
+        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+        requestParams.replace(RequestFactory.condKey, "areaid");
+        requestParams.replace(RequestFactory.fieldKey, areaId);
+        Request request = null;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAllWithCond,
+                    ServerInterface.Tables.PARAM_CLIMATICO,
+                    requestParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(request);
+        Response response = client.getResponse(request.getRequestId());
+        params = (List<ParametroClimatico>) response.getResult();
         List<ParametroClimatico> filteredParams = filterListByYear(params, year);
 
         System.out.println("printing params");
@@ -293,8 +356,25 @@ public class GraphDialog {
         int month = Integer.parseInt(monthFilterText);
         int year = Integer.parseInt(yearFilterText);
 
-        List<ParametroClimatico> params = queryHandler.selectAllWithCond(QueryHandler.tables.PARAM_CLIMATICO, "areaid", areaId);
-
+        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
+        requestParams.replace(RequestFactory.condKey, "areaid");
+        requestParams.replace(RequestFactory.fieldKey, areaId);
+        Request request = null;
+        try{
+            request = RequestFactory.buildRequest(
+                    client.getClientId(),
+                    ServerInterface.RequestType.selectAllWithCond,
+                    ServerInterface.Tables.PARAM_CLIMATICO,
+                    requestParams
+            );
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            mre.printStackTrace();
+            return;
+        }
+        client.addRequest(request);
+        Response response = client.getResponse(request.getRequestId());
+        List<ParametroClimatico> params = (List<ParametroClimatico>)response.getResult();
         List<ParametroClimatico> filteredParams = filterListByMonth(filterListByYear(params, year), Month.of(month));
 
         if(filteredParams.isEmpty()){

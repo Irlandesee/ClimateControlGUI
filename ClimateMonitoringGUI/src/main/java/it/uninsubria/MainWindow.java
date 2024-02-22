@@ -1,24 +1,14 @@
 package it.uninsubria;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
-import it.uninsubria.controller.dialog.GraphDialog;
+import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.mainscene.MainWindowController;
-import it.uninsubria.controller.scene.SceneController;
-import it.uninsubria.parametroClimatico.NotaParametro;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
-import it.uninsubria.queryhandler.QueryHandler;
-import it.uninsubria.util.FakeDataGenerator;
+import it.uninsubria.util.IDGenerator;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.util.List;
-import java.util.LinkedList;
+
 import java.io.IOException;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class MainWindow extends Application {
     @Override
@@ -28,28 +18,19 @@ public class MainWindow extends Application {
         final Properties props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
-        //QueryHandler queryHandler = new QueryHandler(url, props);
-        MainWindowController mainWindowController = new MainWindowController(stage);
+        Client client = new Client(IDGenerator.generateID());
+        MainWindowController mainWindowController = new MainWindowController(stage, client);
         fxmlLoader.setController(mainWindowController);
         Scene scene = new Scene(fxmlLoader.load(),800, 800);
         stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();
         /**
-        String idHunterTown = "1a4957fdc6382209d4d59bc2469722e5";
-        List<ParametroClimatico> params = queryHandler.selectAllWithCond(
-                QueryHandler.tables.PARAM_CLIMATICO,
-                "areaid",
-                idHunterTown);
-        int year = 2008;
-        int july = 7;
-        int october = 10;
-        FakeDataGenerator fakeDataGenerator = new FakeDataGenerator(queryHandler);
-        String api_key = "b1579b15-ecb5-47c3-bcb8-9548ee05f230";
-
-        GraphDialog graphDialog = new GraphDialog(queryHandler, idHunterTown, params);
-        fxmlLoader.setController(graphDialog);
-        Scene scene = new Scene(fxmlLoader.load(),800, 800);
+        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
+        Client client = new Client(IDGenerator.generateID());
+        OperatoreViewController operatoreViewController = new OperatoreViewController(stage, client);
+        fxmlLoader.setController(operatoreViewController);
+        Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
         stage.setTitle("ClimateMonitoringApp!");
         stage.setScene(scene);
         stage.show();

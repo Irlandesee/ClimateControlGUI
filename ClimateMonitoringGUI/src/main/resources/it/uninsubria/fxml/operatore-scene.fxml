@@ -10,15 +10,13 @@
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<?import javafx.scene.chart.LineChart?>
 <BorderPane xmlns="http://javafx.com/javafx/17.02.2-ea"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="borderPane">
     <top>
         <BorderPane styleClass="header-section">
             <left>
-                <!--><Label fx:id="header-text" text="ClimateMonitoring App"/><!-->
-                <Label fx:id="loggedInLabel"/>
+                <Label id="header-text" text="ClimateMonitoring App"/>
             </left>
             <right>
                 <Button fx:id="exitButton" text="exit" onAction="#exit" contentDisplay="LEFT">
@@ -37,16 +35,19 @@
             <children>
                 <!-->Insert action buttons here<!-->
                 <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#handleRicercaAreaInteresse"/>
-                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleInserisciParametriClimatici"/>
+                <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleVisualizzaParametriClimatici"/>
+                <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#handleVisualizzaGrafici"/>
+                <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#handleVisualizzaCentri"/>
+                <Button text="Inserisci Nuova Area Interesse" fx:id="buttonInserisciAreaInteresse" onAction="#handleInserisciAreaInteresse"/>
+                <Button text="Aggiungi Area a centro" fx:id="buttonAggiungiArea" onAction="#handleAggiungiAreaACentro"/>
                 <Button text="Inserisci Parametro climatico" fx:id="buttonInserisciParametri" onAction="#handleInserisciParametriClimatici"/>
-                <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleButtonInserisciCentroMonitoraggio"/>
-                <Button text="Registra nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleRegistraOperatore"/>
+                <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleInserisciCentroMonitoraggio"/>
+                <Button text="Abilita nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleAbilitaNuovoOperatore"/>
             </children>
         </VBox>
     </left>
     <center>
         <VBox styleClass="content-section" fx:id="contentBox">
-            <Label id="content-header" text="Data"/>
             <TableView fx:id="tableView"/>
         </VBox>
     </center>
@@ -54,10 +55,12 @@
     </right>
     <bottom>
         <HBox id="footer-section">
-            <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            <children>
+                <Label text="Copyright 2023 Mattia Lunardi Uninsubria"/>
+            </children>
         </HBox>
     </bottom>
     <stylesheets>
-        <URL value="@../stylesheets/operatore-window.css"/>
+        <URL value="@../stylesheets/main-window.css"/>
     </stylesheets>
 </BorderPane>

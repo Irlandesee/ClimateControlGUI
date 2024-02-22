@@ -1,6 +1,11 @@
 package it.uninsubria.operatore;
 
-public class OperatoreAutorizzato {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class OperatoreAutorizzato implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String codFiscale;
     private String email;
