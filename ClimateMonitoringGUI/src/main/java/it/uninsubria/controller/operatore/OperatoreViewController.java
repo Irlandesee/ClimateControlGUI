@@ -99,8 +99,8 @@ public class OperatoreViewController {
     private Alert centroMonitoraggioAlert;
 
     private Properties props;
-    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
-    //private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
+    private final String url = "jdbc:postgresql://localhost/postgres";
 
     private Stage mainWindowStage;
     private Stage operatoreWindowStage;

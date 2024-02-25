@@ -1,22 +1,13 @@
 package it.uninsubria.clientCm;
 
-import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
-import it.uninsubria.servercm.ServerInterface.Tables;
-import it.uninsubria.servercm.ServerInterface.RequestType;
-import it.uninsubria.servercm.ServerInterface.ResponseType;
-import it.uninsubria.util.IDGenerator;
 import java.util.logging.Logger;
-
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Client extends Thread{
 
@@ -98,13 +89,7 @@ public class Client extends Thread{
             logger.info("Sending Request");
             clientProxy.sendRequest(request);
         }
-        /**
-        logger.info("Client quitting, closing the socket");
-        try{
-            sock.close();
-        }catch(IOException ioe){logger.info(ioe.getMessage());}
-         **/
-
+        //Close the socket?
     }
 
 }

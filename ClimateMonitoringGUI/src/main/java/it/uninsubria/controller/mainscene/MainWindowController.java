@@ -80,8 +80,8 @@ public class MainWindowController{
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
-    //private final String url = "jdbc:postgresql://localhost/postgres";
-    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
+    private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;

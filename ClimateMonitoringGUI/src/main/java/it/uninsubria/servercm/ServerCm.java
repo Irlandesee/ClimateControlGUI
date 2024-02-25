@@ -23,8 +23,9 @@ public class ServerCm {
     private LinkedBlockingQueue<Worker> workers;
 
 
-    private final String dbUrl = "jdbc:postgresql://192.168.1.26/postgres";
+    //private final String dbUrl = "jdbc:postgresql://192.168.1.26/postgres";
     //private final String dbUrl = "jdbc:postgresql://192.168.1.7/postgres";
+    private final String dbUrl = "jdbc:postgresql://localhost/postgres";
 
     private final Properties props;
 
@@ -131,7 +132,6 @@ public class ServerCm {
                 try{
                     serv.slaves.put(slave);
                     System.out.printf("%s starting new worker\n", serv.name);
-                    //serv.workers.put(w);
                 }catch(InterruptedException ie){ie.printStackTrace();}
             }
         }catch(IOException ioe){ioe.printStackTrace();}
