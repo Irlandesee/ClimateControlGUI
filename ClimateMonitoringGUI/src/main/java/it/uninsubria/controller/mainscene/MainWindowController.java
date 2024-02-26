@@ -713,6 +713,9 @@ public class MainWindowController{
     public void handleVisualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        if(paramBox != null)
+            if(!paramBox.getChildren().isEmpty())
+                paramBox.getChildren().clear();
         //tableView.setRowFactory(null);
         Request requestCentro = null;
         try{
