@@ -89,13 +89,11 @@ public class GraphDialog {
 
     private String getDenomArea(){
 
-        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        params.replace(RequestFactory.objectKey, "denominazione");
-        params.replace(RequestFactory.condKey, "areaid");
-        params.replace(RequestFactory.fieldKey, areaId);
 
         Request request = null;
         try{
+            Map<String, String> params = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "denominazione", "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -158,11 +156,10 @@ public class GraphDialog {
 
             monthlyTempLineChart.getData().add(series);
         }else{
-            Map<String, String> requestParameters = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            requestParameters.replace(RequestFactory.condKey, "areaid");
-            requestParameters.replace(RequestFactory.fieldKey, areaId);
             Request request = null;
             try{
+                Map<String, String> requestParameters = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -260,11 +257,9 @@ public class GraphDialog {
             return;
         }
         int year = Integer.parseInt(yearFilterText);
-        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-        requestParams.replace(RequestFactory.condKey, "areaid");
-        requestParams.replace(RequestFactory.fieldKey, areaId);
         Request request = null;
         try{
+            Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAllWithCond,
@@ -360,11 +355,11 @@ public class GraphDialog {
         int month = Integer.parseInt(monthFilterText);
         int year = Integer.parseInt(yearFilterText);
 
-        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-        requestParams.replace(RequestFactory.condKey, "areaid");
-        requestParams.replace(RequestFactory.fieldKey, areaId);
+
         Request request = null;
         try{
+            Map<String, String> requestParams = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAllWithCond,

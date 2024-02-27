@@ -2,7 +2,6 @@ package it.uninsubria.servercm;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
-import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
@@ -1034,12 +1033,12 @@ public class Worker extends Thread{
         Map<String, String> params = request.getParams();
         String notaId = params.get(RequestFactory.notaIdKey);
         String notaVento = params.get(RequestFactory.notaVentoKey);
-        String notaUmidita = params.get(RequestFactory.notaUmidita);
-        String notaPressione = params.get(RequestFactory.notaPressione);
-        String notaTemperatura = params.get(RequestFactory.notaTemperatura);
-        String notaPrecipitazioni = params.get(RequestFactory.notaPrecipitazioni);
-        String notaAltGhiacciai = params.get(RequestFactory.notaAltGhiacciai);
-        String notaMassaGhiacciai = params.get(RequestFactory.notaMassaGhiacciai);
+        String notaUmidita = params.get(RequestFactory.notaUmiditaKey);
+        String notaPressione = params.get(RequestFactory.notaPressioneKey);
+        String notaTemperatura = params.get(RequestFactory.notaTemperaturaKey);
+        String notaPrecipitazioni = params.get(RequestFactory.notaPrecipitazioniKey);
+        String notaAltGhiacciai = params.get(RequestFactory.notaAltGhiacciaiKey);
+        String notaMassaGhiacciai = params.get(RequestFactory.notaMassaGhiacciaiKey);
 
         String query = "insert into nota_parametro_climatico(notaid, nota_vento, nota_umidita, nota_pressione, nota_temperatura, nota_precipitazioni, nota_alt_ghiacciai, nota_massa_ghiacciai)" +
                 "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s')";

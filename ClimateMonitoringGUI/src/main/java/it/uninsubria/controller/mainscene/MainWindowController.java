@@ -255,16 +255,11 @@ public class MainWindowController{
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     AreaInteresse a = (AreaInteresse) row.getItem();
-
                     System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
-                    Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    if(requestParams != null){
-                        requestParams.replace(RequestFactory.condKey, "areaid");
-                        requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
-                    }
                     Request req;
                     try{
+                        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
                         req = RequestFactory.buildRequest(
                                 client.getClientId(),
                                 ServerInterface.RequestType.selectAllWithCond,
@@ -339,11 +334,10 @@ public class MainWindowController{
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "denominazione");
-            params.replace(RequestFactory.fieldKey, denom);
             Request request;
             try{
+                Map<String, String> params = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -371,11 +365,10 @@ public class MainWindowController{
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "stato");
-            params.replace(RequestFactory.fieldKey, stato);
             Request request;
             try{
+                Map<String, String> params = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -523,13 +516,10 @@ public class MainWindowController{
         }
         System.out.println("Creating chart for" + nomeArea);
 
-        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        if(params == null){return;}
-        params.replace(RequestFactory.objectKey, "areaid");
-        params.replace(RequestFactory.condKey, "denominazione");
-        params.replace(RequestFactory.fieldKey, nomeArea);
         Request request;
         try{
+            Map<String, String> params = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -591,12 +581,10 @@ public class MainWindowController{
             if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
                 this.areaInteresseAlert.showAndWait();
             }else{
-                Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-                reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
-                reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
-                reqAreaIdParams.replace(RequestFactory.fieldKey, denomAiCercata);
                 Request requestAreaId;
                 try{
+                    Map<String, String> reqAreaIdParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjWithCond,
@@ -611,11 +599,10 @@ public class MainWindowController{
                 Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
                 String areaInteresseId = resAreaId.getResult().toString();
 
-                Map<String, String> reqParamClimatici = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                reqParamClimatici.replace(RequestFactory.condKey, "areaid");
-                reqParamClimatici.replace(RequestFactory.fieldKey, areaInteresseId);
                 Request requestParamClimatici = null;
                 try{
+                    Map<String, String> reqParamClimatici = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -648,13 +635,15 @@ public class MainWindowController{
             if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
                 this.centroMonitoraggioAlert.showAndWait();
             }else{
-                Map<String, String> requestCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                requestCentroIdParams.replace(RequestFactory.objectKey, "centroid");
-                requestCentroIdParams.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                requestCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
-                requestCentroIdParams.replace(RequestFactory.fieldKey, denomCmCercato);
                 Request requestCentroId;
                 try{
+                    Map<String, String> requestCentroIdParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectObjJoinWithCond,
+                                    "centroid",
+                                    ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
+                                    "nomecentro",
+                                    denomCmCercato
+                            );
                     requestCentroId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
@@ -672,12 +661,11 @@ public class MainWindowController{
                 String centroId = result.get(0);
                 System.out.println(centroId);
 
-                Map<String, String> requestParametriClimaticiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                requestParametriClimaticiParams.replace(RequestFactory.condKey, "centroid");
-                requestParametriClimaticiParams.replace(RequestFactory.fieldKey, centroId);
 
                 Request requestParametriClimatici;
                 try{
+                    Map<String, String> requestParametriClimaticiParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -750,11 +738,10 @@ public class MainWindowController{
                     List<String> areeId = c.getAreeInteresseIdAssociate();
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
-                        Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                        reqAiParams.replace(RequestFactory.condKey, "areaid");
-                        reqAiParams.replace(RequestFactory.fieldKey, areaId);
                         Request requestAi;
                         try{
+                            Map<String, String> reqAiParams = RequestFactory
+                                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                             requestAi = RequestFactory.buildRequest(
                                     client.getClientId(),
                                     ServerInterface.RequestType.selectAllWithCond,
@@ -795,12 +782,11 @@ public class MainWindowController{
 
     public boolean onExecuteLoginQuery(String userID, String password){
         System.out.printf("Userid & password: %s %s\n", userID, password);
-        Map<String, String> loginParams = RequestFactory.buildParams(ServerInterface.RequestType.executeLogin);
-        loginParams.replace(RequestFactory.userKey, userID);
-        loginParams.replace(RequestFactory.passwordKey, password);
 
         Request loginRequest;
         try{
+            Map<String, String> loginParams = RequestFactory
+                    .buildParams(ServerInterface.RequestType.executeLogin, userID, password);
             loginRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.executeLogin,
@@ -861,12 +847,10 @@ public class MainWindowController{
             System.out.println("Operatore inesistente");
             return false;
         }else{//
-            Map<String, String> reqCmIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-            reqCmIdParams.replace(RequestFactory.objectKey, "centroid");
-            reqCmIdParams.replace(RequestFactory.condKey, "comune");
-            reqCmIdParams.replace(RequestFactory.fieldKey, centroAfferenza);
             Request requestCentroId;
             try{
+                Map<String, String> reqCmIdParams = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", "centroAfferenza");
                 requestCentroId = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -880,17 +864,10 @@ public class MainWindowController{
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
             String centroId = responseCmId.getResult().toString();
             System.out.println(centroId);
-            Map<String, String> requestSignUpParams = RequestFactory.buildParams(ServerInterface.RequestType.executeSignUp);
-            requestSignUpParams.replace(RequestFactory.nomeOpKey, nomeOp);
-            requestSignUpParams.replace(RequestFactory.cognomeOpKey, cognomeOp);
-            requestSignUpParams.replace(RequestFactory.codFiscOpKey, codFisc);
-            requestSignUpParams.replace(RequestFactory.userKey, userID);
-            requestSignUpParams.replace(RequestFactory.emailOpKey, email);
-            requestSignUpParams.replace(RequestFactory.passwordKey, password);
-            requestSignUpParams.replace(RequestFactory.centroAfferenzaKey, centroId);
-            requestSignUpParams.forEach((key, value) -> System.out.print(key + ":" + value));
             Request signUpRequest;
             try{
+                Map<String, String> requestSignUpParams = RequestFactory
+                        .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, userID, email, password, centroId);
                 signUpRequest = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.executeSignUp,

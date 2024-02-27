@@ -1,6 +1,5 @@
 package it.uninsubria.controller.parametroclimatico;
 
-import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.servercm.ServerInterface;
@@ -183,12 +182,12 @@ public class ParametroClimaticoController {
             paramValues.replace(RequestFactory.valoreMassaGhiacciaiKey, String.valueOf(massaGhiacciaiValue));
 
             notes.replace(RequestFactory.notaVentoKey, notaVento);
-            notes.replace(RequestFactory.notaPressione, notaPressione);
-            notes.replace(RequestFactory.notaUmidita, notaUmidita);
-            notes.replace(RequestFactory.notaPrecipitazioni, notaPrecipitazioni);
-            notes.replace(RequestFactory.notaTemperatura, notaTemperatura);
-            notes.replace(RequestFactory.notaAltGhiacciai, notaAltGhiacciai);
-            notes.replace(RequestFactory.notaMassaGhiacciai, notaMassaGhiacciai);
+            notes.replace(RequestFactory.notaPressioneKey, notaPressione);
+            notes.replace(RequestFactory.notaUmiditaKey, notaUmidita);
+            notes.replace(RequestFactory.notaPrecipitazioniKey, notaPrecipitazioni);
+            notes.replace(RequestFactory.notaTemperaturaKey, notaTemperatura);
+            notes.replace(RequestFactory.notaAltGhiacciaiKey, notaAltGhiacciai);
+            notes.replace(RequestFactory.notaMassaGhiacciaiKey, notaMassaGhiacciai);
         }catch(NumberFormatException nfe){
             nfe.printStackTrace();
             pcAlert.showAndWait();

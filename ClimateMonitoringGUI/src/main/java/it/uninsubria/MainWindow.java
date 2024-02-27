@@ -16,6 +16,7 @@ public class MainWindow extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
         //final String url = "jdbc:postgresql://192.168.1.26/postgres";
         final Properties props = new Properties();
+
         props.setProperty("user", "postgres");
         props.setProperty("password", "qwerty");
         Client client = new Client(IDGenerator.generateID());

@@ -30,6 +30,8 @@ public class ServerCm {
     private final Properties props;
 
     private final Logger logger;
+    private final String user = "postgres";
+    private final String password = "qwerty";
 
 
     public ServerCm(){
@@ -42,8 +44,8 @@ public class ServerCm {
         responses = new LinkedBlockingQueue<Response>();
         workers = new LinkedBlockingQueue<Worker>();
         props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "qwerty");
+        props.setProperty("user", user);
+        props.setProperty("password", password);
         this.logger = Logger.getLogger(this.name);
     }
 

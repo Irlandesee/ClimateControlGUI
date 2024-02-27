@@ -75,14 +75,11 @@ public class AiDialog {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     ParametroClimatico pcSelected = (ParametroClimatico) row.getItem();
                     String centroId = pcSelected.getIdCentro();
-                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-                    if(params != null){
-                        params.replace(RequestFactory.objectKey, "nomecentro");
-                        params.replace(RequestFactory.condKey, "centroid");
-                        params.replace(RequestFactory.fieldKey, centroId);
-                    }
                     Request request = null;
                     try{
+                        Map<String, String> params = RequestFactory
+                                .buildParams(ServerInterface.RequestType.selectObjWithCond, "nomecentro",
+                                        "centroid", centroId);
                         request = RequestFactory.buildRequest(client.getClientId(),
                                 ServerInterface.RequestType.selectObjWithCond,
                                 ServerInterface.Tables.CENTRO_MONITORAGGIO,

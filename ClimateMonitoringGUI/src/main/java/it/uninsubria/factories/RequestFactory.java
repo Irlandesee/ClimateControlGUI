@@ -44,19 +44,12 @@ public class RequestFactory {
     public static final String latitudineKey = "latitudine";
     public static final String longitudineKey = "longitudine";
     public static final String notaVentoKey = "notaVento";
-    public static final String notaUmidita = "notaUmidita";
-    public static final String notaPressione = "notaPressione";
-    public static final String notaTemperatura = "notaTemperatura";
-    public static final String notaPrecipitazioni = "notaPrecipitazioni";
-    public static final String notaAltGhiacciai = "notaAltGhiacciai";
-    public static final String notaMassaGhiacciai = "notaMassaGhiacciai";
-    public static final int posVento = 0;
-    public static final int posUmidita = 1;
-    public static final int posPressione= 2;
-    public static final int posPrecipitazioni = 3;
-    public static final int posTemperatura = 4;
-    public static final int posAltGhiacciai = 5;
-    public static final int posMassaGhiacciai = 6;
+    public static final String notaUmiditaKey = "notaUmidita";
+    public static final String notaPressioneKey = "notaPressione";
+    public static final String notaTemperaturaKey = "notaTemperatura";
+    public static final String notaPrecipitazioniKey = "notaPrecipitazioni";
+    public static final String notaAltGhiacciaiKey = "notaAltGhiacciai";
+    public static final String notaMassaGhiacciaiKey = "notaMassaGhiacciai";
 
     public static Request buildRequest(String clientId, ServerInterface.RequestType requestType, ServerInterface.Tables table, Map<String, String> params) throws MalformedRequestException{
         switch(requestType){
@@ -150,106 +143,123 @@ public class RequestFactory {
         throw new MalformedRequestException(undefinedRequestType);
     }
 
-    public static Map<String, String> buildInsertParams(ServerInterface.Tables table){
+    public static Map<String, String> buildInsertParams(ServerInterface.Tables table, String... s) throws MalformedRequestException{
         Map<String, String> params = new HashMap<String, String>();
         switch(table){
             case AREA_INTERESSE -> {
-                params.put(areaIdKey, "");
-                params.put(denominazioneAreaKey, "");
-                params.put(statoAreaKey, "");
-                params.put(latitudineKey, "");
-                params.put(longitudineKey, "");
+                if(s.length < 5) throw new MalformedRequestException(paramLengthError);
+                params.put(areaIdKey, s[0]);
+                params.put(denominazioneAreaKey, s[1]);
+                params.put(statoAreaKey, s[2]);
+                params.put(latitudineKey, s[3]);
+                params.put(longitudineKey, s[4]);
             }
             case PARAM_CLIMATICO -> {
-                params.put(parameterIdKey, "");
-                params.put(centroIdKey, "");
-                params.put(areaIdKey, "");
-                params.put(pubDateKey, "");
-                params.put(notaIdKey, "");
-                params.put(valoreVentoKey, "");
-                params.put(valoreUmiditaKey, "");
-                params.put(valorePressioneKey, "");
-                params.put(valoreTemperaturaKey, "");
-                params.put(valorePrecipitazioniKey, "");
-                params.put(valoreAltGhiacciaiKey, "");
-                params.put(valoreMassaGhiacciaiKey, "");
+                if(s.length < 12) throw new MalformedRequestException(paramLengthError);
+                params.put(parameterIdKey, s[0]);
+                params.put(centroIdKey, s[1]);
+                params.put(areaIdKey, s[2]);
+                params.put(pubDateKey, s[3]);
+                params.put(notaIdKey, s[4]);
+                params.put(valoreVentoKey, s[5]);
+                params.put(valoreUmiditaKey, s[6]);
+                params.put(valorePressioneKey, s[7]);
+                params.put(valoreTemperaturaKey, s[8]);
+                params.put(valorePrecipitazioniKey, s[9]);
+                params.put(valoreAltGhiacciaiKey, s[10]);
+                params.put(valoreMassaGhiacciaiKey, s[11]);
             }
             case CENTRO_MONITORAGGIO -> {
-                params.put(centroIdKey, "");
-                params.put(nomeCentroKey, "");
-                params.put(comuneCentroKey, "");
-                params.put(countryCentroKey, "");
-                params.put(listAiKey, "");
+                if(s.length < 5) throw new MalformedRequestException(paramLengthError);
+                params.put(centroIdKey, s[0]);
+                params.put(nomeCentroKey, s[1]);
+                params.put(comuneCentroKey, s[2]);
+                params.put(countryCentroKey, s[3]);
+                params.put(listAiKey, s[4]);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                params.put(notaIdKey, "");
-                params.put(notaVentoKey, "");
-                params.put(notaUmidita, "");
-                params.put(notaPressione, "");
-                params.put(notaPrecipitazioni, "");
-                params.put(notaAltGhiacciai, "");
-                params.put(notaMassaGhiacciai, "");
+                if(s.length < 7) throw new MalformedRequestException(paramLengthError);
+                params.put(notaIdKey, s[0]);
+                params.put(notaVentoKey, s[1]);
+                params.put(notaUmiditaKey, s[2]);
+                params.put(notaPressioneKey, s[3]);
+                params.put(notaPrecipitazioniKey, s[4]);
+                params.put(notaAltGhiacciaiKey, s[5]);
+                params.put(notaMassaGhiacciaiKey, s[6]);
             }
             case OPERATORE -> {
-                params.put(nomeOpKey, "");
-                params.put(cognomeOpKey, "");
-                params.put(codFiscOpKey, "");
-                params.put(emailOpKey, "");
-                params.put(userKey, "");
-                params.put(passwordKey, "");
-                params.put(centroAfferenzaKey, "");
+                if(s.length < 7) throw new MalformedRequestException(paramLengthError);
+                params.put(nomeOpKey, s[0]);
+                params.put(cognomeOpKey, s[1]);
+                params.put(codFiscOpKey, s[2]);
+                params.put(emailOpKey, s[3]);
+                params.put(userKey, s[4]);
+                params.put(passwordKey, s[5]);
+                params.put(centroAfferenzaKey, s[6]);
             }
             case OP_AUTORIZZATO -> {
-                params.put(codFiscOpKey, "");
-                params.put(emailOpKey, "");
+                if(s.length < 2) throw new MalformedRequestException(paramLengthError);
+                params.put(codFiscOpKey, s[0]);
+                params.put(emailOpKey, s[1]);
             }
             default -> {return null;}
         }
         return params;
     }
 
-    public static Map<String, String> buildParams(ServerInterface.RequestType reqType){
+    public static Map<String, String> buildParams(ServerInterface.RequestType requestType, String... s) throws MalformedRequestException{
         Map<String, String> params = new HashMap<String, String>();
-        switch(reqType){
+        switch(requestType){
             case selectAll -> {
                 return params;
             }
             case selectAllWithCond -> {
-                params.put("cond", "");
-                params.put("field", "");
+                if(s.length < 2){
+                    throw new MalformedRequestException(paramLengthError);
+                }
+                params.put(RequestFactory.condKey, s[0]);
+                params.put(RequestFactory.fieldKey, s[1]);
             }
             case selectObjWithCond -> {
-                params.put("object", "");
-                params.put("cond", "");
-                params.put("field", "");
+                if(s.length < 3){
+                    throw new MalformedRequestException(paramLengthError);
+                }
+                params.put(RequestFactory.objectKey, s[0]);
+                params.put(RequestFactory.condKey, s[1]);
+                params.put(RequestFactory.fieldKey, s[2]);
             }
             case selectObjJoinWithCond -> {
-                params.put("object", "");
-                params.put("joinTable", "");
-                params.put("cond", "");
-                params.put("field", "");
+                if(s.length < 4) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.objectKey, s[0]);
+                params.put(RequestFactory.joinKey, s[1]);
+                params.put(RequestFactory.condKey, s[2]);
+                params.put(RequestFactory.fieldKey, s[3]);
             }
             case executeLogin -> {
-                params.put("user", "");
-                params.put("password", "");
+                if(s.length < 2) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.userKey, s[0]);
+                params.put(RequestFactory.passwordKey, s[1]);
             }
             case executeUpdateAi -> {
-                params.put(areaIdKey, "");
-                params.put(centroIdKey, "");
+                if(s.length < 2) throw new MalformedRequestException(paramLengthError);
+                params.put(areaIdKey, s[0]);
+                params.put(centroIdKey, s[1]);
             }
             case executeSignUp -> {
-                params.put(codFiscOpKey, "");
-                params.put(nomeOpKey, "");
-                params.put(cognomeOpKey, "");
-                params.put(userKey, "");
-                params.put(emailOpKey, "");
-                params.put(passwordKey, "");
-                params.put(centroAfferenzaKey, "");
+                if(s.length < 7) throw new MalformedRequestException(paramLengthError);
+                params.put(codFiscOpKey, s[0]);
+                params.put(nomeOpKey, s[1]);
+                params.put(cognomeOpKey, s[2]);
+                params.put(userKey, s[3]);
+                params.put(emailOpKey, s[4]);
+                params.put(passwordKey, s[5]);
+                params.put(centroAfferenzaKey, s[6]);
             }
             default -> {
                 return null;
             }
         }
+
         return params;
     }
 
