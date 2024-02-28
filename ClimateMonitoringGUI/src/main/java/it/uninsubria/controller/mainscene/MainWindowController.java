@@ -363,7 +363,7 @@ public class MainWindowController{
 
     private void handleRicercaAreaPerStato(){
         tableView.getItems().clear();
-        String stato = this.tStato.getText();
+        String stato = this.tStato.getText().trim();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
             Request request;
             try{
@@ -800,15 +800,13 @@ public class MainWindowController{
         }
         client.addRequest(loginRequest);
         Response response = client.getResponse(loginRequest.getRequestId());
-        Operatore o = (Operatore) response.getResult();
-        if(o == null){
-            return false;
-        }else{
+        if(response.getRespType() == ServerInterface.ResponseType.loginKo) return false;
+        else{
             mainWindowStage.close();
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client));
+                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");

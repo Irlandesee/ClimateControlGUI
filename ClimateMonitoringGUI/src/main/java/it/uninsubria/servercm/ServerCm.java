@@ -22,30 +22,26 @@ public class ServerCm {
     private LinkedBlockingQueue<ServerSlave> slaves;
     private LinkedBlockingQueue<Worker> workers;
 
-
-    //private final String dbUrl = "jdbc:postgresql://192.168.1.26/postgres";
-    //private final String dbUrl = "jdbc:postgresql://192.168.1.7/postgres";
-    private final String dbUrl = "jdbc:postgresql://localhost/postgres";
+    protected static final String dbUrl = "jdbc:postgresql://localhost/postgres";
 
     private final Properties props;
 
     private final Logger logger;
     private final String user = "postgres";
     private final String password = "qwerty";
-
-
     public ServerCm(){
         try{
             ss = new ServerSocket(PORT);
             System.err.printf("%s started on port: %d\n", this.name, this.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
+        props = new Properties();
+        props.setProperty("user", user);
+        props.setProperty("password", password);
+
         slaves = new LinkedBlockingQueue<ServerSlave>();
         requests = new LinkedBlockingQueue<Request>();
         responses = new LinkedBlockingQueue<Response>();
         workers = new LinkedBlockingQueue<Worker>();
-        props = new Properties();
-        props.setProperty("user", user);
-        props.setProperty("password", password);
         this.logger = Logger.getLogger(this.name);
     }
 

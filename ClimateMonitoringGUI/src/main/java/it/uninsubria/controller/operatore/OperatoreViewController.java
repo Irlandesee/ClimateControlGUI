@@ -111,7 +111,7 @@ public class OperatoreViewController {
     private final Logger logger;
     private ServerInterface.Tables tableShown;
 
-    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
+    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client, String userId, String password){
         this.mainWindowController = mainWindowController;
         this.mainWindowStage = mainWindowStage;
         this.operatoreWindowStage = operatoreWindowStage;
@@ -125,8 +125,8 @@ public class OperatoreViewController {
         //this.registrazioneController = new RegistrazioneController(this);
 
         props = new Properties();
-        props.put("user", "postgres");
-        props.put("password", "qwerty");
+        props.put("user", userId);
+        props.put("password", password);
     }
 
 
@@ -892,14 +892,11 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, "Longitudine non valida!");
         }
 
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE);
-        insertParams.replace(RequestFactory.areaIdKey, IDGenerator.generateID());
-        insertParams.replace(RequestFactory.denominazioneAreaKey, denom);
-        insertParams.replace(RequestFactory.statoAreaKey, stato);
-        insertParams.replace(RequestFactory.latitudineKey, latitudine);
-        insertParams.replace(RequestFactory.longitudineKey, longitudine);
+        Map<String, String> insertParams;
         Request insertRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE,
+                    IDGenerator.generateID(), denom, stato, latitudine, longitudine);
             insertRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1048,22 +1045,15 @@ public class OperatoreViewController {
             return;
         }
 
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
-        insertParams.replace(RequestFactory.parameterIdKey, parameterId);
-        insertParams.replace(RequestFactory.areaIdKey, areaId);
-        insertParams.replace(RequestFactory.centroIdKey, centroId);
-        insertParams.replace(RequestFactory.pubDateKey, pubdate.toString());
-        insertParams.replace(RequestFactory.notaIdKey, notaId);
-        insertParams.replace(RequestFactory.valoreVentoKey, paramValues.get(RequestFactory.valoreVentoKey));
-        insertParams.replace(RequestFactory.valoreUmiditaKey, paramValues.get(RequestFactory.valoreUmiditaKey));
-        insertParams.replace(RequestFactory.valorePressioneKey, paramValues.get(RequestFactory.valorePressioneKey));
-        insertParams.replace(RequestFactory.valorePrecipitazioniKey, paramValues.get(RequestFactory.valorePrecipitazioniKey));
-        insertParams.replace(RequestFactory.valoreTemperaturaKey, paramValues.get(RequestFactory.valoreTemperaturaKey));
-        insertParams.replace(RequestFactory.valoreAltGhiacciaiKey, paramValues.get(RequestFactory.valoreAltGhiacciaiKey));
-        insertParams.replace(RequestFactory.valoreMassaGhiacciaiKey, paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
-
+        Map<String, String> insertParams;
         Request insertPcRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
+                    parameterId, areaId, centroId, pubdate.toString(), notaId,
+                    paramValues.get(RequestFactory.valoreVentoKey), paramValues.get(RequestFactory.valoreUmiditaKey),
+                    paramValues.get(RequestFactory.valorePressioneKey), paramValues.get(RequestFactory.valorePrecipitazioniKey),
+                    paramValues.get(RequestFactory.valoreTemperaturaKey), paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
+                    paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
             insertPcRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1173,13 +1163,11 @@ public class OperatoreViewController {
         String params = "{%s}, {%s}, {%s}".formatted(nomeCentro, comuneCentro, statoCentro);
         logger.info(params);
         logger.info(areaList.toString());
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO);
-        insertParams.replace(RequestFactory.nomeCentroKey, nomeCentro);
-        insertParams.replace(RequestFactory.comuneCentroKey, comuneCentro);
-        insertParams.replace(RequestFactory.countryCentroKey, statoCentro);
-        insertParams.replace(RequestFactory.listAiKey, areaList.toString());
+        Map<String, String> insertParams;
         Request insertCmRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                nomeCentro, comuneCentro, statoCentro, areaList.toString());
             insertCmRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1249,11 +1237,10 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
             return;
         }
-        Map<String, String> insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO);
-        insertAuthOpParams.replace(RequestFactory.emailOpKey, email);
-        insertAuthOpParams.replace(RequestFactory.codFiscOpKey, codFisc);
+        Map<String, String> insertAuthOpParams;
         Request insertAuthOpRequest;
         try{
+            insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
             insertAuthOpRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,

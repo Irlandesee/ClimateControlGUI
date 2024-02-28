@@ -807,7 +807,6 @@ public class Worker extends Thread{
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
 
-
         //Login has failed
         return new Response(
                 clientId,
@@ -820,7 +819,6 @@ public class Worker extends Thread{
 
     public Response insertOperatore(Request request){
         Map<String, String> params = request.getParams();
-
         String nomeOp = params.get(RequestFactory.nomeOpKey);
         String cognomeOp = params.get(RequestFactory.cognomeOpKey);
         String codFisc = params.get(RequestFactory.codFiscOpKey);
@@ -828,6 +826,19 @@ public class Worker extends Thread{
         String password = params.get(RequestFactory.passwordKey);
         String email = params.get(RequestFactory.emailOpKey);
         String centroAfferenza = params.get(RequestFactory.centroAfferenzaKey);
+
+        //create role with the userId
+        final String CREATE_USER_ROLE = "create role %s with login password '%s'".formatted(userId, password);
+        try(PreparedStatement createUserRoleStat = conn.prepareStatement(CREATE_USER_ROLE)){
+            createUserRoleStat.executeUpdate();
+        }catch(SQLException sqlException){sqlException.printStackTrace();}
+
+        // add user to group role
+        final String ADD_USER_TO_GROUP_ROLE = "grant operatori to %s".formatted(userId);
+        try(PreparedStatement addUserToGroupRoleStat = conn.prepareStatement(ADD_USER_TO_GROUP_ROLE)){
+            addUserToGroupRoleStat.executeUpdate();
+        }catch(SQLException sqlException){sqlException.printStackTrace();}
+
         String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
                 .formatted(nomeOp, cognomeOp, codFisc, userId, email, password, centroAfferenza);
         try(PreparedStatement stat = conn.prepareStatement(query)){
