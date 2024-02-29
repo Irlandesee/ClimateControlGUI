@@ -13,10 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -92,13 +89,11 @@ public class GraphDialog {
 
     private String getDenomArea(){
 
-        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        params.replace(RequestFactory.objectKey, "denominazione");
-        params.replace(RequestFactory.condKey, "areaid");
-        params.replace(RequestFactory.fieldKey, areaId);
 
         Request request = null;
         try{
+            Map<String, String> params = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "denominazione", "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -161,11 +156,10 @@ public class GraphDialog {
 
             monthlyTempLineChart.getData().add(series);
         }else{
-            Map<String, String> requestParameters = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            requestParameters.replace(RequestFactory.condKey, "areaid");
-            requestParameters.replace(RequestFactory.fieldKey, areaId);
             Request request = null;
             try{
+                Map<String, String> requestParameters = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -181,9 +175,16 @@ public class GraphDialog {
             Response response = client.getResponse(request.getRequestId());
             params = (List<ParametroClimatico>) response.getResult();
 
+            listViewDati.setEditable(false);
             for(ParametroClimatico p : params){
                 listViewDati.getItems().add(p.getPubDate());
             }
+            listViewDati.setOnMouseClicked(mouseClicked -> {
+                LocalDate clickedPubDate =  (LocalDate) listViewDati.getSelectionModel().getSelectedItem();
+                tfMonthFilter.setText(String.valueOf(clickedPubDate.getMonth().getValue()));
+                tfYearFilter.setText(String.valueOf(clickedPubDate.getYear()));
+            });
+
         }
 
 
@@ -256,11 +257,9 @@ public class GraphDialog {
             return;
         }
         int year = Integer.parseInt(yearFilterText);
-        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-        requestParams.replace(RequestFactory.condKey, "areaid");
-        requestParams.replace(RequestFactory.fieldKey, areaId);
         Request request = null;
         try{
+            Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAllWithCond,
@@ -356,11 +355,11 @@ public class GraphDialog {
         int month = Integer.parseInt(monthFilterText);
         int year = Integer.parseInt(yearFilterText);
 
-        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-        requestParams.replace(RequestFactory.condKey, "areaid");
-        requestParams.replace(RequestFactory.fieldKey, areaId);
+
         Request request = null;
         try{
+            Map<String, String> requestParams = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAllWithCond,

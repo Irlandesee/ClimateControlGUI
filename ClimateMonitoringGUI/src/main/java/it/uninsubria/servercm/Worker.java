@@ -2,7 +2,6 @@ package it.uninsubria.servercm;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.city.City;
-import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
@@ -13,13 +12,11 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface.Tables;
 import it.uninsubria.servercm.ServerInterface.ResponseType;
 import it.uninsubria.util.IDGenerator;
+import javafx.util.Pair;
 
 
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Worker extends Thread{
@@ -178,8 +175,6 @@ public class Worker extends Thread{
         }catch(SQLException sqle){sqle.printStackTrace();}
         return null;
     }
-
-
 
     private ParametroClimatico extractParametroClimatico(ResultSet rSet) throws SQLException{
         ParametroClimatico pc = new ParametroClimatico(
@@ -518,98 +513,85 @@ public class Worker extends Thread{
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             default -> {
-                return new Response(
-                        clientId,
-                        requestId,
-                        IDGenerator.generateID(),
-                        ResponseType.List,
-                        r.getTable(),
-                        null);
+                return new Response(clientId, requestId, IDGenerator.generateID(), ResponseType.List, r.getTable(), null);
             }
         }
     }
+    private Pair<ResponseType, String> getResponseResult(String oggetto, String query) {
+        //System.out.println(query);
+        String res = getQueryResult(query, oggetto);
+        if(res == null) return new Pair<ResponseType, String>(ResponseType.NoSuchElement, "");
+        return new Pair<ResponseType, String>(ResponseType.Object, res);
+    }
 
-    private String selectObjCityCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjCityCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from city where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjCmCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjCmCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from centro_monitoraggio where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjAiCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjAiCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from area_interesse where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjPcCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjPcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjNpcCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjNpcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from nota_parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjOpCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjOpCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from operatore where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjAuthOpCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjAuthOpCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from operatore_autorizzati where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
     private Response selectObjWithCond(Request r){
         Map<String, String> params = r.getParams();
         switch(r.getTable()){
             case CITY -> {
-                String res = selectObjCityCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjCityCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CITY, res);
             }
             case CENTRO_MONITORAGGIO -> {
-                String res = selectObjCmCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CENTRO_MONITORAGGIO, res);
+                Pair<ResponseType, String> res = selectObjCmCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.CENTRO_MONITORAGGIO, res.getValue());
             }
             case AREA_INTERESSE -> {
-                String res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.AREA_INTERESSE, res);
             }
             case PARAM_CLIMATICO -> {
-                String res = selectObjPcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjPcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.PARAM_CLIMATICO, res);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                String res = selectObjNpcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjNpcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.NOTA_PARAM_CLIMATICO, res);
             }
             case OPERATORE -> {
-                String res = selectObjOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OPERATORE, res);
             }
             case OP_AUTORIZZATO -> {
-                String res = selectObjAuthOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjAuthOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OP_AUTORIZZATO, res);
             }
             default -> {
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.Object,
-                        r.getTable(),
-                        null);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, r.getTable(), null);
             }
         }
     }
@@ -808,7 +790,6 @@ public class Worker extends Thread{
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
 
-
         //Login has failed
         return new Response(
                 clientId,
@@ -821,7 +802,6 @@ public class Worker extends Thread{
 
     public Response insertOperatore(Request request){
         Map<String, String> params = request.getParams();
-
         String nomeOp = params.get(RequestFactory.nomeOpKey);
         String cognomeOp = params.get(RequestFactory.cognomeOpKey);
         String codFisc = params.get(RequestFactory.codFiscOpKey);
@@ -829,27 +809,34 @@ public class Worker extends Thread{
         String password = params.get(RequestFactory.passwordKey);
         String email = params.get(RequestFactory.emailOpKey);
         String centroAfferenza = params.get(RequestFactory.centroAfferenzaKey);
+
+        //create role with the userId
+        final String CREATE_USER_ROLE = "create role %s with login password '%s'".formatted(userId, password);
+        try(PreparedStatement createUserRoleStat = conn.prepareStatement(CREATE_USER_ROLE)){
+            boolean res = createUserRoleStat.execute();
+            if(res) logger.info("Worker %s: Role creation successful".formatted(workerId));
+            else logger.info("Worker %s: Role creation unsuccessful".formatted(workerId));
+        }catch(SQLException sqlException){sqlException.printStackTrace();}
+
+        // add user to group role
+        final String ADD_USER_TO_GROUP_ROLE = "grant operatori to %s".formatted(userId);
+        System.err.println("Executing: " + ADD_USER_TO_GROUP_ROLE);
+        try(PreparedStatement addUserToGroupRoleStat = conn.prepareStatement(ADD_USER_TO_GROUP_ROLE)){
+            boolean res = addUserToGroupRoleStat.execute();
+            if(res) logger.info("Worker %s: Grant privileges successful".formatted(workerId));
+            else logger.info("Worker %s: Grant privileges unsuccessful".formatted(workerId));
+        }catch(SQLException sqlException){sqlException.printStackTrace();}
+
         String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
                 .formatted(nomeOp, cognomeOp, codFisc, userId, email, password, centroAfferenza);
+
+        System.err.println(query);
+
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
-            if(res == 1){
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.insertOk,
-                        Tables.OPERATORE,
-                        true);
-            }
+            if(res == 1){return new Response( clientId, requestId, responseId, ResponseType.insertOk, Tables.OPERATORE, true);}
         }catch(SQLException sqle){sqle.printStackTrace();}
-        return new Response(
-                clientId,
-                requestId,
-                responseId,
-                ResponseType.insertKo,
-                Tables.OPERATORE,
-                false);
+        return new Response(clientId, requestId, responseId, ResponseType.insertKo, Tables.OPERATORE, false);
     }
 
     public Response insertOperatoreAutorizzato(Request request){
@@ -859,15 +846,7 @@ public class Worker extends Thread{
         String query = "insert into operatore_autorizzati(codice_fiscale, email) values('%s','%s')".formatted(codFisc, email);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
-            if(res == 1){
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.insertOk,
-                        Tables.OP_AUTORIZZATO,
-                        true);
-            }
+            if(res == 1){return new Response(clientId, requestId, responseId, ResponseType.insertOk, Tables.OP_AUTORIZZATO, true);}
         }catch (SQLException sqlException){sqlException.printStackTrace();}
         return new Response(clientId, requestId, responseId, ResponseType.insertKo, Tables.OP_AUTORIZZATO, false);
 
@@ -1034,12 +1013,12 @@ public class Worker extends Thread{
         Map<String, String> params = request.getParams();
         String notaId = params.get(RequestFactory.notaIdKey);
         String notaVento = params.get(RequestFactory.notaVentoKey);
-        String notaUmidita = params.get(RequestFactory.notaUmidita);
-        String notaPressione = params.get(RequestFactory.notaPressione);
-        String notaTemperatura = params.get(RequestFactory.notaTemperatura);
-        String notaPrecipitazioni = params.get(RequestFactory.notaPrecipitazioni);
-        String notaAltGhiacciai = params.get(RequestFactory.notaAltGhiacciai);
-        String notaMassaGhiacciai = params.get(RequestFactory.notaMassaGhiacciai);
+        String notaUmidita = params.get(RequestFactory.notaUmiditaKey);
+        String notaPressione = params.get(RequestFactory.notaPressioneKey);
+        String notaTemperatura = params.get(RequestFactory.notaTemperaturaKey);
+        String notaPrecipitazioni = params.get(RequestFactory.notaPrecipitazioniKey);
+        String notaAltGhiacciai = params.get(RequestFactory.notaAltGhiacciaiKey);
+        String notaMassaGhiacciai = params.get(RequestFactory.notaMassaGhiacciaiKey);
 
         String query = "insert into nota_parametro_climatico(notaid, nota_vento, nota_umidita, nota_pressione, nota_temperatura, nota_precipitazioni, nota_alt_ghiacciai, nota_massa_ghiacciai)" +
                 "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s')";

@@ -117,13 +117,10 @@ public class TableViewBuilder {
         row.setOnMouseClicked(event -> {
             if(event.getClickCount() == 2 && (!row.isEmpty())){
                 AreaInteresse a = (AreaInteresse) row.getItem();
-                Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                if(requestParams != null){
-                    requestParams.replace(RequestFactory.condKey, "areaid");
-                    requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
-                }
                 Request request = null;
                 try{
+                    Map<String, String> requestParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
                     request = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -191,17 +188,13 @@ public class TableViewBuilder {
                     if(event.getClickCount() == 2 && (!row.isEmpty())){
                         ParametroClimatico pc = (ParametroClimatico) row.getItem();
 
-                        Map<String, String> paramsReqDenom =
-                                RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                        if(paramsReqDenom != null){
-                            paramsReqDenom.replace(RequestFactory.objectKey, "denominazione");
-                            paramsReqDenom.replace(RequestFactory.joinKey, ServerInterface.Tables.AREA_INTERESSE.label);
-                            paramsReqDenom.replace(RequestFactory.condKey, "parameterid");
-                            paramsReqDenom.replace(RequestFactory.fieldKey, pc.getParameterId());
-                        }
 
                         Request requestDenominazione = null;
                         try {
+                            Map<String, String> paramsReqDenom = RequestFactory
+                                    .buildParams(ServerInterface.RequestType.selectObjJoinWithCond,
+                                            "denominazione", ServerInterface.Tables.AREA_INTERESSE.label,
+                                            "parameterid", pc.getParameterId());
                             requestDenominazione = RequestFactory
                                     .buildRequest(
                                             client.getClientId(),
@@ -214,15 +207,14 @@ public class TableViewBuilder {
                             return;
                         }
 
-                        Map<String, String> paramsReqNomeCentro = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                        if(paramsReqNomeCentro != null){
-                            paramsReqNomeCentro.replace(RequestFactory.objectKey, "nomecentro");
-                            paramsReqNomeCentro.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                            paramsReqNomeCentro.replace(RequestFactory.condKey, "parameterid");
-                            paramsReqNomeCentro.replace(RequestFactory.fieldKey, pc.getParameterId());
-                        }
                         Request requestNomeCentro = null;
                         try{
+                            Map<String, String> paramsReqNomeCentro = RequestFactory
+                                    .buildParams(ServerInterface.RequestType.selectObjJoinWithCond,
+                                            "nomecentro",
+                                            ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
+                                            "parameterid",
+                                            pc.getParameterId());
                             requestNomeCentro = RequestFactory
                                     .buildRequest(
                                             client.getClientId(),
@@ -305,11 +297,10 @@ public class TableViewBuilder {
                 List<String> areeId = cm.getAreeInteresseIdAssociate();
                 List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                 for(String areaId : areeId){
-                    Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    reqAiParams.replace(RequestFactory.condKey, "areaid");
-                    reqAiParams.replace(RequestFactory.fieldKey, areaId);
                     Request requestAi;
                     try{
+                        Map<String, String> reqAiParams = RequestFactory
+                                .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                         requestAi = RequestFactory.buildRequest(
                                 client.getClientId(),
                                 ServerInterface.RequestType.selectAllWithCond,

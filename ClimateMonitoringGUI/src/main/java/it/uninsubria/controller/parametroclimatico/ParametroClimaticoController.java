@@ -1,8 +1,8 @@
 package it.uninsubria.controller.parametroclimatico;
 
-import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.util.IDGenerator;
 import javafx.event.ActionEvent;
@@ -91,8 +91,6 @@ public class ParametroClimaticoController {
         short tempValue;
         short altGhiacciaiValue;
         short massaGhiacciaiValue;
-        Map<String, String> paramValues = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
-        Map<String, String> notes = RequestFactory.buildInsertParams(ServerInterface.Tables.NOTA_PARAM_CLIMATICO);
 
         if(nomeArea.isEmpty() || centroMon.isEmpty()){
             nomeOrCentroError.showAndWait();
@@ -174,26 +172,32 @@ public class ParametroClimaticoController {
             }else{
                 massaGhiacciaiValue = Short.MIN_VALUE;
             }
-            paramValues.replace(RequestFactory.valoreVentoKey, String.valueOf(ventoValue));
-            paramValues.replace(RequestFactory.valoreUmiditaKey, String.valueOf(umiditaValue));
-            paramValues.replace(RequestFactory.valorePressioneKey, String.valueOf(pressioneValue));
-            paramValues.replace(RequestFactory.valorePrecipitazioniKey, String.valueOf(precipitazioniValue));
-            paramValues.replace(RequestFactory.valoreTemperaturaKey, String.valueOf(tempValue));
-            paramValues.replace(RequestFactory.valoreAltGhiacciaiKey, String.valueOf(altGhiacciaiValue));
-            paramValues.replace(RequestFactory.valoreMassaGhiacciaiKey, String.valueOf(massaGhiacciaiValue));
-
-            notes.replace(RequestFactory.notaVentoKey, notaVento);
-            notes.replace(RequestFactory.notaPressione, notaPressione);
-            notes.replace(RequestFactory.notaUmidita, notaUmidita);
-            notes.replace(RequestFactory.notaPrecipitazioni, notaPrecipitazioni);
-            notes.replace(RequestFactory.notaTemperatura, notaTemperatura);
-            notes.replace(RequestFactory.notaAltGhiacciai, notaAltGhiacciai);
-            notes.replace(RequestFactory.notaMassaGhiacciai, notaMassaGhiacciai);
         }catch(NumberFormatException nfe){
             nfe.printStackTrace();
             pcAlert.showAndWait();
             return;
         }
+        Map<String, String> paramValues;
+        Map<String, String> notes;
+        try{
+            paramValues = RequestFactory
+                    .buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
+                            String.valueOf(ventoValue),
+                            String.valueOf(umiditaValue),
+                            String.valueOf(pressioneValue),
+                            String.valueOf(precipitazioniValue),
+                            String.valueOf(tempValue),
+                            String.valueOf(altGhiacciaiValue),
+                            String.valueOf(massaGhiacciaiValue));
+            notes = RequestFactory.buildInsertParams(ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
+                    notaVento,
+                    notaPressione,
+                    notaUmidita,
+                    notaPrecipitazioni,
+                    notaTemperatura,
+                    notaAltGhiacciai,
+                    notaMassaGhiacciai);
+        }catch(MalformedRequestException mre){mre.printStackTrace(); return;}
         String parameterId = IDGenerator.generateID();
         String notaId = IDGenerator.generateID();
         operatoreViewController.executeInsertPCQuery(parameterId, nomeArea, centroMon, pubDate, paramValues, notaId, notes);

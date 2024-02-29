@@ -21,15 +21,18 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -77,8 +80,8 @@ public class MainWindowController{
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
-    //private final String url = "jdbc:postgresql://localhost/postgres";
-    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
+    private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;
@@ -126,17 +129,6 @@ public class MainWindowController{
         showAreeInserite();
     }
 
-    static TableView<String[]> createTable(String[] columnNames){
-        TableView<String[]> table = new TableView<String[]>();
-        for(int i = 0; i < columnNames.length; i++){
-            final int index = i;
-            TableColumn<String[], String> column = new TableColumn<String[], String>(columnNames[i]);
-            column.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue()[index]));
-            table.getColumns().add(column);
-        }
-        return table;
-    }
-
     private void initAlerts(){
 
         this.denomAlert = new Alert(Alert.AlertType.ERROR);
@@ -175,10 +167,12 @@ public class MainWindowController{
     @FXML
     public void handleLogin(ActionEvent actionEvent) {
         try{
-            //mainWindowStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+            //mainWindowStage = ;
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
             fxmlLoader.setController(getLoginViewController());
             loginStage = new Stage();
+            loginStage.initOwner((Stage)((Node) actionEvent.getSource()).getScene().getWindow());
+            loginStage.initModality(Modality.WINDOW_MODAL);
             Scene scene = new Scene(fxmlLoader.load(), 400, 300);
             loginStage.setScene(scene);
             loginStage.show();
@@ -261,16 +255,11 @@ public class MainWindowController{
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && (!row.isEmpty())){
                     AreaInteresse a = (AreaInteresse) row.getItem();
-
                     System.out.println("Item double Clicked: "+ a);
                     //get cp associated with this area interesse
-                    Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    if(requestParams != null){
-                        requestParams.replace(RequestFactory.condKey, "areaid");
-                        requestParams.replace(RequestFactory.fieldKey, a.getAreaid());
-                    }
                     Request req;
                     try{
+                        Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
                         req = RequestFactory.buildRequest(
                                 client.getClientId(),
                                 ServerInterface.RequestType.selectAllWithCond,
@@ -345,11 +334,10 @@ public class MainWindowController{
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "denominazione");
-            params.replace(RequestFactory.fieldKey, denom);
             Request request;
             try{
+                Map<String, String> params = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -375,13 +363,12 @@ public class MainWindowController{
 
     private void handleRicercaAreaPerStato(){
         tableView.getItems().clear();
-        String stato = this.tStato.getText();
+        String stato = this.tStato.getText().trim();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "stato");
-            params.replace(RequestFactory.fieldKey, stato);
             Request request;
             try{
+                Map<String, String> params = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -392,7 +379,6 @@ public class MainWindowController{
                 mre.printStackTrace();
                 return;
             }
-
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
 
@@ -487,7 +473,6 @@ public class MainWindowController{
         this.tglDatePicker = new ToggleButton("Ricerca con data");
         this.startDatePicker = new DatePicker();
         this.endDatePicker = new DatePicker();
-        this.tglRicercaAreaCm = new ToggleButton("Ricerca entrambi");
         this.btnRicercaPcArea = new Button("Ricerca per area");
         this.btnRicercaPcArea.setOnAction(this::handleRicercaPc);
         this.btnRicercaPcCm = new Button("Ricerca Per Cm");
@@ -498,7 +483,6 @@ public class MainWindowController{
         paramBox.getChildren().add(tglDatePicker);
         paramBox.getChildren().add(startDatePicker);
         paramBox.getChildren().add(endDatePicker);
-        paramBox.getChildren().add(tglRicercaAreaCm);
         paramBox.getChildren().add(btnRicercaPcArea);
         paramBox.getChildren().add(btnRicercaPcCm);
         this.borderPane.setRight(paramBox);
@@ -532,13 +516,10 @@ public class MainWindowController{
         }
         System.out.println("Creating chart for" + nomeArea);
 
-        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        if(params == null){return;}
-        params.replace(RequestFactory.objectKey, "areaid");
-        params.replace(RequestFactory.condKey, "denominazione");
-        params.replace(RequestFactory.fieldKey, nomeArea);
         Request request;
         try{
+            Map<String, String> params = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -600,12 +581,10 @@ public class MainWindowController{
             if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
                 this.areaInteresseAlert.showAndWait();
             }else{
-                Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-                reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
-                reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
-                reqAreaIdParams.replace(RequestFactory.fieldKey, denomAiCercata);
                 Request requestAreaId;
                 try{
+                    Map<String, String> reqAreaIdParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjWithCond,
@@ -620,11 +599,10 @@ public class MainWindowController{
                 Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
                 String areaInteresseId = resAreaId.getResult().toString();
 
-                Map<String, String> reqParamClimatici = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                reqParamClimatici.replace(RequestFactory.condKey, "areaid");
-                reqParamClimatici.replace(RequestFactory.fieldKey, areaInteresseId);
                 Request requestParamClimatici = null;
                 try{
+                    Map<String, String> reqParamClimatici = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -647,9 +625,7 @@ public class MainWindowController{
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
-                    });
+                    parametriClimatici.removeIf(parametroClimatico -> isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
@@ -659,13 +635,15 @@ public class MainWindowController{
             if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
                 this.centroMonitoraggioAlert.showAndWait();
             }else{
-                Map<String, String> requestCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                requestCentroIdParams.replace(RequestFactory.objectKey, "centroid");
-                requestCentroIdParams.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                requestCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
-                requestCentroIdParams.replace(RequestFactory.fieldKey, denomCmCercato);
                 Request requestCentroId;
                 try{
+                    Map<String, String> requestCentroIdParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectObjJoinWithCond,
+                                    "centroid",
+                                    ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
+                                    "nomecentro",
+                                    denomCmCercato
+                            );
                     requestCentroId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
@@ -683,12 +661,11 @@ public class MainWindowController{
                 String centroId = result.get(0);
                 System.out.println(centroId);
 
-                Map<String, String> requestParametriClimaticiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                requestParametriClimaticiParams.replace(RequestFactory.condKey, "centroid");
-                requestParametriClimaticiParams.replace(RequestFactory.fieldKey, centroId);
 
                 Request requestParametriClimatici;
                 try{
+                    Map<String, String> requestParametriClimaticiParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -724,6 +701,9 @@ public class MainWindowController{
     public void handleVisualizzaCentri(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        if(paramBox != null)
+            if(!paramBox.getChildren().isEmpty())
+                paramBox.getChildren().clear();
         //tableView.setRowFactory(null);
         Request requestCentro = null;
         try{
@@ -758,11 +738,10 @@ public class MainWindowController{
                     List<String> areeId = c.getAreeInteresseIdAssociate();
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
-                        Map<String, String> reqAiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                        reqAiParams.replace(RequestFactory.condKey, "areaid");
-                        reqAiParams.replace(RequestFactory.fieldKey, areaId);
                         Request requestAi;
                         try{
+                            Map<String, String> reqAiParams = RequestFactory
+                                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                             requestAi = RequestFactory.buildRequest(
                                     client.getClientId(),
                                     ServerInterface.RequestType.selectAllWithCond,
@@ -803,12 +782,11 @@ public class MainWindowController{
 
     public boolean onExecuteLoginQuery(String userID, String password){
         System.out.printf("Userid & password: %s %s\n", userID, password);
-        Map<String, String> loginParams = RequestFactory.buildParams(ServerInterface.RequestType.executeLogin);
-        loginParams.replace(RequestFactory.userKey, userID);
-        loginParams.replace(RequestFactory.passwordKey, password);
 
         Request loginRequest;
         try{
+            Map<String, String> loginParams = RequestFactory
+                    .buildParams(ServerInterface.RequestType.executeLogin, userID, password);
             loginRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.executeLogin,
@@ -822,15 +800,13 @@ public class MainWindowController{
         }
         client.addRequest(loginRequest);
         Response response = client.getResponse(loginRequest.getRequestId());
-        Operatore o = (Operatore) response.getResult();
-        if(o == null){
-            return false;
-        }else{
+        if(response.getRespType() == ServerInterface.ResponseType.loginKo) return false;
+        else{
             mainWindowStage.close();
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client));
+                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");
@@ -866,15 +842,13 @@ public class MainWindowController{
 
     public boolean onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
         if(!requestSignUp(codFisc, email)){
-            System.out.println("Operatore inesistente");
+            new Alert(Alert.AlertType.ERROR, "Operatore non abilitato alla registrazione.").showAndWait();
             return false;
         }else{//
-            Map<String, String> reqCmIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-            reqCmIdParams.replace(RequestFactory.objectKey, "centroid");
-            reqCmIdParams.replace(RequestFactory.condKey, "comune");
-            reqCmIdParams.replace(RequestFactory.fieldKey, centroAfferenza);
             Request requestCentroId;
             try{
+                Map<String, String> reqCmIdParams = RequestFactory
+                        .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", centroAfferenza);
                 requestCentroId = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -887,18 +861,15 @@ public class MainWindowController{
             client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
             String centroId = responseCmId.getResult().toString();
+            if(responseCmId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, "Centro inesistente").showAndWait();
+                return false;
+            }
             System.out.println(centroId);
-            Map<String, String> requestSignUpParams = RequestFactory.buildParams(ServerInterface.RequestType.executeSignUp);
-            requestSignUpParams.replace(RequestFactory.nomeOpKey, nomeOp);
-            requestSignUpParams.replace(RequestFactory.cognomeOpKey, cognomeOp);
-            requestSignUpParams.replace(RequestFactory.codFiscOpKey, codFisc);
-            requestSignUpParams.replace(RequestFactory.userKey, userID);
-            requestSignUpParams.replace(RequestFactory.emailOpKey, email);
-            requestSignUpParams.replace(RequestFactory.passwordKey, password);
-            requestSignUpParams.replace(RequestFactory.centroAfferenzaKey, centroId);
-            requestSignUpParams.forEach((key, value) -> System.out.print(key + ":" + value));
             Request signUpRequest;
             try{
+                Map<String, String> requestSignUpParams = RequestFactory
+                        .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, userID, email, password, centroId);
                 signUpRequest = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.executeSignUp,

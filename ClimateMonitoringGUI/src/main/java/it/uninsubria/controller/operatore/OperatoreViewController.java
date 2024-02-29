@@ -99,8 +99,8 @@ public class OperatoreViewController {
     private Alert centroMonitoraggioAlert;
 
     private Properties props;
-    private final String url = "jdbc:postgresql://192.168.1.26/postgres";
-    //private final String url = "jdbc:postgresql://localhost/postgres";
+    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
+    private final String url = "jdbc:postgresql://localhost/postgres";
 
     private Stage mainWindowStage;
     private Stage operatoreWindowStage;
@@ -111,7 +111,7 @@ public class OperatoreViewController {
     private final Logger logger;
     private ServerInterface.Tables tableShown;
 
-    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client){
+    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client, String userId, String password){
         this.mainWindowController = mainWindowController;
         this.mainWindowStage = mainWindowStage;
         this.operatoreWindowStage = operatoreWindowStage;
@@ -119,13 +119,13 @@ public class OperatoreViewController {
 
         this.logger = Logger.getLogger("OperatoreWindow");
 
+        this.operatoreWindowStage.setMinHeight(800);
         this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
-        //this.registrazioneController = new RegistrazioneController(this);
 
         props = new Properties();
-        props.put("user", "postgres");
-        props.put("password", "qwerty");
+        props.put("user", userId);
+        props.put("password", password);
     }
 
 
@@ -311,11 +311,9 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "denominazione");
-            params.replace(RequestFactory.fieldKey, denom);
             Request request;
             try{
+                Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -343,11 +341,9 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-            params.replace(RequestFactory.condKey, "stato");
-            params.replace(RequestFactory.fieldKey, stato);
             Request request;
             try{
+                Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -494,12 +490,10 @@ public class OperatoreViewController {
             if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
                 this.areaInteresseAlert.showAndWait();
             }else{
-                Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-                reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
-                reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
-                reqAreaIdParams.replace(RequestFactory.fieldKey, denomAiCercata);
                 Request requestAreaId;
                 try{
+                    Map<String, String> reqAreaIdParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjWithCond,
@@ -514,11 +508,10 @@ public class OperatoreViewController {
                 Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
                 String areaInteresseId = resAreaId.getResult().toString();
 
-                Map<String, String> reqParamClimatici = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                reqParamClimatici.replace(RequestFactory.condKey, "areaid");
-                reqParamClimatici.replace(RequestFactory.fieldKey, areaInteresseId);
                 Request requestParamClimatici = null;
                 try{
+                    Map<String, String> reqParamClimatici = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -538,9 +531,7 @@ public class OperatoreViewController {
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
-                    });
+                    parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> {
                     System.out.println(pc);
@@ -553,13 +544,16 @@ public class OperatoreViewController {
             if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
                 this.centroMonitoraggioAlert.showAndWait();
             }else{
-                Map<String, String> requestCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjJoinWithCond);
-                requestCentroIdParams.replace(RequestFactory.objectKey, "centroid");
-                requestCentroIdParams.replace(RequestFactory.joinKey, ServerInterface.Tables.CENTRO_MONITORAGGIO.label);
-                requestCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
-                requestCentroIdParams.replace(RequestFactory.fieldKey, denomCmCercato);
                 Request requestCentroId;
                 try{
+                    Map<String, String> requestCentroIdParams = RequestFactory
+                            .buildParams(
+                                    ServerInterface.RequestType.selectObjJoinWithCond,
+                                    "centroid",
+                                    ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
+                                    "nomecentro",
+                                    denomCmCercato
+                            );
                     requestCentroId = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
@@ -581,12 +575,11 @@ public class OperatoreViewController {
                 String centroId = result.get(0);
                 System.out.println(centroId);
 
-                Map<String, String> requestParametriClimaticiParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                requestParametriClimaticiParams.replace(RequestFactory.condKey, "centroid");
-                requestParametriClimaticiParams.replace(RequestFactory.fieldKey, centroId);
 
                 Request requestParametriClimatici;
                 try{
+                    Map<String, String> requestParametriClimaticiParams = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -677,9 +670,7 @@ public class OperatoreViewController {
             }
         }else{
             try{
-                Map<String, String> cmParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                cmParams.replace(RequestFactory.condKey, "country");
-                cmParams.replace(RequestFactory.fieldKey, country);
+                Map<String, String> cmParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "country", country);
                 cmRequest = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.selectAllWithCond,
@@ -720,9 +711,9 @@ public class OperatoreViewController {
                 }
             }else{
                 try{
-                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    params.replace(RequestFactory.condKey, "country");
-                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    String statoDaFiltrare = tFilterCountry.getText();
+                    Map<String, String> params = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -734,10 +725,10 @@ public class OperatoreViewController {
                 }
                 client.addRequest(request);
                 Response responseCity = client.getResponse(request.getRequestId());
-                Map<String, String> paramsAiRequest = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                paramsAiRequest.replace(RequestFactory.condKey, "stato");
-                paramsAiRequest.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                String statoDaFiltrare = tFilterCountry.getText();
                 try{
+                    Map<String, String> paramsAiRequest = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     requestAi  = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -777,10 +768,10 @@ public class OperatoreViewController {
                     return;
                 }
             }else{
+                String statoDaFiltrare = tFilterCountry.getText();
                 try{
-                    Map<String, String> paramsCityRequest = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    paramsCityRequest.replace(RequestFactory.condKey, "stato");
-                    paramsCityRequest.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    Map<String, String> paramsCityRequest = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -857,10 +848,10 @@ public class OperatoreViewController {
                 client.addRequest(centriMonitoraggioRequest);
                 Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
                 List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>)responseCentriMonitoraggio.getResult();
+                String statoDaFiltrare = tFilterCountry.getText();
                 try{
-                    Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-                    params.replace(RequestFactory.condKey, "country");
-                    params.replace(RequestFactory.fieldKey, tFilterCountry.getText());
+                    Map<String, String> params = RequestFactory
+                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
                             client.getClientId(),
                             ServerInterface.RequestType.selectAllWithCond,
@@ -900,14 +891,11 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, "Longitudine non valida!");
         }
 
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE);
-        insertParams.replace(RequestFactory.areaIdKey, IDGenerator.generateID());
-        insertParams.replace(RequestFactory.denominazioneAreaKey, denom);
-        insertParams.replace(RequestFactory.statoAreaKey, stato);
-        insertParams.replace(RequestFactory.latitudineKey, latitudine);
-        insertParams.replace(RequestFactory.longitudineKey, longitudine);
+        Map<String, String> insertParams;
         Request insertRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE,
+                    IDGenerator.generateID(), denom, stato, latitudine, longitudine);
             insertRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -969,12 +957,14 @@ public class OperatoreViewController {
         logger.info("Parameterid: " +parameterId);
         logger.info("Notaid:  "+ notaId);
 
-        Map<String, String> reqAreaIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        reqAreaIdParams.replace(RequestFactory.objectKey, "areaid");
-        reqAreaIdParams.replace(RequestFactory.condKey, "denominazione");
-        reqAreaIdParams.replace(RequestFactory.fieldKey, nomeArea);
         Request requestAreaId;
         try{
+            Map<String, String> reqAreaIdParams = RequestFactory
+                    .buildParams(
+                            ServerInterface.RequestType.selectObjWithCond,
+                            "areaid",
+                            "denominazione",
+                            nomeArea);
             requestAreaId = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -987,12 +977,14 @@ public class OperatoreViewController {
         client.addRequest(requestAreaId);
         Response respAreaId = client.getResponse(requestAreaId.getRequestId());
 
-        Map<String, String> reqCentroIdParams = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        reqCentroIdParams.replace(RequestFactory.objectKey, "centroid");
-        reqCentroIdParams.replace(RequestFactory.condKey, "nomecentro");
-        reqCentroIdParams.replace(RequestFactory.fieldKey, centroMon);
         Request requestCentroId;
         try{
+            Map<String, String> reqCentroIdParams = RequestFactory
+                    .buildParams(
+                            ServerInterface.RequestType.selectObjWithCond,
+                            "centroid",
+                            "nomecentro",
+                            centroMon);
             requestCentroId = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -1052,22 +1044,15 @@ public class OperatoreViewController {
             return;
         }
 
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO);
-        insertParams.replace(RequestFactory.parameterIdKey, parameterId);
-        insertParams.replace(RequestFactory.areaIdKey, areaId);
-        insertParams.replace(RequestFactory.centroIdKey, centroId);
-        insertParams.replace(RequestFactory.pubDateKey, pubdate.toString());
-        insertParams.replace(RequestFactory.notaIdKey, notaId);
-        insertParams.replace(RequestFactory.valoreVentoKey, paramValues.get(RequestFactory.valoreVentoKey));
-        insertParams.replace(RequestFactory.valoreUmiditaKey, paramValues.get(RequestFactory.valoreUmiditaKey));
-        insertParams.replace(RequestFactory.valorePressioneKey, paramValues.get(RequestFactory.valorePressioneKey));
-        insertParams.replace(RequestFactory.valorePrecipitazioniKey, paramValues.get(RequestFactory.valorePrecipitazioniKey));
-        insertParams.replace(RequestFactory.valoreTemperaturaKey, paramValues.get(RequestFactory.valoreTemperaturaKey));
-        insertParams.replace(RequestFactory.valoreAltGhiacciaiKey, paramValues.get(RequestFactory.valoreAltGhiacciaiKey));
-        insertParams.replace(RequestFactory.valoreMassaGhiacciaiKey, paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
-
+        Map<String, String> insertParams;
         Request insertPcRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
+                    parameterId, areaId, centroId, pubdate.toString(), notaId,
+                    paramValues.get(RequestFactory.valoreVentoKey), paramValues.get(RequestFactory.valoreUmiditaKey),
+                    paramValues.get(RequestFactory.valorePressioneKey), paramValues.get(RequestFactory.valorePrecipitazioniKey),
+                    paramValues.get(RequestFactory.valoreTemperaturaKey), paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
+                    paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
             insertPcRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1144,12 +1129,11 @@ public class OperatoreViewController {
             }
         }
         //Controlla che il comune inserito sia associato allo stato corretto
-        Map<String, String> comuneParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond);
-        comuneParams.replace(RequestFactory.fieldKey, comuneCentro);
-        comuneParams.replace(RequestFactory.condKey, "ascii_name");
 
         Request reqStato = null;
         try{
+            Map<String, String> comuneParams = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "ascii_name", comuneCentro);
             reqStato = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectAllWithCond,
@@ -1178,13 +1162,11 @@ public class OperatoreViewController {
         String params = "{%s}, {%s}, {%s}".formatted(nomeCentro, comuneCentro, statoCentro);
         logger.info(params);
         logger.info(areaList.toString());
-        Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO);
-        insertParams.replace(RequestFactory.nomeCentroKey, nomeCentro);
-        insertParams.replace(RequestFactory.comuneCentroKey, comuneCentro);
-        insertParams.replace(RequestFactory.countryCentroKey, statoCentro);
-        insertParams.replace(RequestFactory.listAiKey, areaList.toString());
+        Map<String, String> insertParams;
         Request insertCmRequest;
         try{
+            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                nomeCentro, comuneCentro, statoCentro, areaList.toString());
             insertCmRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1254,11 +1236,10 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
             return;
         }
-        Map<String, String> insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO);
-        insertAuthOpParams.replace(RequestFactory.emailOpKey, email);
-        insertAuthOpParams.replace(RequestFactory.codFiscOpKey, codFisc);
+        Map<String, String> insertAuthOpParams;
         Request insertAuthOpRequest;
         try{
+            insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
             insertAuthOpRequest = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.insert,
@@ -1311,12 +1292,10 @@ public class OperatoreViewController {
             return;
         }
         //check se l'area esiste
-        Map<String, String> paramsCheckAi = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        paramsCheckAi.replace(RequestFactory.objectKey, "areaid");
-        paramsCheckAi.replace(RequestFactory.condKey, "denominazione");
-        paramsCheckAi.replace(RequestFactory.fieldKey, denomAi);
         Request requestAi;
         try {
+            Map<String, String> paramsCheckAi = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAi);
             requestAi = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -1335,12 +1314,9 @@ public class OperatoreViewController {
         }
 
         //check se il centro esiste
-        Map<String, String> paramsCheckCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        paramsCheckCm.replace(RequestFactory.objectKey, "centroid");
-        paramsCheckCm.replace(RequestFactory.condKey, "nomecentro");
-        paramsCheckCm.replace(RequestFactory.fieldKey, denomCm);
         Request requestCm;
         try {
+            Map<String, String> paramsCheckCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "nomecentro", denomCm);
             requestCm = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -1360,12 +1336,10 @@ public class OperatoreViewController {
         }
 
         //Check se l'area sia gia presente nell'array del centro
-        Map<String, String> paramsCheckAiInCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        paramsCheckAiInCm.replace(RequestFactory.objectKey, "aree_interesse_ids");
-        paramsCheckAiInCm.replace(RequestFactory.condKey, "centroid");
-        paramsCheckAiInCm.replace(RequestFactory.fieldKey, centroId);
         Request req;
         try {
+            Map<String, String> paramsCheckAiInCm = RequestFactory
+                    .buildParams(ServerInterface.RequestType.selectObjWithCond, "aree_interesse_ids", "centroid", centroId);
             req = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -1384,11 +1358,9 @@ public class OperatoreViewController {
             return;
         } else { //area non è associata al centro -> si aggiunge l'area al array associato al centro
             //requires an UPDATE statement
-            Map<String, String> updateParams = RequestFactory.buildParams(ServerInterface.RequestType.executeUpdateAi);
-            updateParams.replace(RequestFactory.areaIdKey, areaId);
-            updateParams.replace(RequestFactory.centroIdKey, centroId);
             Request insertAreaRequest = null;
             try{
+                Map<String, String> updateParams = RequestFactory.buildParams(ServerInterface.RequestType.executeUpdateAi, areaId, centroId);
                 insertAreaRequest = RequestFactory.buildRequest(
                         client.getClientId(),
                         ServerInterface.RequestType.executeUpdateAi,
@@ -1436,14 +1408,10 @@ public class OperatoreViewController {
             return;
         }
         System.out.println("Creating chart for" + nomeArea);
-
-        Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond);
-        if(params == null){return;}
-        params.replace(RequestFactory.objectKey, "areaid");
-        params.replace(RequestFactory.condKey, "denominazione");
-        params.replace(RequestFactory.fieldKey, nomeArea);
         Request request;
         try{
+            Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond,
+                    "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,

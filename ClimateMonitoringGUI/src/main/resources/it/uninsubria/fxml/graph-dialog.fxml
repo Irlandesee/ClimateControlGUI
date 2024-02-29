@@ -18,47 +18,33 @@
         <HBox fx:id="menuSection" styleClass="menu-section">
             <Button fx:id="closeBtn" onAction="#close">Cancel</Button>
             <MenuBar>
-                <Menu text="temperatura">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyTemp"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyTemp"/>
-                    </items>
+                <Menu styleClass="menu" text="temperatura">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyTemp"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyTemp"/>
                 </Menu>
-                <Menu text="vento">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyWind"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyWind"/>
-                    </items>
+                <Menu styleClass="menu" text="vento">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyWind"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyWind"/>
                 </Menu>
-                <Menu text="umidita">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyUmidity"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyUmidity"/>
-                    </items>
+                <Menu styleClass="menu" text="umidita">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyUmidity"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyUmidity"/>
                 </Menu>
-                <Menu text="pressione">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyPressure"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyPressure"/>
-                    </items>
+                <Menu styleClass="menu" text="pressione">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyPressure"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyPressure"/>
                 </Menu>
-                <Menu text="precipitazini">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyRainfall"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyRainfall"/>
-                    </items>
+                <Menu styleClass="menu" text="precipitazini">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyRainfall"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyRainfall"/>
                 </Menu>
-                <Menu text="altitudine">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyAlt"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyAlt"/>
-                    </items>
+                <Menu styleClass="menu" text="altitudine">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyAlt"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyAlt"/>
                 </Menu>
-                <Menu text="massa">
-                    <items>
-                        <MenuItem text="Mensile" onAction="#monthlyMass"/>
-                        <MenuItem text="Giornaliero" onAction="#dailyMass"/>
-                    </items>
+                <Menu styleClass="menu" text="massa">
+                    <MenuItem styleClass="menu-item" text="Mensile" onAction="#monthlyMass"/>
+                    <MenuItem styleClass="menu-item" text="Giornaliero" onAction="#dailyMass"/>
                 </Menu>
             </MenuBar>
         </HBox>
@@ -75,9 +61,6 @@
             <ListView fx:id="listViewDati"/>
         </VBox>
     </right>
-    <bottom>
-        <Label>Copyright 2023 Mattia Mauro Lunardi</Label>
-    </bottom>
     <stylesheets>
         <URL value="@../stylesheets/graph-dialog.css"/>
     </stylesheets>

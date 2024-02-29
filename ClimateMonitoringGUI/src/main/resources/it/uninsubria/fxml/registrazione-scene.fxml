@@ -1,49 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import java.net.URL?>
 <GridPane
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="600.0" prefWidth="400.0"
             alignment="CENTER" vgap="10" hgap="10">
-            <Label text="Nome Operatore"
-                GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="nomeOpField"
-                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label text="Cognome Operatore"
-                GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <TextField fx:id="cognomeField"
-                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="codice fiscale"
-                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="codFiscaleField"
-                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="user id:"
-                   GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <TextField fx:id="userIDField"
-                       GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-            <Label text="email"
-                   GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-            <TextField fx:id="emailField"
-                       GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-            <Label text="password"
-                   GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-            <PasswordField fx:id="passwordField"
-                           GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-            <Label text="Centro Afferenza"
-                    GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-            <TextField fx:id="centroField"
-                       GridPane.columnIndex="1" GridPane.rowIndex="6"/>
-            <Button text="registra" fx:id="btnRegistra" onAction="#registraOp"
-                GridPane.columnIndex="1" GridPane.rowIndex="7" />
-            <Button text="cancel" fx:id="cancelButton" onAction="#cancel"
-                    GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-            <stylesheets>
-                <URL value="@../stylesheets/registrazione.css"/>
-            </stylesheets>
+    <Label text="Nome Operatore" styleClass="label"
+           GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <Label text="Cognome Operatore" styleClass="label"
+           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <Label text="codice fiscale" styleClass="label"
+           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <Label text="user id:" styleClass="label"
+           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <Label text="email" styleClass="label"
+           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <Label text="password" styleClass="label"
+           GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+    <Label text="Centro Afferenza" styleClass="label"
+           GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+    <Button text="cancel" fx:id="cancelButton"
+            onAction="#cancel" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+    <TextField styleClass="text-field" fx:id="nomeOpField"
+               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+    <TextField styleClass="text-field" fx:id="cognomeField"
+               GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <TextField styleClass="text-field" fx:id="codFiscaleField"
+               GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    <TextField styleClass="text-field" fx:id="userIDField"
+               GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    <TextField styleClass="text-field" fx:id="emailField"
+               GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+    <PasswordField styleClass="text-field" fx:id="passwordField"
+                   GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    <TextField styleClass="text-field" fx:id="centroField"
+               GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+    <Button text="registra" fx:id="btnRegistra" onAction="#registraOp"
+             GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+    <stylesheets>
+        <URL value="@../stylesheets/registrazione.css"/>
+    </stylesheets>
 </GridPane>
