@@ -247,11 +247,11 @@ public class RequestFactory {
             }
             case executeSignUp -> {
                 if(s.length < 7) throw new MalformedRequestException(paramLengthError);
-                params.put(codFiscOpKey, s[0]);
-                params.put(nomeOpKey, s[1]);
-                params.put(cognomeOpKey, s[2]);
-                params.put(userKey, s[3]);
-                params.put(emailOpKey, s[4]);
+                params.put(nomeOpKey, s[0]);
+                params.put(cognomeOpKey, s[1]);
+                params.put(codFiscOpKey, s[2]);
+                params.put(emailOpKey, s[3]);
+                params.put(userKey, s[4]);
                 params.put(passwordKey, s[5]);
                 params.put(centroAfferenzaKey, s[6]);
             }

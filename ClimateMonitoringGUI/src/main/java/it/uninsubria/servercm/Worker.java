@@ -12,13 +12,11 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface.Tables;
 import it.uninsubria.servercm.ServerInterface.ResponseType;
 import it.uninsubria.util.IDGenerator;
+import javafx.util.Pair;
 
 
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Worker extends Thread{
@@ -534,10 +532,13 @@ public class Worker extends Thread{
         return getQueryResult(query, oggetto);
     }
 
-    private String selectObjCmCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjCmCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from centro_monitoraggio where %s = '%s'".formatted(oggetto, fieldCond, cond);
         System.out.println(query);
-        return getQueryResult(query, oggetto);
+        String res = getQueryResult(query, oggetto);
+        System.out.printf(res + "\n");
+        if(res == null) return new Pair<ResponseType, String>(ResponseType.NoSuchElement, "");
+        return new Pair<ResponseType, String>(ResponseType.Object, res);
     }
 
     private String selectObjAiCond(String oggetto, String fieldCond, String cond){
@@ -570,6 +571,7 @@ public class Worker extends Thread{
         return getQueryResult(query, oggetto);
     }
 
+    //TODO:
     private Response selectObjWithCond(Request r){
         Map<String, String> params = r.getParams();
         switch(r.getTable()){
@@ -578,8 +580,8 @@ public class Worker extends Thread{
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CITY, res);
             }
             case CENTRO_MONITORAGGIO -> {
-                String res = selectObjCmCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CENTRO_MONITORAGGIO, res);
+                Pair<ResponseType, String> res = selectObjCmCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.CENTRO_MONITORAGGIO, res.getValue());
             }
             case AREA_INTERESSE -> {
                 String res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
@@ -830,36 +832,30 @@ public class Worker extends Thread{
         //create role with the userId
         final String CREATE_USER_ROLE = "create role %s with login password '%s'".formatted(userId, password);
         try(PreparedStatement createUserRoleStat = conn.prepareStatement(CREATE_USER_ROLE)){
-            createUserRoleStat.executeUpdate();
+            boolean res = createUserRoleStat.execute();
+            if(res) logger.info("Worker %s: Role creation successful".formatted(workerId));
+            else logger.info("Worker %s: Role creation unsuccessful".formatted(workerId));
         }catch(SQLException sqlException){sqlException.printStackTrace();}
 
         // add user to group role
         final String ADD_USER_TO_GROUP_ROLE = "grant operatori to %s".formatted(userId);
+        System.err.println("Executing: " + ADD_USER_TO_GROUP_ROLE);
         try(PreparedStatement addUserToGroupRoleStat = conn.prepareStatement(ADD_USER_TO_GROUP_ROLE)){
-            addUserToGroupRoleStat.executeUpdate();
+            boolean res = addUserToGroupRoleStat.execute();
+            if(res) logger.info("Worker %s: Grant privileges successful".formatted(workerId));
+            else logger.info("Worker %s: Grant privileges unsuccessful".formatted(workerId));
         }catch(SQLException sqlException){sqlException.printStackTrace();}
 
         String query = "insert into operatore(nome, cognome, codice_fiscale, email, userid, password, centroid) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')"
                 .formatted(nomeOp, cognomeOp, codFisc, userId, email, password, centroAfferenza);
+
+        System.err.println(query);
+
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
-            if(res == 1){
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.insertOk,
-                        Tables.OPERATORE,
-                        true);
-            }
+            if(res == 1){return new Response( clientId, requestId, responseId, ResponseType.insertOk, Tables.OPERATORE, true);}
         }catch(SQLException sqle){sqle.printStackTrace();}
-        return new Response(
-                clientId,
-                requestId,
-                responseId,
-                ResponseType.insertKo,
-                Tables.OPERATORE,
-                false);
+        return new Response(clientId, requestId, responseId, ResponseType.insertKo, Tables.OPERATORE, false);
     }
 
     public Response insertOperatoreAutorizzato(Request request){
@@ -869,15 +865,7 @@ public class Worker extends Thread{
         String query = "insert into operatore_autorizzati(codice_fiscale, email) values('%s','%s')".formatted(codFisc, email);
         try(PreparedStatement stat = conn.prepareStatement(query)){
             int res = stat.executeUpdate();
-            if(res == 1){
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.insertOk,
-                        Tables.OP_AUTORIZZATO,
-                        true);
-            }
+            if(res == 1){return new Response(clientId, requestId, responseId, ResponseType.insertOk, Tables.OP_AUTORIZZATO, true);}
         }catch (SQLException sqlException){sqlException.printStackTrace();}
         return new Response(clientId, requestId, responseId, ResponseType.insertKo, Tables.OP_AUTORIZZATO, false);
 

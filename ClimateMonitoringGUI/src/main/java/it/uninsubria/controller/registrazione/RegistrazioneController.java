@@ -27,7 +27,6 @@ public class RegistrazioneController {
     private Alert registrationFailed;
     private Alert registrationSuccess;
 
-    //private final OperatoreViewController operatoreViewController;
     private final MainWindowController mainWindowController;
 
     public RegistrazioneController(MainWindowController mainWindowController){

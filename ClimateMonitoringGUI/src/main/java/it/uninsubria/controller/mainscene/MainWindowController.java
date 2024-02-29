@@ -842,13 +842,13 @@ public class MainWindowController{
 
     public boolean onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
         if(!requestSignUp(codFisc, email)){
-            System.out.println("Operatore inesistente");
+            new Alert(Alert.AlertType.ERROR, "Operatore non abilitato alla registrazione.").showAndWait();
             return false;
         }else{//
             Request requestCentroId;
             try{
                 Map<String, String> reqCmIdParams = RequestFactory
-                        .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", "centroAfferenza");
+                        .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", centroAfferenza);
                 requestCentroId = RequestFactory.buildRequest(
                     client.getClientId(),
                     ServerInterface.RequestType.selectObjWithCond,
@@ -861,6 +861,10 @@ public class MainWindowController{
             client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
             String centroId = responseCmId.getResult().toString();
+            if(responseCmId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, "Centro inesistente").showAndWait();
+                return false;
+            }
             System.out.println(centroId);
             Request signUpRequest;
             try{

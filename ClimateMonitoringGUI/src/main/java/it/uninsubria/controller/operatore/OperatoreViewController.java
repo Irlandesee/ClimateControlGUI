@@ -122,7 +122,6 @@ public class OperatoreViewController {
         this.operatoreWindowStage.setMinHeight(800);
         this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
-        //this.registrazioneController = new RegistrazioneController(this);
 
         props = new Properties();
         props.put("user", userId);
