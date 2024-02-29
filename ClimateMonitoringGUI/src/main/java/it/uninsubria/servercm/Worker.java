@@ -176,8 +176,6 @@ public class Worker extends Thread{
         return null;
     }
 
-
-
     private ParametroClimatico extractParametroClimatico(ResultSet rSet) throws SQLException{
         ParametroClimatico pc = new ParametroClimatico(
                 rSet.getString("parameterid"),
@@ -515,68 +513,57 @@ public class Worker extends Thread{
                 return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
             }
             default -> {
-                return new Response(
-                        clientId,
-                        requestId,
-                        IDGenerator.generateID(),
-                        ResponseType.List,
-                        r.getTable(),
-                        null);
+                return new Response(clientId, requestId, IDGenerator.generateID(), ResponseType.List, r.getTable(), null);
             }
         }
     }
-
-    private String selectObjCityCond(String oggetto, String fieldCond, String cond){
-        String query = "select %s from city where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
-    }
-
-    private Pair<ResponseType, String> selectObjCmCond(String oggetto, String fieldCond, String cond){
-        String query = "select %s from centro_monitoraggio where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
+    private Pair<ResponseType, String> getResponseResult(String oggetto, String query) {
+        //System.out.println(query);
         String res = getQueryResult(query, oggetto);
-        System.out.printf(res + "\n");
         if(res == null) return new Pair<ResponseType, String>(ResponseType.NoSuchElement, "");
         return new Pair<ResponseType, String>(ResponseType.Object, res);
     }
 
-    private String selectObjAiCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjCityCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from city where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        return getResponseResult(oggetto, query);
+    }
+
+    private Pair<ResponseType, String> selectObjCmCond(String oggetto, String fieldCond, String cond){
+        String query = "select %s from centro_monitoraggio where %s = '%s'".formatted(oggetto, fieldCond, cond);
+        return getResponseResult(oggetto, query);
+    }
+
+    private Pair<ResponseType, String> selectObjAiCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from area_interesse where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjPcCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjPcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjNpcCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjNpcCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from nota_parametro_climatico where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjOpCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjOpCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from operatore where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    private String selectObjAuthOpCond(String oggetto, String fieldCond, String cond){
+    private Pair<ResponseType, String> selectObjAuthOpCond(String oggetto, String fieldCond, String cond){
         String query = "select %s from operatore_autorizzati where %s = '%s'".formatted(oggetto, fieldCond, cond);
-        System.out.println(query);
-        return getQueryResult(query, oggetto);
+        return getResponseResult(oggetto, query);
     }
 
-    //TODO:
     private Response selectObjWithCond(Request r){
         Map<String, String> params = r.getParams();
         switch(r.getTable()){
             case CITY -> {
-                String res = selectObjCityCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjCityCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CITY, res);
             }
             case CENTRO_MONITORAGGIO -> {
@@ -584,33 +571,27 @@ public class Worker extends Thread{
                 return new Response(clientId, requestId, responseId, res.getKey(), Tables.CENTRO_MONITORAGGIO, res.getValue());
             }
             case AREA_INTERESSE -> {
-                String res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.AREA_INTERESSE, res);
             }
             case PARAM_CLIMATICO -> {
-                String res = selectObjPcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjPcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.PARAM_CLIMATICO, res);
             }
             case NOTA_PARAM_CLIMATICO -> {
-                String res = selectObjNpcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjNpcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.NOTA_PARAM_CLIMATICO, res);
             }
             case OPERATORE -> {
-                String res = selectObjOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OPERATORE, res);
             }
             case OP_AUTORIZZATO -> {
-                String res = selectObjAuthOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                Pair<ResponseType, String> res = selectObjAuthOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
                 return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OP_AUTORIZZATO, res);
             }
             default -> {
-                return new Response(
-                        clientId,
-                        requestId,
-                        responseId,
-                        ResponseType.Object,
-                        r.getTable(),
-                        null);
+                return new Response(clientId, requestId, responseId, ResponseType.Object, r.getTable(), null);
             }
         }
     }
