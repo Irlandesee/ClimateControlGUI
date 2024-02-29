@@ -6,13 +6,11 @@ import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
-import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.operatore.Operatore;
 import it.uninsubria.operatore.OperatoreAutorizzato;
 import it.uninsubria.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
@@ -20,9 +18,6 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -235,16 +230,16 @@ public class MainWindowController{
         tableView.getColumns().clear();
         System.out.println("table view column size in prepAreaInteresse: "+ tableView.getColumns().size());
 
-        TableColumn denomColumn = new TableColumn("denominazione");
+        TableColumn<AreaInteresse, String> denomColumn = new TableColumn("denominazione");
         denomColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("denominazione"));
         denomColumn.setMinWidth(120);
-        TableColumn countryColumn = new TableColumn("stato");
+        TableColumn<AreaInteresse, String> countryColumn = new TableColumn("stato");
         countryColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("stato"));
         countryColumn.setMinWidth(100);
-        TableColumn latColumn = new TableColumn("latitudine");
+        TableColumn<AreaInteresse, String> latColumn = new TableColumn("latitudine");
         latColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("latitudine"));
         latColumn.setMinWidth(100);
-        TableColumn longColumn = new TableColumn("longitudine");
+        TableColumn<AreaInteresse, String> longColumn = new TableColumn("longitudine");
         longColumn.setCellValueFactory(new PropertyValueFactory<AreaInteresse, String>("longitudine"));
         longColumn.setMinWidth(100);
 
@@ -260,12 +255,7 @@ public class MainWindowController{
                     Request req;
                     try{
                         Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
-                        req = RequestFactory.buildRequest(
-                                client.getClientId(),
-                                ServerInterface.RequestType.selectAllWithCond,
-                                ServerInterface.Tables.PARAM_CLIMATICO,
-                                requestParams);
-
+                        req = RequestFactory.buildRequest(client.getClientId(), ServerInterface.RequestType.selectAllWithCond, ServerInterface.Tables.PARAM_CLIMATICO, requestParams);
                     }catch(MalformedRequestException mre){
                         new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                         mre.printStackTrace();

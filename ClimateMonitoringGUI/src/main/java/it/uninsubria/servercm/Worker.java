@@ -365,30 +365,17 @@ public class Worker extends Thread{
                 try(PreparedStatement stat = conn.prepareStatement(query)){
                     ResultSet rSet = stat.executeQuery();
                     while(rSet.next()){
-                        ParametroClimatico pc =
-                                extractParametroClimatico(rSet);
+                        ParametroClimatico pc = extractParametroClimatico(rSet);
                         res.add(pc);
                     }
                 }catch(SQLException sqle){sqle.printStackTrace(); }
-                return new Response(
-                        clientId,
-                        req.getRequestId(),
-                        IDGenerator.generateID(),
-                        ResponseType.List,
-                        Tables.PARAM_CLIMATICO,
-                        res);
+                return new Response(clientId, req.getRequestId(), IDGenerator.generateID(), ResponseType.List, Tables.PARAM_CLIMATICO, res);
             }
         }
-        return new Response(
-                clientId,
-                req.getRequestId(),
-                IDGenerator.generateID(),
-                ResponseType.Error,
-                req.getTable(),
-                null);
+        return new Response(clientId, req.getRequestId(), IDGenerator.generateID(), ResponseType.Error, req.getTable(), null);
     }
 
-    private List<City> selectAllCityCond(String fieldCond, String cond){
+    private Pair<ResponseType, List<City>> selectAllCityCond(String fieldCond, String cond){
         String query = "select * from city where " + fieldCond + " = ?";
         LinkedList<City> cities = new LinkedList<City>();
         try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
@@ -396,11 +383,12 @@ public class Worker extends Thread{
                 City c = extractCity(rSet);
                 cities.add(c);
             }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return cities;
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        if(cities.isEmpty()) return new Pair<ResponseType, List<City>>(ResponseType.NoSuchElement, cities);
+        return new Pair<ResponseType, List<City>>(ResponseType.List, cities);
     }
 
-     private List<CentroMonitoraggio> selectAllCmCond(String fieldCond, String cond){
+     private Pair<ResponseType, List<CentroMonitoraggio>> selectAllCmCond(String fieldCond, String cond){
         String query = "select * from centro_monitoraggio where " + fieldCond + " = ?";
         List<CentroMonitoraggio> cms = new LinkedList<CentroMonitoraggio>();
         try(ResultSet rSet = prepAndExecuteStatement(query, cond)){
@@ -408,11 +396,12 @@ public class Worker extends Thread{
                 CentroMonitoraggio cm = extractCentroMonitoraggio(rSet);
                 cms.add(cm);
             }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return cms;
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        if(cms.isEmpty()) return new Pair<ResponseType, List<CentroMonitoraggio>>(ResponseType.NoSuchElement, cms);
+        return new Pair<ResponseType, List<CentroMonitoraggio>>(ResponseType.List, cms);
     }
 
-    private List<AreaInteresse> selectAllAiCond(String fieldCond, String cond){
+    private Pair<ResponseType, List<AreaInteresse>> selectAllAiCond(String fieldCond, String cond){
         String query = "select * from area_interesse where %s = '%s'".formatted(fieldCond, cond);
         System.out.println(query);
         List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
@@ -422,14 +411,13 @@ public class Worker extends Thread{
                 AreaInteresse ai = extractAreaInteresse(rSet);
                 areeInteresse.add(ai);
             }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        areeInteresse.forEach(System.out::println);
-        return areeInteresse;
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        if(areeInteresse.isEmpty()) return new Pair<ResponseType, List<AreaInteresse>>(ResponseType.NoSuchElement, areeInteresse);
+        return new Pair<ResponseType, List<AreaInteresse>>(ResponseType.List, areeInteresse);
     }
 
-    private List<ParametroClimatico> selectAllPcCond(String fieldCond, String cond){
+    private Pair<ResponseType, List<ParametroClimatico>> selectAllPcCond(String fieldCond, String cond){
         String query = "select * from parametro_climatico where %s = '%s'".formatted(fieldCond, cond);
-        System.out.println(query);
         LinkedList<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
         try(PreparedStatement stat = conn.prepareStatement(query)){
             ResultSet rSet = stat.executeQuery();
@@ -438,10 +426,11 @@ public class Worker extends Thread{
                 parametriClimatici.add(cp);
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
-        return parametriClimatici;
+        if(parametriClimatici.isEmpty()) return new Pair<ResponseType, List<ParametroClimatico>>(ResponseType.NoSuchElement, parametriClimatici);
+        return new Pair<ResponseType, List<ParametroClimatico>>(ResponseType.List, parametriClimatici);
     }
 
-    private List<NotaParametro> selectAllNotaCond(String fieldCond, String cond){
+    private Pair<ResponseType, List<NotaParametro>> selectAllNotaCond(String fieldCond, String cond){
         String query = "select * from nota_parametro_climatico where %s = '%s'".formatted(fieldCond, cond);
         List<NotaParametro> resultList = new LinkedList<NotaParametro>();
         try(PreparedStatement stat = conn.prepareStatement(query)){
@@ -451,10 +440,11 @@ public class Worker extends Thread{
                 resultList.add(np);
             }
         }catch(SQLException sqle){sqle.printStackTrace();}
-        return resultList;
+        if(resultList.isEmpty()) return new Pair<ResponseType, List<NotaParametro>>(ResponseType.NoSuchElement, resultList);
+        return new Pair<ResponseType, List<NotaParametro>>(ResponseType.List, resultList);
     }
 
-    private List<Operatore> selectAllOpCond(String fieldCond, String cond){
+    private Pair<ResponseType, List<Operatore>> selectAllOpCond(String fieldCond, String cond){
         String query = "select * from operatore where %s = '%s'".formatted(fieldCond, cond);
         LinkedList<Operatore> operatori = new LinkedList<Operatore>();
         try(PreparedStatement stat = conn.prepareStatement(query)){
@@ -463,11 +453,12 @@ public class Worker extends Thread{
                 Operatore op = extractOperatore(rSet);
                 operatori.add(op);
             }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return operatori;
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        if(operatori.isEmpty()) return new Pair<ResponseType, List<Operatore>>(ResponseType.NoSuchElement, operatori);
+        return new Pair<ResponseType, List<Operatore>>(ResponseType.List, operatori);
     }
 
-    public List<OperatoreAutorizzato> selectAllAuthOpCond(String fieldCond, String cond){
+    public Pair<ResponseType, List<OperatoreAutorizzato>> selectAllAuthOpCond(String fieldCond, String cond){
         String query = "select * from operatore_autorizzati where %s = '%s'".formatted(fieldCond, cond);
         LinkedList<OperatoreAutorizzato> opAutorizzati = new LinkedList<OperatoreAutorizzato>();
         try(PreparedStatement stat = conn.prepareStatement(query)){
@@ -476,8 +467,9 @@ public class Worker extends Thread{
                 OperatoreAutorizzato authOp = extractAuthOp(rSet);
                 opAutorizzati.add(authOp);
             }
-        }catch(SQLException sqle){sqle.printStackTrace(); return null;}
-        return opAutorizzati;
+        }catch(SQLException sqle){sqle.printStackTrace();}
+        if(opAutorizzati.isEmpty()) return new Pair<ResponseType, List<OperatoreAutorizzato>>(ResponseType.NoSuchElement, opAutorizzati);
+        return new Pair<ResponseType, List<OperatoreAutorizzato>>(ResponseType.List, opAutorizzati);
     }
 
     private Response selectAllWithCond(Request r){
@@ -485,32 +477,32 @@ public class Worker extends Thread{
         System.out.println("executing request" + r);
         switch(r.getTable()){
             case CITY -> {
-                List<City> res = selectAllCityCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<City>> res = selectAllCityCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case CENTRO_MONITORAGGIO -> {
-                List<CentroMonitoraggio> res = selectAllCmCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<CentroMonitoraggio>> res = selectAllCmCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case AREA_INTERESSE -> {
-                List<AreaInteresse> res = selectAllAiCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<AreaInteresse>> res = selectAllAiCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case PARAM_CLIMATICO -> {
-                List<ParametroClimatico> res = selectAllPcCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<ParametroClimatico>> res = selectAllPcCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case NOTA_PARAM_CLIMATICO -> {
-                List<NotaParametro> res = selectAllNotaCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<NotaParametro>> res = selectAllNotaCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case OPERATORE -> {
-                List<Operatore> res = selectAllOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<Operatore>> res = selectAllOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             case OP_AUTORIZZATO -> {
-                List<OperatoreAutorizzato> res = selectAllAuthOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.List, r.getTable(), res);
+                Pair<ResponseType, List<OperatoreAutorizzato>> res = selectAllAuthOpCond(params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
+                return new Response(clientId, requestId, responseId, res.getKey(), r.getTable(), res.getValue());
             }
             default -> {
                 return new Response(clientId, requestId, IDGenerator.generateID(), ResponseType.List, r.getTable(), null);
@@ -564,7 +556,7 @@ public class Worker extends Thread{
         switch(r.getTable()){
             case CITY -> {
                 Pair<ResponseType, String> res = selectObjCityCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.CITY, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.CITY, res.getValue());
             }
             case CENTRO_MONITORAGGIO -> {
                 Pair<ResponseType, String> res = selectObjCmCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
@@ -572,26 +564,26 @@ public class Worker extends Thread{
             }
             case AREA_INTERESSE -> {
                 Pair<ResponseType, String> res = selectObjAiCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.AREA_INTERESSE, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.AREA_INTERESSE, res.getValue());
             }
             case PARAM_CLIMATICO -> {
                 Pair<ResponseType, String> res = selectObjPcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.PARAM_CLIMATICO, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.PARAM_CLIMATICO, res.getValue());
             }
             case NOTA_PARAM_CLIMATICO -> {
                 Pair<ResponseType, String> res = selectObjNpcCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.NOTA_PARAM_CLIMATICO, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.NOTA_PARAM_CLIMATICO, res.getValue());
             }
             case OPERATORE -> {
                 Pair<ResponseType, String> res = selectObjOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OPERATORE, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.OPERATORE, res.getValue());
             }
             case OP_AUTORIZZATO -> {
                 Pair<ResponseType, String> res = selectObjAuthOpCond(params.get(RequestFactory.objectKey), params.get(RequestFactory.condKey), params.get(RequestFactory.fieldKey));
-                return new Response(clientId, requestId, responseId, ResponseType.Object, Tables.OP_AUTORIZZATO, res);
+                return new Response(clientId, requestId, responseId, res.getKey(), Tables.OP_AUTORIZZATO, res.getValue());
             }
             default -> {
-                return new Response(clientId, requestId, responseId, ResponseType.Object, r.getTable(), null);
+                return new Response(clientId, requestId, responseId, ResponseType.NoSuchElement, r.getTable(), null);
             }
         }
     }
