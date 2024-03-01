@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -269,7 +268,7 @@ public class OperatoreViewController {
         client.addRequest(request);
         //get response
         Response response = client.getResponse(request.getRequestId());
-        if(response.getRespType() == ServerInterface.ResponseType.List
+        if(response.getResponseType() == ServerInterface.ResponseType.List
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
             prepTableAreaInteresse();
@@ -293,7 +292,7 @@ public class OperatoreViewController {
         }
         client.addRequest(request);
         Response response = client.getResponse(request.getRequestId());
-        if(response.getRespType() == ServerInterface.ResponseType.List
+        if(response.getResponseType() == ServerInterface.ResponseType.List
             && response.getTable() == ServerInterface.Tables.CENTRO_MONITORAGGIO){
             List<CentroMonitoraggio> res = (List<CentroMonitoraggio>) response.getResult();
             tableView.getColumns().clear();
@@ -358,7 +357,7 @@ public class OperatoreViewController {
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
 
-            if(response.getRespType() == ServerInterface.ResponseType.List &&
+            if(response.getResponseType() == ServerInterface.ResponseType.List &&
                     response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
                 List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
                 queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
@@ -395,7 +394,7 @@ public class OperatoreViewController {
             client.addRequest(request);
             List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
             Response response = client.getResponse(request.getRequestId());
-            if(response.getRespType() == ServerInterface.ResponseType.List
+            if(response.getResponseType() == ServerInterface.ResponseType.List
                     && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
                 areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
 
@@ -1001,8 +1000,8 @@ public class OperatoreViewController {
          * TODO:
          * NullPointerException se non c'e' risultato... add checks...
          * **/
-        if(respAreaId.getRespType() != ServerInterface.ResponseType.Object){
-            ServerInterface.ResponseType responseType = respAreaId.getRespType();
+        if(respAreaId.getResponseType() != ServerInterface.ResponseType.Object){
+            ServerInterface.ResponseType responseType = respAreaId.getResponseType();
             if(responseType == ServerInterface.ResponseType.NoSuchElement){
                 new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
             }else if(responseType == ServerInterface.ResponseType.Error){
@@ -1010,8 +1009,8 @@ public class OperatoreViewController {
             }
             return;
         }
-        if(respCentroId.getRespType() != ServerInterface.ResponseType.Object){
-            ServerInterface.ResponseType responseType = respAreaId.getRespType();
+        if(respCentroId.getResponseType() != ServerInterface.ResponseType.Object){
+            ServerInterface.ResponseType responseType = respAreaId.getResponseType();
             if(responseType == ServerInterface.ResponseType.NoSuchElement){
                 new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
             }else if(responseType == ServerInterface.ResponseType.Error){
@@ -1039,7 +1038,7 @@ public class OperatoreViewController {
         }
         client.addRequest(insertNotaRequest);
         Response responseNota = client.getResponse(insertNotaRequest.getRequestId());
-        if(responseNota.getRespType() == ServerInterface.ResponseType.insertKo){
+        if(responseNota.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "errore inserimento nota").showAndWait();
             return;
         }
@@ -1066,7 +1065,7 @@ public class OperatoreViewController {
         }
         client.addRequest(insertPcRequest);
         Response insertPcResponse = client.getResponse(insertPcRequest.getRequestId());
-        if(insertPcResponse.getRespType() == ServerInterface.ResponseType.insertKo){
+        if(insertPcResponse.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
         }else{
             if((boolean) insertPcResponse.getResult()){
@@ -1374,7 +1373,7 @@ public class OperatoreViewController {
             }
             client.addRequest(insertAreaRequest);
             Response updateAi = client.getResponse(insertAreaRequest.getRequestId());
-            if(updateAi.getRespType() == ServerInterface.ResponseType.updateOk){
+            if(updateAi.getResponseType() == ServerInterface.ResponseType.updateOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Area aggiunta al centro").showAndWait();
             }else{
                 new Alert(Alert.AlertType.ERROR, "Errore nell'aggiunta dell'area").showAndWait();
@@ -1427,7 +1426,7 @@ public class OperatoreViewController {
         if(request == null){return;}
         Response response = client.getResponse(request.getRequestId());
         String areaId = "";
-        if(response.getRespType() == ServerInterface.ResponseType.Object
+        if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             areaId = response.getResult().toString();
         }

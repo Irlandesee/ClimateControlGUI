@@ -143,7 +143,7 @@ public class TableViewBuilder {
                 }
                 List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
                 if(response.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
-                    && response.getRespType() == ServerInterface.ResponseType.List){
+                    && response.getResponseType() == ServerInterface.ResponseType.List){
                     parametriClimatici = (List<ParametroClimatico>) response.getResult();
                 }
 
@@ -248,13 +248,13 @@ public class TableViewBuilder {
                         String nomeArea = "";
                         String nomeCentro = "";
 
-                        if(respDenom.getRespType().equals(ServerInterface.ResponseType.Object) &&
+                        if(respDenom.getResponseType().equals(ServerInterface.ResponseType.Object) &&
                                 respDenom.getTable().equals(ServerInterface.Tables.AREA_INTERESSE)){
                             nomeArea = respDenom.getResult().toString();
                         }else{
                             nomeArea = "Error while retrieving denominazione area";
                         }
-                        if(respNomeCentro.getRespType().equals(ServerInterface.ResponseType.Object)
+                        if(respNomeCentro.getResponseType().equals(ServerInterface.ResponseType.Object)
                                 && respNomeCentro.getTable().equals(ServerInterface.Tables.CENTRO_MONITORAGGIO)){
                             nomeCentro = respNomeCentro.getResult().toString();
                         }else{

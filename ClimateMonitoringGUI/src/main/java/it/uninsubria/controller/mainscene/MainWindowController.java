@@ -75,6 +75,9 @@ public class MainWindowController{
     private Alert invalidDateAlert;
     private Alert cmAlert;
 
+    private Alert resErrorAlert;
+    private Alert resNoSuchElementAlert;
+
     private final String url = "jdbc:postgresql://localhost/postgres";
     //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
@@ -157,6 +160,16 @@ public class MainWindowController{
         this.cmAlert = new Alert(Alert.AlertType.ERROR);
         this.cmAlert.setHeaderText("Invalid cm");
         this.cmAlert.setContentText("centro in input non valido");
+
+        this.resErrorAlert = new Alert(Alert.AlertType.ERROR);
+        this.resErrorAlert.setHeaderText("Errore in risposta");
+        this.resErrorAlert.setContentText("Errore nell'oggetto risposta");
+
+        this.resNoSuchElementAlert = new Alert(Alert.AlertType.ERROR);
+        this.resNoSuchElementAlert.setHeaderText("Oggetto inesistente");
+        this.resNoSuchElementAlert.setContentText("L'oggetto richiesto non esiste!");
+
+
     }
 
     @FXML
@@ -266,23 +279,23 @@ public class MainWindowController{
                     //get response
                     Response res;
                     res = client.getResponse(req.getRequestId());
-                    if(res == null){
-                        new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
+
+                    //Check Response for errors
+                    if(res.getResponseType() == ServerInterface.ResponseType.Error){
+                        resErrorAlert.showAndWait();
                         return;
                     }
-                    List<ParametroClimatico> params = new LinkedList<ParametroClimatico>();
-                    if(res.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
-                            && res.getRespType() == ServerInterface.ResponseType.List){
-                        params = (List<ParametroClimatico>)res.getResult();
+                    if(res.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                        resNoSuchElementAlert.showAndWait();
+                        return;
                     }
+                    List<ParametroClimatico> params = (List<ParametroClimatico>) res.getResult();
                     params.forEach(System.out::println);
 
                     try{
                         Stage aiDialogStage = new Stage();
                         AiDialog aiDialogController = new AiDialog(aiDialogStage, client, a, params);
-
                         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/ai-dialog.fxml"));
-
                         fxmlLoader.setController(aiDialogController);
                         Scene dialogScene = new Scene(fxmlLoader.load(), 400, 400);
                         aiDialogStage.setScene(dialogScene);
@@ -303,7 +316,7 @@ public class MainWindowController{
                     client.getClientId(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.AREA_INTERESSE,
-                    new HashMap<>());//select all does not need parameters
+                    null);//select all does not need parameters
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             mre.printStackTrace();
@@ -312,10 +325,10 @@ public class MainWindowController{
         client.addRequest(request);
         //get response
         Response response = client.getResponse(request.getRequestId());
-        if(response.getRespType() == ServerInterface.ResponseType.List
-                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-            List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
+        //Check response
+        if(response.getResponseType() == ServerInterface.ResponseType.List && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             prepTableAreaInteresse();
+            List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
             res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
         }
     }
@@ -341,6 +354,16 @@ public class MainWindowController{
             }
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
+
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
+            }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
+            }
+
             List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
             areeInteresseRichieste.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
@@ -372,12 +395,19 @@ public class MainWindowController{
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
 
-            if(response.getRespType() == ServerInterface.ResponseType.List &&
-                response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-                List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
-                queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
-                queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
             }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
+            }
+
+            List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
+            queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
+            queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+
         }else{
             statoAlert.showAndWait();
         }
@@ -426,14 +456,18 @@ public class MainWindowController{
                 return;
             }
             client.addRequest(request);
-            List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
             Response response = client.getResponse(request.getRequestId());
-            if(response.getRespType() == ServerInterface.ResponseType.List
-                    && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-                areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
 
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
+            }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
             }
 
+            List<AreaInteresse> areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
                 float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
@@ -522,15 +556,18 @@ public class MainWindowController{
             return;
         }
         client.addRequest(request);
-        if(request == null){return;}
         Response response = client.getResponse(request.getRequestId());
-        String areaId = "";
-        if(response.getRespType() == ServerInterface.ResponseType.Object
-                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-            areaId = response.getResult().toString();
+
+        if(response.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
+        }
+        if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+            resNoSuchElementAlert.showAndWait();
+            return;
         }
 
-        System.out.println("areaid ->" + areaId);
+        String areaId = response.getResult().toString();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
             fxmlLoader.setController(new GraphDialog(client, areaId));
@@ -586,10 +623,19 @@ public class MainWindowController{
                     return;
                 }
                 client.addRequest(requestAreaId);
-                Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
-                String areaInteresseId = resAreaId.getResult().toString();
+                Response resAreaId = client.getResponse(requestAreaId.getRequestId());
 
-                Request requestParamClimatici = null;
+                if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(resAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
+
+                String areaInteresseId = resAreaId.getResult().toString();
+                Request requestParamClimatici;
                 try{
                     Map<String, String> reqParamClimatici = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
@@ -607,11 +653,17 @@ public class MainWindowController{
                 client.addRequest(requestParamClimatici);
                 Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
 
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
 
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
-                tableView
-                        .getItems()
-                        .clear();
+                tableView.getItems().clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
@@ -647,10 +699,22 @@ public class MainWindowController{
                 }
                 client.addRequest(requestCentroId);
                 Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
+
+                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
+
+                /**
                 List<String> result = (List<String>)responseCentroId.getResult(); //returns multiple...
                 String centroId = result.get(0);
+                 **/
+                String centroId = responseCentroId.getResult().toString();
                 System.out.println(centroId);
-
 
                 Request requestParametriClimatici;
                 try{
@@ -668,11 +732,19 @@ public class MainWindowController{
                 }
                 client.addRequest(requestParametriClimatici);
                 Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
+
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
+
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
 
-                tableView
-                        .getItems()
-                        .clear();
+                tableView.getItems().clear();
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
@@ -692,9 +764,7 @@ public class MainWindowController{
         tableView.getColumns().clear();
         tableView.getItems().clear();
         if(paramBox != null)
-            if(!paramBox.getChildren().isEmpty())
-                paramBox.getChildren().clear();
-        //tableView.setRowFactory(null);
+            if(!paramBox.getChildren().isEmpty()) paramBox.getChildren().clear();
         Request requestCentro = null;
         try{
             requestCentro = RequestFactory.buildRequest(
@@ -710,21 +780,28 @@ public class MainWindowController{
         client.addRequest(requestCentro);
         Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
 
+        if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
+        }
+        if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+            resNoSuchElementAlert.showAndWait();
+            return;
+        }
+
         List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
-        TableColumn denomCentro = new TableColumn("Denominazione");
+        TableColumn<CentroMonitoraggio, String> denomCentro = new TableColumn("Denominazione");
         denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
         tableView.getColumns().add(denomCentro);
 
-        centriMonitoraggio.forEach(cm -> {
-            tableView.getItems().add(cm);
-        });
+        centriMonitoraggio.forEach(cm -> {tableView.getItems().add(cm);});
 
         tableView.setRowFactory(tv -> {
             TableRow row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if(event.getClickCount() == 2 && !(row.isEmpty())){
                     CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
-                    System.out.println("Item double clicked: " + c);
+                    //System.out.println("Item double clicked: " + c);
                     List<String> areeId = c.getAreeInteresseIdAssociate();
                     List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
                     for(String areaId : areeId){
@@ -745,6 +822,16 @@ public class MainWindowController{
                         }
                         client.addRequest(requestAi);
                         Response responseAi = client.getResponse(requestAi.getRequestId());
+
+                        if(responseAi.getResponseType() == ServerInterface.ResponseType.Error){
+                            resErrorAlert.showAndWait();
+                            return;
+                        }
+                        if(responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                            resNoSuchElementAlert.showAndWait();
+                            return;
+                        }
+
                         List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
                         responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
                     }
@@ -790,7 +877,7 @@ public class MainWindowController{
         }
         client.addRequest(loginRequest);
         Response response = client.getResponse(loginRequest.getRequestId());
-        if(response.getRespType() == ServerInterface.ResponseType.loginKo) return false;
+        if(response.getResponseType() == ServerInterface.ResponseType.loginKo) return false;
         else{
             mainWindowStage.close();
             try{
@@ -834,7 +921,7 @@ public class MainWindowController{
         if(!requestSignUp(codFisc, email)){
             new Alert(Alert.AlertType.ERROR, "Operatore non abilitato alla registrazione.").showAndWait();
             return false;
-        }else{//
+        }else{
             Request requestCentroId;
             try{
                 Map<String, String> reqCmIdParams = RequestFactory
@@ -851,10 +938,16 @@ public class MainWindowController{
             client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse(requestCentroId.getRequestId());
             String centroId = responseCmId.getResult().toString();
-            if(responseCmId.getRespType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, "Centro inesistente").showAndWait();
+
+            if(responseCmId.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
                 return false;
             }
+            if(responseCmId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return false;
+            }
+
             System.out.println(centroId);
             Request signUpRequest;
             try{

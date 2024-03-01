@@ -334,7 +334,7 @@ public class Worker extends Thread{
                 City c = extractCity(rSet);
                 cities.add(c);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<City>>(ResponseType.Error, cities);}
         if(cities.isEmpty()) return new Pair<ResponseType, List<City>>(ResponseType.NoSuchElement, cities);
         return new Pair<ResponseType, List<City>>(ResponseType.List, cities);
     }
@@ -347,7 +347,7 @@ public class Worker extends Thread{
                 CentroMonitoraggio cm = extractCentroMonitoraggio(rSet);
                 cms.add(cm);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<CentroMonitoraggio>>(ResponseType.Error, cms);}
         if(cms.isEmpty()) return new Pair<ResponseType, List<CentroMonitoraggio>>(ResponseType.NoSuchElement, cms);
         return new Pair<ResponseType, List<CentroMonitoraggio>>(ResponseType.List, cms);
     }
@@ -362,7 +362,7 @@ public class Worker extends Thread{
                 AreaInteresse ai = extractAreaInteresse(rSet);
                 areeInteresse.add(ai);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<AreaInteresse>>(ResponseType.Error, areeInteresse);}
         if(areeInteresse.isEmpty()) return new Pair<ResponseType, List<AreaInteresse>>(ResponseType.NoSuchElement, areeInteresse);
         return new Pair<ResponseType, List<AreaInteresse>>(ResponseType.List, areeInteresse);
     }
@@ -376,7 +376,7 @@ public class Worker extends Thread{
                 ParametroClimatico cp = extractParametroClimatico(rSet);
                 parametriClimatici.add(cp);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<ParametroClimatico>>(ResponseType.Error, parametriClimatici);}
         if(parametriClimatici.isEmpty()) return new Pair<ResponseType, List<ParametroClimatico>>(ResponseType.NoSuchElement, parametriClimatici);
         return new Pair<ResponseType, List<ParametroClimatico>>(ResponseType.List, parametriClimatici);
     }
@@ -390,7 +390,7 @@ public class Worker extends Thread{
                 NotaParametro np = extractNota(rSet);
                 resultList.add(np);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<NotaParametro>>(ResponseType.Error, resultList);}
         if(resultList.isEmpty()) return new Pair<ResponseType, List<NotaParametro>>(ResponseType.NoSuchElement, resultList);
         return new Pair<ResponseType, List<NotaParametro>>(ResponseType.List, resultList);
     }
@@ -404,7 +404,7 @@ public class Worker extends Thread{
                 Operatore op = extractOperatore(rSet);
                 operatori.add(op);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<Operatore>>(ResponseType.Error, operatori);}
         if(operatori.isEmpty()) return new Pair<ResponseType, List<Operatore>>(ResponseType.NoSuchElement, operatori);
         return new Pair<ResponseType, List<Operatore>>(ResponseType.List, operatori);
     }
@@ -418,7 +418,7 @@ public class Worker extends Thread{
                 OperatoreAutorizzato authOp = extractAuthOp(rSet);
                 opAutorizzati.add(authOp);
             }
-        }catch(SQLException sqle){sqle.printStackTrace();}
+        }catch(SQLException sqle){sqle.printStackTrace(); return new Pair<ResponseType, List<OperatoreAutorizzato>>(ResponseType.Error, opAutorizzati);}
         if(opAutorizzati.isEmpty()) return new Pair<ResponseType, List<OperatoreAutorizzato>>(ResponseType.NoSuchElement, opAutorizzati);
         return new Pair<ResponseType, List<OperatoreAutorizzato>>(ResponseType.List, opAutorizzati);
     }

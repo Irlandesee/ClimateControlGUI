@@ -108,7 +108,7 @@ public class GraphDialog {
         client.addRequest(request);
         Response response = client.getResponse(request.getClientId());
         String denominazione = "";
-        if(response.getRespType() == ServerInterface.ResponseType.Object
+        if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             denominazione = response.getResult().toString();
         }
