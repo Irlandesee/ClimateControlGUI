@@ -8,23 +8,20 @@
 
 <GridPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="300.0" prefWidth="400.0">
 
     <Label text="Indirizzo IP: "
-           GridPane.columnIndex="0" GridPane.rowIndex="1"
-    />
+           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
     <TextField
             fx:id="ipField"
             GridPane.columnIndex="1"
             GridPane.rowIndex="1"/>
     <Label text="Porta: "
-           GridPane.columnIndex="0" GridPane.rowIndex="2"
-    />
+           GridPane.columnIndex="0" GridPane.rowIndex="2"/>
     <TextField
             fx:id="portField"
             GridPane.columnIndex="1"
-            GridPane.rowIndex="2"
-    />
+            GridPane.rowIndex="2"/>
     <Button
             fx:id="buttonConnect"
             text="Nuova connessione"

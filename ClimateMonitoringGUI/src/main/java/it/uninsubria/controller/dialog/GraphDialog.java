@@ -95,7 +95,7 @@ public class GraphDialog {
             Map<String, String> params = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "denominazione", "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     params
@@ -161,7 +161,7 @@ public class GraphDialog {
                 Map<String, String> requestParameters = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.PARAM_CLIMATICO,
                         requestParameters
@@ -261,7 +261,7 @@ public class GraphDialog {
         try{
             Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     requestParams
@@ -361,7 +361,7 @@ public class GraphDialog {
             Map<String, String> requestParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     requestParams

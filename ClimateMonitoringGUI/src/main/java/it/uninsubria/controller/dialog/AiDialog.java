@@ -80,7 +80,7 @@ public class AiDialog {
                         Map<String, String> params = RequestFactory
                                 .buildParams(ServerInterface.RequestType.selectObjWithCond, "nomecentro",
                                         "centroid", centroId);
-                        request = RequestFactory.buildRequest(client.getClientId(),
+                        request = RequestFactory.buildRequest(client.getHostName(),
                                 ServerInterface.RequestType.selectObjWithCond,
                                 ServerInterface.Tables.CENTRO_MONITORAGGIO,
                                 params);

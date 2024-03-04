@@ -93,18 +93,17 @@ public class MainWindowController{
     private ParametroClimaticoController parametroClimaticoController;
     private OperatoreViewController operatoreViewController;
 
-    private final Client client;
+    private Client client;
 
-    public MainWindowController(Stage stage, Client client){
-        this.client = client;
+    public MainWindowController(Stage stage){
 
         this.mainWindowStage = stage;
+        this.client = new Client();
         mainWindowStage.setMinHeight(800);
         mainWindowStage.setMinWidth(1200);
 
         createControllers();
         initAlerts();
-        client.start();
     }
 
     private void createControllers(){
@@ -118,6 +117,14 @@ public class MainWindowController{
 
     public RegistrazioneController getRegistrazioneController(){
         return this.registrazioneController;
+    }
+
+    public Client getClient(){
+        return this.client;
+    }
+
+    public void setClient(Client client){
+        this.client = client;
     }
 
     @FXML
@@ -267,7 +274,7 @@ public class MainWindowController{
                     Request req;
                     try{
                         Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
-                        req = RequestFactory.buildRequest(client.getClientId(), ServerInterface.RequestType.selectAllWithCond, ServerInterface.Tables.PARAM_CLIMATICO, requestParams);
+                        req = RequestFactory.buildRequest(client.getHostName(), ServerInterface.RequestType.selectAllWithCond, ServerInterface.Tables.PARAM_CLIMATICO, requestParams);
                     }catch(MalformedRequestException mre){
                         new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                         mre.printStackTrace();
@@ -312,7 +319,7 @@ public class MainWindowController{
         Request request = null;
         try{
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.AREA_INTERESSE,
                     null);//select all does not need parameters
@@ -341,7 +348,7 @@ public class MainWindowController{
                 Map<String, String> params = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -382,7 +389,7 @@ public class MainWindowController{
                 Map<String, String> params = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -445,7 +452,7 @@ public class MainWindowController{
             Request request;
             try{
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAll,
                         ServerInterface.Tables.AREA_INTERESSE,
                         null);
@@ -544,7 +551,7 @@ public class MainWindowController{
             Map<String, String> params = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     params
@@ -612,7 +619,7 @@ public class MainWindowController{
                     Map<String, String> reqAreaIdParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectObjWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             reqAreaIdParams);
@@ -639,7 +646,7 @@ public class MainWindowController{
                     Map<String, String> reqParamClimatici = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             reqParamClimatici
@@ -686,7 +693,7 @@ public class MainWindowController{
                                     denomCmCercato
                             );
                     requestCentroId = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
                             requestCentroIdParams);
@@ -720,7 +727,7 @@ public class MainWindowController{
                     Map<String, String> requestParametriClimaticiParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             requestParametriClimaticiParams);
@@ -767,7 +774,7 @@ public class MainWindowController{
         Request requestCentro = null;
         try{
             requestCentro = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null);
@@ -809,7 +816,7 @@ public class MainWindowController{
                             Map<String, String> reqAiParams = RequestFactory
                                     .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                             requestAi = RequestFactory.buildRequest(
-                                    client.getClientId(),
+                                    client.getHostName(),
                                     ServerInterface.RequestType.selectAllWithCond,
                                     ServerInterface.Tables.AREA_INTERESSE,
                                     reqAiParams
@@ -864,7 +871,7 @@ public class MainWindowController{
             Map<String, String> loginParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.executeLogin, userID, password);
             loginRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.executeLogin,
                     ServerInterface.Tables.OPERATORE,
                     loginParams
@@ -896,7 +903,7 @@ public class MainWindowController{
         Request request;
         try{
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     null);
@@ -926,7 +933,7 @@ public class MainWindowController{
                 Map<String, String> reqCmIdParams = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", centroAfferenza);
                 requestCentroId = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO, reqCmIdParams);
             }catch(MalformedRequestException mre){
@@ -953,7 +960,7 @@ public class MainWindowController{
                 Map<String, String> requestSignUpParams = RequestFactory
                         .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, userID, email, password, centroId);
                 signUpRequest = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.executeSignUp,
                         ServerInterface.Tables.OPERATORE,
                         requestSignUpParams);
@@ -974,15 +981,14 @@ public class MainWindowController{
     public void handleNewConnection(){
         System.out.println("New connection");
         try{
-            Stage cmDialogStage = new Stage();
-            NewConnectionDialog connectionDialog = new NewConnectionDialog();
+            Stage connectionStage = new Stage();
+            NewConnectionDialog connectionDialog = new NewConnectionDialog(client);
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
             fxmlLoader.setController(connectionDialog);
             Scene dialogScene = new Scene(fxmlLoader.load());
-            cmDialogStage.setScene(dialogScene);
-            cmDialogStage.show();
+            connectionStage.setScene(dialogScene);
+            connectionStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
-
     }
 
     @FXML

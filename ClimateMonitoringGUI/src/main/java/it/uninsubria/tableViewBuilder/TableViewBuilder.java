@@ -122,7 +122,7 @@ public class TableViewBuilder {
                     Map<String, String> requestParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             requestParams
@@ -197,7 +197,7 @@ public class TableViewBuilder {
                                             "parameterid", pc.getParameterId());
                             requestDenominazione = RequestFactory
                                     .buildRequest(
-                                            client.getClientId(),
+                                            client.getHostName(),
                                             ServerInterface.RequestType.selectObjJoinWithCond,
                                             ServerInterface.Tables.PARAM_CLIMATICO,
                                             paramsReqDenom);
@@ -217,7 +217,7 @@ public class TableViewBuilder {
                                             pc.getParameterId());
                             requestNomeCentro = RequestFactory
                                     .buildRequest(
-                                            client.getClientId(),
+                                            client.getHostName(),
                                             ServerInterface.RequestType.selectObjJoinWithCond,
                                             ServerInterface.Tables.PARAM_CLIMATICO,
                                             paramsReqNomeCentro
@@ -302,7 +302,7 @@ public class TableViewBuilder {
                         Map<String, String> reqAiParams = RequestFactory
                                 .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                         requestAi = RequestFactory.buildRequest(
-                                client.getClientId(),
+                                client.getHostName(),
                                 ServerInterface.RequestType.selectAllWithCond,
                                 ServerInterface.Tables.AREA_INTERESSE,
                                 reqAiParams

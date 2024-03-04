@@ -265,7 +265,7 @@ public class OperatoreViewController {
         Request request = null;
         try{
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.AREA_INTERESSE,
                     new HashMap<>());//select all does not need parameters
@@ -296,7 +296,7 @@ public class OperatoreViewController {
         tableView.refresh();
         try{
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null
@@ -328,7 +328,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -368,7 +368,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -412,7 +412,7 @@ public class OperatoreViewController {
             Request request;
             try{
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAll,
                         ServerInterface.Tables.AREA_INTERESSE,
                         null);
@@ -526,7 +526,7 @@ public class OperatoreViewController {
                     Map<String, String> reqAreaIdParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectObjWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             reqAreaIdParams);
@@ -554,7 +554,7 @@ public class OperatoreViewController {
                     Map<String, String> reqParamClimatici = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             reqParamClimatici
@@ -605,7 +605,7 @@ public class OperatoreViewController {
                                     denomCmCercato
                             );
                     requestCentroId = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
                             requestCentroIdParams);
@@ -633,7 +633,7 @@ public class OperatoreViewController {
                     Map<String, String> requestParametriClimaticiParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             requestParametriClimaticiParams);
@@ -706,7 +706,7 @@ public class OperatoreViewController {
         if(country.isEmpty()){
             try{
                 cmRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null
@@ -719,7 +719,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> cmParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "country", country);
                 cmRequest = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         cmParams
@@ -730,7 +730,7 @@ public class OperatoreViewController {
             }
         }
         client.addRequest(cmRequest);
-        Response response = client.getResponse(client.getClientId());
+        Response response = client.getResponse(client.getHostName());
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -758,7 +758,7 @@ public class OperatoreViewController {
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CITY,
                             null);
@@ -772,7 +772,7 @@ public class OperatoreViewController {
                     Map<String, String> params = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.CITY,
                             params);
@@ -787,7 +787,7 @@ public class OperatoreViewController {
                     Map<String, String> paramsAiRequest = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     requestAi  = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             paramsAiRequest
@@ -815,7 +815,7 @@ public class OperatoreViewController {
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.AREA_INTERESSE,
                             null
@@ -830,7 +830,7 @@ public class OperatoreViewController {
                     Map<String, String> paramsCityRequest = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             paramsCityRequest
@@ -853,7 +853,7 @@ public class OperatoreViewController {
                 Request centriMonitoraggioRequest;
                 try{
                     citiesRequest = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CITY,
                             null);
@@ -867,7 +867,7 @@ public class OperatoreViewController {
 
                 try{
                     centriMonitoraggioRequest = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CENTRO_MONITORAGGIO,
                             null
@@ -892,7 +892,7 @@ public class OperatoreViewController {
                 Request centriMonitoraggioRequest;
                 try{
                     centriMonitoraggioRequest = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CENTRO_MONITORAGGIO,
                             null
@@ -910,7 +910,7 @@ public class OperatoreViewController {
                     Map<String, String> params = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.CITY,
                             params);
@@ -954,7 +954,7 @@ public class OperatoreViewController {
             insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE,
                     IDGenerator.generateID(), denom, stato, latitudine, longitudine);
             insertRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.AREA_INTERESSE,
                     insertParams
@@ -1028,7 +1028,7 @@ public class OperatoreViewController {
                             "denominazione",
                             nomeArea);
             requestAreaId = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     reqAreaIdParams);
@@ -1048,7 +1048,7 @@ public class OperatoreViewController {
                             "nomecentro",
                             centroMon);
             requestCentroId = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     reqCentroIdParams
@@ -1090,7 +1090,7 @@ public class OperatoreViewController {
         notaInsertParams.replace(RequestFactory.notaIdKey, notaId);
         try{
             insertNotaRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
                     notaInsertParams);
@@ -1116,7 +1116,7 @@ public class OperatoreViewController {
                     paramValues.get(RequestFactory.valoreTemperaturaKey), paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
                     paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
             insertPcRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     insertParams
@@ -1197,7 +1197,7 @@ public class OperatoreViewController {
             Map<String, String> comuneParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectAllWithCond, "ascii_name", comuneCentro);
             reqStato = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.CITY,
                     comuneParams);
@@ -1230,7 +1230,7 @@ public class OperatoreViewController {
             insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
                 nomeCentro, comuneCentro, statoCentro, areaList.toString());
             insertCmRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     insertParams);
@@ -1273,7 +1273,7 @@ public class OperatoreViewController {
         Request opAutorizzatiRequest;
         try{
             opAutorizzatiRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     null
@@ -1303,7 +1303,7 @@ public class OperatoreViewController {
         try{
             insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
             insertAuthOpRequest = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     insertAuthOpParams);
@@ -1359,7 +1359,7 @@ public class OperatoreViewController {
             Map<String, String> paramsCheckAi = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAi);
             requestAi = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     paramsCheckAi);
@@ -1380,7 +1380,7 @@ public class OperatoreViewController {
         try {
             Map<String, String> paramsCheckCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "nomecentro", denomCm);
             requestCm = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     paramsCheckCm
@@ -1403,7 +1403,7 @@ public class OperatoreViewController {
             Map<String, String> paramsCheckAiInCm = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "aree_interesse_ids", "centroid", centroId);
             req = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     paramsCheckAiInCm
@@ -1424,7 +1424,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> updateParams = RequestFactory.buildParams(ServerInterface.RequestType.executeUpdateAi, areaId, centroId);
                 insertAreaRequest = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.executeUpdateAi,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         updateParams
@@ -1475,7 +1475,7 @@ public class OperatoreViewController {
             Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond,
                     "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     params
@@ -1519,7 +1519,7 @@ public class OperatoreViewController {
         Request requestCentro;
         try{
             requestCentro = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null);

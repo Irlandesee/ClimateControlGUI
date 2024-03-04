@@ -4,18 +4,21 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 
-import java.net.UnknownHostException;
-import java.util.logging.Logger;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Inet4Address;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread{
 
-    private final ClientProxy clientProxy;
-    private final String clientId;
-    private final String serverIp;
+    private ClientProxy clientProxy;
+    private String hostName;
+    private Inet4Address serverIp;
+    private int portNumber;
     private Socket sock;
     private boolean runCondition;
 
@@ -23,26 +26,22 @@ public class Client extends Thread{
     private LinkedBlockingQueue<Response> responses;
     private Logger logger;
 
-    public Client(String clientId, String serverIp) {
-        this.clientId = clientId;
-        this.setName(clientId);
+    public Client(){
         logger = Logger.getLogger("Client");
-        this.serverIp = serverIp;
-        /**
-        try{
-            sock = new Socket(InetAddress.getLocalHost(), ServerInterface.PORT);
-        }catch(IOException ioe){ioe.printStackTrace();}
-         **/
-        try{
-            InetAddress inetAddress = InetAddress.getByName(serverIp);
-            sock = new Socket(inetAddress.getHostAddress(), ServerInterface.PORT);
-        }catch(IOException ioe){ioe.printStackTrace();}
-
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        this.clientProxy = new ClientProxy(this, sock, clientId);
-        this.runCondition = true;
     }
+
+    public String getHostName(){return this.hostName;}
+
+    public void setHostName(String hostName){this.hostName = hostName;}
+
+    public Inet4Address getServerIp(){return this.serverIp;}
+    public void setServerIp(Inet4Address serverIp){this.serverIp = serverIp;}
+
+    public int getPortNumber(){return this.portNumber;}
+
+    public void setPortNumber(int portNumber){this.portNumber = portNumber;}
 
     public synchronized void setRunCondition(boolean runCondition) {
         try{
@@ -54,9 +53,6 @@ public class Client extends Thread{
         notify();
     }
 
-    public String getClientId(){
-        return this.clientId;
-    }
 
     public synchronized boolean getRunCondition(){
         //does this method release the lock on the object?
@@ -90,8 +86,36 @@ public class Client extends Thread{
         }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}
     }
 
+    public boolean testConnection(){
+        try{
+            sock = new Socket(serverIp, portNumber);
+            ObjectInputStream inStream = new ObjectInputStream(sock.getInputStream());
+            ObjectOutputStream outStream = new ObjectOutputStream(sock.getOutputStream());
+
+            System.out.println("Testing connection to server...");
+            outStream.writeObject(ServerInterface.ID);
+            int number = ThreadLocalRandom.current().nextInt(10, 100);
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
+            }catch(InterruptedException ie){ie.printStackTrace();}
+            outStream.writeObject(number);
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
+            }catch(InterruptedException ie){ie.printStackTrace();}
+            int numberReceived = inStream.readInt();
+            if(numberReceived == number+1) return true;
+        }catch(IOException ioe){ioe.printStackTrace();}
+        return false;
+    }
+
     public void run(){
         logger.info("Client started");
+        try{
+            sock = new Socket(serverIp, portNumber);
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
+        this.clientProxy = new ClientProxy(this, sock, hostName);
         while (true) {
             //wait for requests from the gui
             logger.info("waiting for a request");
