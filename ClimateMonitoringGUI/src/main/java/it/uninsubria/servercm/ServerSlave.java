@@ -48,11 +48,7 @@ public class ServerSlave extends Thread{
                         Request req = (Request) inStream.readObject();
                         serv.addRequest(req, this.getName());
                         System.err.println("Adding request, size: " + serv.getRequestsQueueSize());
-                        worker = new Worker(
-                                IDGenerator.generateID(),
-                                serv.getDbUrl(),
-                                props,
-                                serv);
+                        worker = new Worker(IDGenerator.generateID(), serv.getDbUrl(), props, serv);
                         worker.start();
                         try {
                             System.out.printf("%s waiting for worker to join\n", this.getName());

@@ -87,24 +87,40 @@ public class Client extends Thread{
     }
 
     public boolean testConnection(){
+        ObjectInputStream inStream;
+        ObjectOutputStream outStream;
         try{
             sock = new Socket(serverIp, portNumber);
-            ObjectInputStream inStream = new ObjectInputStream(sock.getInputStream());
-            ObjectOutputStream outStream = new ObjectOutputStream(sock.getOutputStream());
+            inStream = new ObjectInputStream(sock.getInputStream());
+            outStream = new ObjectOutputStream(sock.getOutputStream());
 
             System.out.println("Testing connection to server...");
+            //send id
             outStream.writeObject(ServerInterface.ID);
             int number = ThreadLocalRandom.current().nextInt(10, 100);
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
-            outStream.writeObject(number);
+            outStream.writeObject(hostName);
+            //send number
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
+            outStream.writeObject(ServerInterface.TEST);
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
+            }catch(InterruptedException ie){ie.printStackTrace();}
+            System.out.printf("Sending %d...\n", number);
+            outStream.writeObject(number);
+
             int numberReceived = inStream.readInt();
+            System.out.println(numberReceived);
+            outStream.close();
+            inStream.close();
             if(numberReceived == number+1) return true;
-        }catch(IOException ioe){ioe.printStackTrace();}
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
         return false;
     }
 
