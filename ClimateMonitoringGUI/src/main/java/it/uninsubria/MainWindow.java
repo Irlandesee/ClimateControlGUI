@@ -15,7 +15,7 @@ public class MainWindow extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
         //final String url = "jdbc:postgresql://192.168.1.26/postgres";
-        Client client = new Client(IDGenerator.generateID());
+        Client client = new Client(IDGenerator.generateID(), "192.168.1.26");
         MainWindowController mainWindowController = new MainWindowController(stage, client);
         fxmlLoader.setController(mainWindowController);
         Scene scene = new Scene(fxmlLoader.load(),800, 800);

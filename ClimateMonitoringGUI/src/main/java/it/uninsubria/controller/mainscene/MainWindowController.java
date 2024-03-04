@@ -6,6 +6,7 @@ import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
+import it.uninsubria.controller.dialog.NewConnectionDialog;
 import it.uninsubria.controller.loginview.LoginViewController;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
@@ -65,6 +66,9 @@ public class MainWindowController{
     private ToggleButton tglDatePicker;
     private ToggleButton tglRicercaAreaCm;
 
+    private Button buttonNewConnection;
+    private Button buttonDisconnect;
+
     //alerts
     private Alert coordAlert;
     private Alert denomAlert;
@@ -78,8 +82,6 @@ public class MainWindowController{
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
 
-    private final String url = "jdbc:postgresql://localhost/postgres";
-    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
     private Properties props;
 
     private Stage mainWindowStage;
@@ -121,7 +123,7 @@ public class MainWindowController{
     @FXML
     public void initialize(){
         //table view
-        showAreeInserite();
+        //showAreeInserite();
     }
 
     private void initAlerts(){
@@ -968,5 +970,25 @@ public class MainWindowController{
         }
     }
 
+    @FXML
+    public void handleNewConnection(){
+        System.out.println("New connection");
+        try{
+            Stage cmDialogStage = new Stage();
+            NewConnectionDialog connectionDialog = new NewConnectionDialog();
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
+            fxmlLoader.setController(connectionDialog);
+            Scene dialogScene = new Scene(fxmlLoader.load());
+            cmDialogStage.setScene(dialogScene);
+            cmDialogStage.show();
+        }catch(IOException ioe){ioe.printStackTrace();}
+
+    }
+
+    @FXML
+    public void handleDisconnect(){
+        System.out.println("Disconnecting from: ");
+
+    }
 
 }

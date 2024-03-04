@@ -15,6 +15,7 @@ public class Client extends Thread{
 
     private final ClientProxy clientProxy;
     private final String clientId;
+    private final String serverIp;
     private Socket sock;
     private boolean runCondition;
 
@@ -22,20 +23,20 @@ public class Client extends Thread{
     private LinkedBlockingQueue<Response> responses;
     private Logger logger;
 
-    public Client(String clientId) {
+    public Client(String clientId, String serverIp) {
         this.clientId = clientId;
         this.setName(clientId);
         logger = Logger.getLogger("Client");
+        this.serverIp = serverIp;
         /**
         try{
             sock = new Socket(InetAddress.getLocalHost(), ServerInterface.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
          **/
         try{
-            InetAddress inetAddress = InetAddress.getByName("192.168.1.26");
+            InetAddress inetAddress = InetAddress.getByName(serverIp);
             sock = new Socket(inetAddress.getHostAddress(), ServerInterface.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
-
 
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
