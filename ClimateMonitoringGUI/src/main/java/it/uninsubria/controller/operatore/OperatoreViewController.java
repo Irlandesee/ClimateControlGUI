@@ -96,6 +96,8 @@ public class OperatoreViewController {
     private Alert areaInteresseAlert;
     private Alert invalidDateAlert;
     private Alert centroMonitoraggioAlert;
+    private Alert resErrorAlert;
+    private Alert resNoSuchElementAlert;
 
     private Properties props;
     //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
@@ -164,6 +166,13 @@ public class OperatoreViewController {
         this.invalidDateAlert.setHeaderText("Invalid date");
         this.invalidDateAlert.setContentText("data input non valida");
 
+        this.resErrorAlert = new Alert(Alert.AlertType.ERROR);
+        this.resErrorAlert.setHeaderText("Errore in risposta");
+        this.resErrorAlert.setContentText("Errore nell'oggetto risposta");
+
+        this.resNoSuchElementAlert = new Alert(Alert.AlertType.ERROR);
+        this.resNoSuchElementAlert.setHeaderText("Oggetto inesistente");
+        this.resNoSuchElementAlert.setContentText("L'oggetto richiesto non esiste!");
     }
 
     @FXML
@@ -268,16 +277,23 @@ public class OperatoreViewController {
         client.addRequest(request);
         //get response
         Response response = client.getResponse(request.getRequestId());
-        if(response.getResponseType() == ServerInterface.ResponseType.List
-                && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-            List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
-            prepTableAreaInteresse();
-            res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+
+        if(response.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
         }
+
+        List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
+        prepTableAreaInteresse();
+        res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
 
     private void showCentriInseriti(){
         Request request = null;
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.setRowFactory(null);
+        tableView.refresh();
         try{
             request = RequestFactory.buildRequest(
                     client.getClientId(),
@@ -292,18 +308,16 @@ public class OperatoreViewController {
         }
         client.addRequest(request);
         Response response = client.getResponse(request.getRequestId());
-        if(response.getResponseType() == ServerInterface.ResponseType.List
-            && response.getTable() == ServerInterface.Tables.CENTRO_MONITORAGGIO){
-            List<CentroMonitoraggio> res = (List<CentroMonitoraggio>) response.getResult();
-            tableView.getColumns().clear();
-            tableView.getItems().clear();
-            tableView.setRowFactory(null);
-            tableView.refresh();
 
-            tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
-
-            res.forEach(centroMonitoraggio -> tableView.getItems().add(centroMonitoraggio));
+        if(response.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
         }
+
+        List<CentroMonitoraggio> res = (List<CentroMonitoraggio>) response.getResult();
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
+        res.forEach(centroMonitoraggio -> tableView.getItems().add(centroMonitoraggio));
+
     }
 
     private void handleRicercaAreaPerDenominazione(){
@@ -326,6 +340,16 @@ public class OperatoreViewController {
             }
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
+
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
+            }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
+            }
+
             List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
             areeInteresseRichieste.forEach((areaInteresse -> {
                 tableView.getItems().add(areaInteresse);
@@ -357,12 +381,18 @@ public class OperatoreViewController {
             client.addRequest(request);
             Response response = client.getResponse(request.getRequestId());
 
-            if(response.getResponseType() == ServerInterface.ResponseType.List &&
-                    response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-                List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
-                queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
-                queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
             }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
+            }
+            List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
+            queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
+            queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
+
         }else{
             statoAlert.showAndWait();
         }
@@ -394,19 +424,21 @@ public class OperatoreViewController {
             client.addRequest(request);
             List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
             Response response = client.getResponse(request.getRequestId());
-            if(response.getResponseType() == ServerInterface.ResponseType.List
-                    && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
-                areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
-
+            if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
+            }
+            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
             }
 
+            areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
                 float distance = MainWindowController.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
-                if(distance < 50) { //50 km
-                    System.out.println(area);
-                    areeVicine.add(area);
-                }
+                //50 km
+                if(distance < 50) areeVicine.add(area);
             });
             tableView.getItems().clear();
             areeVicine.forEach(area -> tableView.getItems().add(area));
@@ -504,7 +536,17 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestAreaId);
-                Response resAreaId = client.getResponse(requestAreaId.getRequestId()); //should wait for the response
+                Response resAreaId = client.getResponse(requestAreaId.getRequestId());
+
+                if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(resAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
+
                 String areaInteresseId = resAreaId.getResult().toString();
 
                 Request requestParamClimatici = null;
@@ -524,6 +566,15 @@ public class OperatoreViewController {
                 }
                 client.addRequest(requestParamClimatici);
                 Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
+
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
+                    return;
+                }
+                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
 
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
                 tableView.getItems().clear();
@@ -566,14 +617,16 @@ public class OperatoreViewController {
                 }
                 client.addRequest(requestCentroId);
                 Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
-                List<String> result = (List<String>)responseCentroId.getResult(); //returns multiple...
-                if(result.isEmpty()){
-                    new Alert(Alert.AlertType.ERROR, "Centro non esistente o non valido").showAndWait();
+                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
+                    resErrorAlert.showAndWait();
                     return;
                 }
-                String centroId = result.get(0);
-                System.out.println(centroId);
+                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    resNoSuchElementAlert.showAndWait();
+                    return;
+                }
 
+                String centroId = responseCentroId.getResult().toString();
 
                 Request requestParametriClimatici;
                 try{
@@ -605,11 +658,6 @@ public class OperatoreViewController {
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
-        }else if(event.getSource() == tglRicercaAreaCm){
-            /**
-             * TODO:
-             * Si effettua la ricerca intersecando i risultati
-             */
         }
     }
 
@@ -683,6 +731,16 @@ public class OperatoreViewController {
         }
         client.addRequest(cmRequest);
         Response response = client.getResponse(client.getClientId());
+
+        if(response.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
+        }
+        if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+            resNoSuchElementAlert.showAndWait();
+            return;
+        }
+
         List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) response.getResult();
         tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
         centri.forEach(centro -> tableView.getItems().add(centro));
