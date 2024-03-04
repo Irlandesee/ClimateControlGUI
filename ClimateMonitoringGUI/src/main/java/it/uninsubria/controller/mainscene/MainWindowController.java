@@ -100,9 +100,6 @@ public class MainWindowController{
         mainWindowStage.setMinHeight(800);
         mainWindowStage.setMinWidth(1200);
 
-        props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "qwerty");
         createControllers();
         initAlerts();
         client.start();

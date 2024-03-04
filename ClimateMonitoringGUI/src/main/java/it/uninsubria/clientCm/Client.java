@@ -3,6 +3,8 @@ package it.uninsubria.clientCm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+
+import java.net.UnknownHostException;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -20,13 +22,21 @@ public class Client extends Thread{
     private LinkedBlockingQueue<Response> responses;
     private Logger logger;
 
-    public Client(String clientId){
+    public Client(String clientId) {
         this.clientId = clientId;
         this.setName(clientId);
         logger = Logger.getLogger("Client");
+        /**
         try{
             sock = new Socket(InetAddress.getLocalHost(), ServerInterface.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
+         **/
+        try{
+            InetAddress inetAddress = InetAddress.getByName("192.168.1.26");
+            sock = new Socket(inetAddress.getHostAddress(), ServerInterface.PORT);
+        }catch(IOException ioe){ioe.printStackTrace();}
+
+
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
         this.clientProxy = new ClientProxy(this, sock, clientId);

@@ -965,11 +965,16 @@ public class OperatoreViewController {
         }
         client.addRequest(insertRequest);
         Response insertResponse = client.getResponse(insertRequest.getClientId());
+        if(insertResponse.getResponseType() == ServerInterface.ResponseType.Error){
+            resErrorAlert.showAndWait();
+            return;
+        }
+
         Object obj = insertResponse.getResult();
         if(obj instanceof String){
             new Alert(Alert.AlertType.ERROR, ServerInterface.DUPLICATE_ITEM).showAndWait();
         }else{
-            boolean res = (boolean)insertResponse.getResult();
+            boolean res = (boolean) insertResponse.getResult();
             if(res){
                 new Alert(Alert.AlertType.CONFIRMATION, ServerInterface.SUCCESSFULL_INSERT).showAndWait();
             }else{
