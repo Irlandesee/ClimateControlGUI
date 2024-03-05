@@ -62,11 +62,11 @@ public class ServerSlave extends Thread{
                         outStream.writeObject(res);
                     }
                     case ServerInterface.TEST -> {
-                        int number = inStream.readInt();
+                        int number = (int)inStream.readObject();
                         System.err.printf("Slave %d received %d\n", slaveId, number);
                         number += 1;
                         System.out.printf("Slave %d sending: %d\n", slaveId, number);
-                        outStream.writeInt(number);
+                        outStream.writeObject(number);
                     }
                     default -> {
                         System.err.println("Received some undefined behaviour");

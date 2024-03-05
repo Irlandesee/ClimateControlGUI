@@ -111,13 +111,17 @@ public class Client extends Thread{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
             System.out.printf("Sending %d...\n", number);
+
             outStream.writeObject(number);
 
-            int numberReceived = inStream.readInt();
-            System.out.println(numberReceived);
+            try{
+                int numberReceived = (int) inStream.readObject();
+                System.out.println(numberReceived);
+                if(numberReceived == number+1) return true;
+            }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
+
             outStream.close();
             inStream.close();
-            if(numberReceived == number+1) return true;
         }catch(IOException ioe){
             ioe.printStackTrace();
         }
