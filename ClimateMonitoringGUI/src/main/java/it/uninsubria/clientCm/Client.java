@@ -97,22 +97,18 @@ public class Client extends Thread{
             System.out.println("Testing connection to server...");
             //send id
             outStream.writeObject(ServerInterface.ID);
-            int number = ThreadLocalRandom.current().nextInt(10, 100);
-            try{
-                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
-            }catch(InterruptedException ie){ie.printStackTrace();}
             outStream.writeObject(hostName);
-            //send number
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
+            //send number
+            int number = ThreadLocalRandom.current().nextInt(10, 100);
             outStream.writeObject(ServerInterface.TEST);
+            outStream.writeObject(number);
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
             System.out.printf("Sending %d...\n", number);
-
-            outStream.writeObject(number);
 
             try{
                 int numberReceived = (int) inStream.readObject();

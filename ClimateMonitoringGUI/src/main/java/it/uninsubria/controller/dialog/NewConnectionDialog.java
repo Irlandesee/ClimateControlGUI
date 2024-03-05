@@ -46,6 +46,7 @@ public class NewConnectionDialog {
         }catch(IOException ioe){new Alert(Alert.AlertType.ERROR, "Indirizzo ip o hostname non validi!").showAndWait(); return;}
         if(client.testConnection()){
             new Alert(Alert.AlertType.CONFIRMATION, "Connessione al server stabilita!").showAndWait();
+            client.start();
         }else{
             new Alert(Alert.AlertType.ERROR, "Connessione al server fallita!").showAndWait();
         }

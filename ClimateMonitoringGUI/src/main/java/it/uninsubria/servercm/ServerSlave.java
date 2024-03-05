@@ -62,8 +62,8 @@ public class ServerSlave extends Thread{
                         outStream.writeObject(res);
                     }
                     case ServerInterface.TEST -> {
-                        int number = (int)inStream.readObject();
-                        System.err.printf("Slave %d received %d\n", slaveId, number);
+                        int number = (int) inStream.readObject();
+                        System.out.printf("Slave %d received %d\n", slaveId, number);
                         number += 1;
                         System.out.printf("Slave %d sending: %d\n", slaveId, number);
                         outStream.writeObject(number);
