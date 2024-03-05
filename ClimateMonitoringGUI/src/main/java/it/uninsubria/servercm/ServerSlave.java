@@ -27,22 +27,21 @@ public class ServerSlave extends Thread{
         this.slaveId = slaveId;
         this.props = props;
         this.setName("Slave " +slaveId);
-        try{
-            outStream = new ObjectOutputStream(sock.getOutputStream());
-            inStream = new ObjectInputStream(sock.getInputStream());
-        }catch(IOException ioe){ioe.printStackTrace();}
         this.start();
     }
 
     public void run(){
         String clientId = "";
+        boolean runCondition = true;
         try{
-            String cmd = "";
-            while(!(cmd = inStream.readObject().toString()).equals(ServerInterface.QUIT)){
-                switch (cmd) {
+            outStream = new ObjectOutputStream(sock.getOutputStream());
+            inStream = new ObjectInputStream(sock.getInputStream());
+            while(runCondition){
+                String s = inStream.readObject().toString();
+                switch(s){
                     case ServerInterface.ID -> {
                         clientId = inStream.readObject().toString();
-                        System.err.printf("Slave %d connected to client %s\n", slaveId, clientId);
+                        System.out.printf("Slave %d connected to client %s\n", slaveId, clientId);
                     }
                     case ServerInterface.NEXT -> {
                         Request req = (Request) inStream.readObject();
@@ -68,21 +67,30 @@ public class ServerSlave extends Thread{
                         System.out.printf("Slave %d sending: %d\n", slaveId, number);
                         outStream.writeObject(number);
                     }
+                    case ServerInterface.QUIT -> {
+                        System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);
+                        runCondition = false;
+                    }
                     default -> {
                         System.err.println("Received some undefined behaviour");
                         outStream.writeObject(ServerInterface.UNDEFINED_BEHAVIOUR);
                     }
                 }
             }
-            System.out.printf("Client %d has disconnected\n", slaveId);
-        }catch (IOException ioe){
+        }catch(IOException ioe){
+            System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);
+            runCondition = false;
             ioe.printStackTrace();
-        } catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
-        finally {
-            System.out.printf("Slave %d closing\n", slaveId);
+        }catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+        }finally{
             try{
+                outStream.close();
+                inStream.close();
                 sock.close();
-            }catch(IOException i){i.printStackTrace();}
+            }catch(IOException ioe){
+                ioe.printStackTrace();
+            }
         }
 
     }

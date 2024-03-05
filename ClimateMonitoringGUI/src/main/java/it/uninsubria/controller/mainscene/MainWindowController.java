@@ -129,8 +129,7 @@ public class MainWindowController{
 
     @FXML
     public void initialize(){
-        //table view
-        //showAreeInserite();
+        //table view //showAreeInserite();
     }
 
     private void initAlerts(){

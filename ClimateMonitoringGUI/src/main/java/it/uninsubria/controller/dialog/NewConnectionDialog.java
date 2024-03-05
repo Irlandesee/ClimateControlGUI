@@ -27,10 +27,17 @@ public class NewConnectionDialog {
     }
 
     @FXML
+    public void initialize(){
+        /**
+        ipField.setText("192.168.26");
+        portField.setText("9999");
+         **/
+    }
+
+    @FXML
     public void handleConnect(){
         String ipAddr = ipField.getText();
         String portNumber = portField.getText();
-        //if(ipAddr.isEmpty()){new Alert(Alert.AlertType.ERROR, "Indirizzo ip non valido!").showAndWait();}
         try{
             String hostName = InetAddress.getLocalHost().getHostName();
             Inet4Address ipv4Addr = (Inet4Address) InetAddress.getByName(ipAddr);
