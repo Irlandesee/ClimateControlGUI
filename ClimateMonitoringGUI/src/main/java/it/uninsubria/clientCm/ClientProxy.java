@@ -7,6 +7,7 @@ import it.uninsubria.servercm.ServerInterface;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
@@ -19,15 +20,31 @@ public class ClientProxy implements ServerInterface {
     private ObjectInputStream inStream;
     private ObjectOutputStream outStream;
 
+    private Inet4Address ipAddr;
+    private int portNumber;
+    private String hostName;
 
     public ClientProxy(Client client, String proxyId){
         this.logger = Logger.getLogger("ClientProxy: "+proxyId);
         this.client = client;
         this.proxyId = proxyId;
+    }
+
+    public Inet4Address getIpAddr(){return this.ipAddr;}
+    public void setIpAddr(Inet4Address ipAddr){this.ipAddr = ipAddr;}
+    public int getPortNumber(){return this.portNumber;}
+    public void setPortNumber(int portNumber){this.portNumber = portNumber;}
+
+    public String getHostName(){return this.hostName;}
+    public void setHostName(String hostName){this.hostName = hostName;}
+
+    public void init(){
         try{
-            this.sock = new Socket(client.getServerIp(), client.getPortNumber());
-            this.inStream = new ObjectInputStream(sock.getInputStream());
-            this.outStream = new ObjectOutputStream(sock.getOutputStream());
+            String ipAddr = getIpAddr().getHostAddress();
+            System.out.println(ipAddr);
+            sock = new Socket(ipAddr, getPortNumber());
+            outStream = new ObjectOutputStream(sock.getOutputStream());
+            inStream = new ObjectInputStream(sock.getInputStream());
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
@@ -37,7 +54,7 @@ public class ClientProxy implements ServerInterface {
             System.out.println("Testing connection to server...");
             //send id
             outStream.writeObject(ServerInterface.ID);
-            outStream.writeObject(client.getHostName());
+            outStream.writeObject(getHostName());
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
             }catch(InterruptedException ie){ie.printStackTrace();}
@@ -55,6 +72,7 @@ public class ClientProxy implements ServerInterface {
                 System.out.println(numberReceived);
                 if(numberReceived == number+1) res = true;
             }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
+            outStream.flush();
 
         }catch(IOException ioe){
             ioe.printStackTrace();

@@ -10,7 +10,7 @@
            GridPane.columnIndex="0" GridPane.rowIndex="1"/>
     <TextField
             fx:id="ipField"
-            text="192.168.26"
+            text="192.168.1.26"
             GridPane.columnIndex="1"
             GridPane.rowIndex="1"/>
     <Label text="Porta: "

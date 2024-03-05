@@ -1,6 +1,7 @@
 package it.uninsubria.controller.dialog;
 
 import it.uninsubria.clientCm.Client;
+import it.uninsubria.clientCm.ClientProxy;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.servercm.ServerInterface;
 import javafx.fxml.FXML;
@@ -20,11 +21,7 @@ public class NewConnectionDialog {
     private TextField portField;
     @FXML
     private Button buttonConnect;
-
-    private Client client;
-    public NewConnectionDialog(Client client){
-        this.client = client;
-    }
+    public NewConnectionDialog(){}
 
     @FXML
     public void handleConnect(){
@@ -33,22 +30,29 @@ public class NewConnectionDialog {
         try{
             String hostName = InetAddress.getLocalHost().getHostName();
             Inet4Address ipv4Addr = (Inet4Address) InetAddress.getByName(ipAddr);
-            client.setHostName(hostName);
-            client.setServerIp(ipv4Addr);
+            int port = -1;
+            Client client = new Client();
             try{
-                int port = Integer.parseInt(portNumber);
-                client.setPortNumber(port);
+                port = Integer.parseInt(portNumber);
             }catch(NumberFormatException nfe){
                 new Alert(Alert.AlertType.ERROR, "Numero di porta non valido!").showAndWait();
                 return;
             }
+            ClientProxy clientProxy = new ClientProxy(client, hostName);
+            client.setClientProxy(clientProxy);
+
+            clientProxy.setHostName(hostName);
+            clientProxy.setIpAddr(ipv4Addr);
+            clientProxy.setPortNumber(port);
+            clientProxy.init();
+
+            if(clientProxy.testConnection()){
+                new Alert(Alert.AlertType.CONFIRMATION, "Connessione al server stabilita!").showAndWait();
+                client.start();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Connessione al server fallita!").showAndWait();
+            }
         }catch(IOException ioe){new Alert(Alert.AlertType.ERROR, "Indirizzo ip o hostname non validi!").showAndWait(); return;}
-        if(client.getClientProxy().testConnection()){
-            new Alert(Alert.AlertType.CONFIRMATION, "Connessione al server stabilita!").showAndWait();
-            client.start();
-        }else{
-            new Alert(Alert.AlertType.ERROR, "Connessione al server fallita!").showAndWait();
-        }
     }
 
 

@@ -3,6 +3,7 @@ import it.uninsubria.MainWindow;
 import it.uninsubria.areaInteresse.AreaInteresse;
 import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.clientCm.Client;
+import it.uninsubria.clientCm.ClientProxy;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.GraphDialog;
@@ -32,6 +33,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -94,14 +96,14 @@ public class MainWindowController{
     private OperatoreViewController operatoreViewController;
 
     private Client client;
+    private ClientProxy clientProxy;
 
     public MainWindowController(Stage stage){
 
         this.mainWindowStage = stage;
-        this.client = new Client();
+
         mainWindowStage.setMinHeight(800);
         mainWindowStage.setMinWidth(1200);
-
         createControllers();
         initAlerts();
     }
@@ -127,9 +129,12 @@ public class MainWindowController{
         this.client = client;
     }
 
-    @FXML
-    public void initialize(){
-        //table view //showAreeInserite();
+    public ClientProxy getClientProxy(){
+        return this.clientProxy;
+    }
+
+    public void setClientProxy(ClientProxy clientProxy){
+        this.clientProxy= clientProxy;
     }
 
     private void initAlerts(){
@@ -981,7 +986,7 @@ public class MainWindowController{
         System.out.println("New connection");
         try{
             Stage connectionStage = new Stage();
-            NewConnectionDialog connectionDialog = new NewConnectionDialog(client);
+            NewConnectionDialog connectionDialog = new NewConnectionDialog();
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
             fxmlLoader.setController(connectionDialog);
             Scene dialogScene = new Scene(fxmlLoader.load());

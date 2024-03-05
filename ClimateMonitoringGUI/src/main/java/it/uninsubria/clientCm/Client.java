@@ -17,9 +17,6 @@ public class Client extends Thread{
 
     private ClientProxy clientProxy;
     private String hostName;
-    private Inet4Address serverIp;
-    private int portNumber;
-    private Socket sock;
     private boolean runCondition;
 
     private LinkedBlockingQueue<Request> requests;
@@ -30,27 +27,10 @@ public class Client extends Thread{
         logger = Logger.getLogger("Client");
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        runCondition = true;
+        this.clientProxy = new ClientProxy(this, hostName);
     }
 
     public String getHostName(){return this.hostName;}
-
-    public void setHostName(String hostName){this.hostName = hostName;}
-
-    public Inet4Address getServerIp(){return this.serverIp;}
-    public void setServerIp(Inet4Address serverIp){this.serverIp = serverIp;}
-
-    public int getPortNumber(){return this.portNumber;}
-
-    public void setPortNumber(int portNumber){this.portNumber = portNumber;}
-
-    public Socket getSocket(){
-        return this.sock;
-    }
-
-    public void setSocket(Socket sock){
-        this.sock = sock;
-    }
 
     public boolean getRunCondition(){
         return this.runCondition;
@@ -88,8 +68,11 @@ public class Client extends Thread{
         return this.clientProxy;
     }
 
+    public void setClientProxy(ClientProxy clientProxy){
+        this.clientProxy = clientProxy;
+    }
+
     public void run(){
-        this.clientProxy = new ClientProxy(this, hostName);
         logger.info("Client started");
         while (getRunCondition()) {
             //wait for requests from the gui
