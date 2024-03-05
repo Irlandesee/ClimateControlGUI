@@ -30,6 +30,12 @@ public class Client extends Thread{
         logger = Logger.getLogger("Client");
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
+        try{
+            sock = new Socket(serverIp, portNumber);
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
+        this.clientProxy = new ClientProxy(this, sock, hostName);
     }
 
     public String getHostName(){return this.hostName;}
@@ -86,52 +92,12 @@ public class Client extends Thread{
         }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}
     }
 
-    public boolean testConnection(){
-        ObjectInputStream inStream;
-        ObjectOutputStream outStream;
-        try{
-            sock = new Socket(serverIp, portNumber);
-            inStream = new ObjectInputStream(sock.getInputStream());
-            outStream = new ObjectOutputStream(sock.getOutputStream());
-
-            System.out.println("Testing connection to server...");
-            //send id
-            outStream.writeObject(ServerInterface.ID);
-            outStream.writeObject(hostName);
-            try{
-                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
-            }catch(InterruptedException ie){ie.printStackTrace();}
-            //send number
-            int number = ThreadLocalRandom.current().nextInt(10, 100);
-            outStream.writeObject(ServerInterface.TEST);
-            outStream.writeObject(number);
-            try{
-                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
-            }catch(InterruptedException ie){ie.printStackTrace();}
-            System.out.printf("Sending %d...\n", number);
-
-            try{
-                int numberReceived = (int) inStream.readObject();
-                System.out.println(numberReceived);
-                if(numberReceived == number+1) return true;
-            }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
-
-            outStream.close();
-            inStream.close();
-        }catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        return false;
+    public ClientProxy getClientProxy(){
+        return this.clientProxy;
     }
 
     public void run(){
         logger.info("Client started");
-        try{
-            sock = new Socket(serverIp, portNumber);
-        }catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        this.clientProxy = new ClientProxy(this, sock, hostName);
         while (true) {
             //wait for requests from the gui
             logger.info("waiting for a request");
@@ -140,7 +106,6 @@ public class Client extends Thread{
             logger.info("Sending Request");
             clientProxy.sendRequest(request);
         }
-        //Close the socket?
     }
 
 }

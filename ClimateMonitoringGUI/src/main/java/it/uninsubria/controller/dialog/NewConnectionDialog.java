@@ -27,14 +27,6 @@ public class NewConnectionDialog {
     }
 
     @FXML
-    public void initialize(){
-        /**
-        ipField.setText("192.168.26");
-        portField.setText("9999");
-         **/
-    }
-
-    @FXML
     public void handleConnect(){
         String ipAddr = ipField.getText();
         String portNumber = portField.getText();
@@ -51,7 +43,7 @@ public class NewConnectionDialog {
                 return;
             }
         }catch(IOException ioe){new Alert(Alert.AlertType.ERROR, "Indirizzo ip o hostname non validi!").showAndWait(); return;}
-        if(client.testConnection()){
+        if(client.getClientProxy().testConnection()){
             new Alert(Alert.AlertType.CONFIRMATION, "Connessione al server stabilita!").showAndWait();
             client.start();
         }else{

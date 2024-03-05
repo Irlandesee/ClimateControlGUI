@@ -32,6 +32,36 @@ public class ClientProxy implements ServerInterface {
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
+    public boolean testConnection(){
+        try{
+            System.out.println("Testing connection to server...");
+            //send id
+            outStream.writeObject(ServerInterface.ID);
+            outStream.writeObject(client.getHostName());
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
+            }catch(InterruptedException ie){ie.printStackTrace();}
+            //send number
+            int number = ThreadLocalRandom.current().nextInt(10, 100);
+            outStream.writeObject(ServerInterface.TEST);
+            outStream.writeObject(number);
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
+            }catch(InterruptedException ie){ie.printStackTrace();}
+            System.out.printf("Sending %d...\n", number);
+
+            try{
+                int numberReceived = (int) inStream.readObject();
+                System.out.println(numberReceived);
+                if(numberReceived == number+1) {return true;}
+            }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
+
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
+        return false;
+    }
+
     public void sendRequest(Request req){
         int result = -1;
         try{
@@ -40,15 +70,14 @@ public class ClientProxy implements ServerInterface {
             outStream.writeObject(ServerInterface.ID);
             outStream.writeObject(proxyId);
             try{
-                //System.out.printf("Proxy %s sleeping\n", this.proxyId);
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
-            }catch(InterruptedException ie){ie.printStackTrace();}
+            }
+            catch(InterruptedException ie){ie.printStackTrace();}
 
             System.out.printf("Proxy %s sending request to server\n", this.proxyId);
             outStream.writeObject(ServerInterface.NEXT);
             outStream.writeObject(req);
             try{
-                //System.out.printf("Proxy %s sleeping\n", this.proxyId);
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }catch(InterruptedException ie){ie.printStackTrace();}
 
@@ -56,8 +85,6 @@ public class ClientProxy implements ServerInterface {
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
             logger.info("Adding response to queue");
-            //System.out.printf("Proxy %s quitting\n", proxyId);
-            //outStream.writeObject(ServerInterface.QUIT);
         }catch(IOException ioe){
             ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
@@ -68,6 +95,7 @@ public class ClientProxy implements ServerInterface {
             outStream.writeObject(ServerInterface.QUIT);
             outStream.close();
             inStream.close();
+            sock.close();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
