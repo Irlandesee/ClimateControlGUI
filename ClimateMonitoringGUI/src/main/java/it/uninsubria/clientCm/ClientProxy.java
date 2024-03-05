@@ -13,26 +13,26 @@ import java.util.logging.Logger;
 
 public class ClientProxy implements ServerInterface {
     private final String proxyId;
-    private final Socket sock;
+    private Socket sock;
     private final Client client;
     private final Logger logger;
-
     private ObjectInputStream inStream;
     private ObjectOutputStream outStream;
 
 
-    public ClientProxy(Client client, Socket sock, String proxyId){
+    public ClientProxy(Client client, String proxyId){
         this.logger = Logger.getLogger("ClientProxy: "+proxyId);
         this.client = client;
         this.proxyId = proxyId;
-        this.sock = sock;
         try{
+            this.sock = new Socket(client.getServerIp(), client.getPortNumber());
             this.inStream = new ObjectInputStream(sock.getInputStream());
             this.outStream = new ObjectOutputStream(sock.getOutputStream());
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
     public boolean testConnection(){
+        boolean res = false;
         try{
             System.out.println("Testing connection to server...");
             //send id
@@ -53,17 +53,17 @@ public class ClientProxy implements ServerInterface {
             try{
                 int numberReceived = (int) inStream.readObject();
                 System.out.println(numberReceived);
-                if(numberReceived == number+1) {return true;}
+                if(numberReceived == number+1) res = true;
             }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
 
         }catch(IOException ioe){
             ioe.printStackTrace();
         }
-        return false;
+        if(!res) quit();
+        return res;
     }
 
     public void sendRequest(Request req){
-        int result = -1;
         try{
 
             System.out.printf("Proxy %s sending id to server\n", this.proxyId);
@@ -90,12 +90,20 @@ public class ClientProxy implements ServerInterface {
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }
 
+    public void sendQuitRequest(){
+        try{
+            if(outStream != null)
+                outStream.writeObject(ServerInterface.QUIT);
+        }catch(IOException ioe){ioe.printStackTrace();}
+        this.quit();
+    }
+
     public void quit(){
         try{
-            outStream.writeObject(ServerInterface.QUIT);
             outStream.close();
             inStream.close();
             sock.close();
+            client.setRunCondition(false);
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 

@@ -30,12 +30,7 @@ public class Client extends Thread{
         logger = Logger.getLogger("Client");
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        try{
-            sock = new Socket(serverIp, portNumber);
-        }catch(IOException ioe){
-            ioe.printStackTrace();
-        }
-        this.clientProxy = new ClientProxy(this, sock, hostName);
+        runCondition = true;
     }
 
     public String getHostName(){return this.hostName;}
@@ -49,23 +44,20 @@ public class Client extends Thread{
 
     public void setPortNumber(int portNumber){this.portNumber = portNumber;}
 
-    public synchronized void setRunCondition(boolean runCondition) {
-        try{
-            wait();
-            this.runCondition = runCondition;
-        }catch(InterruptedException ie){
-            logger.info(ie.getMessage());
-        }
-        notify();
+    public Socket getSocket(){
+        return this.sock;
     }
 
+    public void setSocket(Socket sock){
+        this.sock = sock;
+    }
 
-    public synchronized boolean getRunCondition(){
-        //does this method release the lock on the object?
-        try{
-            wait();
-        }catch(InterruptedException ie){logger.info(ie.getMessage());}
+    public boolean getRunCondition(){
         return this.runCondition;
+    }
+
+    public void setRunCondition(boolean runCondition){
+        this.runCondition = runCondition;
     }
 
     public void addRequest(Request req){
@@ -97,8 +89,9 @@ public class Client extends Thread{
     }
 
     public void run(){
+        this.clientProxy = new ClientProxy(this, hostName);
         logger.info("Client started");
-        while (true) {
+        while (getRunCondition()) {
             //wait for requests from the gui
             logger.info("waiting for a request");
             Request request = getRequest();
