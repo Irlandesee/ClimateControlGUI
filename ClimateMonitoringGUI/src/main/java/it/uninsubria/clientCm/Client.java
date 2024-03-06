@@ -27,10 +27,13 @@ public class Client extends Thread{
         logger = Logger.getLogger("Client");
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        this.clientProxy = new ClientProxy(this, hostName);
+        //this.clientProxy = new ClientProxy(this, hostName);
     }
 
     public String getHostName(){return this.hostName;}
+    public void setHostName(String hostName){
+        this.hostName = hostName;
+    }
 
     public boolean getRunCondition(){
         return this.runCondition;
