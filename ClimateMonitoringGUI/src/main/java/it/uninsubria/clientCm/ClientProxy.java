@@ -13,7 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 public class ClientProxy implements ServerInterface {
-    private final String proxyId;
     private Socket sock;
     private final Client client;
     private final Logger logger;
@@ -24,10 +23,10 @@ public class ClientProxy implements ServerInterface {
     private int portNumber;
     private String hostName;
 
-    public ClientProxy(Client client, String proxyId){
-        this.logger = Logger.getLogger("ClientProxy: "+proxyId);
+    public ClientProxy(Client client, String hostName){
+        this.logger = Logger.getLogger("ClientProxy: "+hostName);
         this.client = client;
-        this.proxyId = proxyId;
+        this.hostName = hostName;
     }
 
     public Inet4Address getIpAddr(){return this.ipAddr;}
@@ -54,6 +53,8 @@ public class ClientProxy implements ServerInterface {
             System.out.println("Testing connection to server...");
             //send id
             outStream.writeObject(ServerInterface.ID);
+            String hostName = getHostName();
+            System.out.println(hostName);
             outStream.writeObject(getHostName());
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(25, 50));
@@ -75,6 +76,7 @@ public class ClientProxy implements ServerInterface {
             outStream.flush();
 
         }catch(IOException ioe){
+            System.out.println("Server has disconnected, closing the connection...");
             ioe.printStackTrace();
         }
         if(!res) quit();
@@ -84,26 +86,28 @@ public class ClientProxy implements ServerInterface {
     public void sendRequest(Request req){
         try{
 
-            System.out.printf("Proxy %s sending id to server\n", this.proxyId);
+            System.out.printf("Proxy %s sending id to server\n", this.hostName);
             outStream.writeObject(ServerInterface.ID);
-            outStream.writeObject(proxyId);
+            outStream.writeObject(hostName);
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }
             catch(InterruptedException ie){ie.printStackTrace();}
 
-            System.out.printf("Proxy %s sending request to server\n", this.proxyId);
+            System.out.printf("Proxy %s sending request to server\n", this.hostName);
             outStream.writeObject(ServerInterface.NEXT);
             outStream.writeObject(req);
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }catch(InterruptedException ie){ie.printStackTrace();}
 
-            System.out.printf("Proxy %s waiting for response from server\n", this.proxyId);
+            System.out.printf("Proxy %s waiting for response from server\n", this.hostName);
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
             logger.info("Adding response to queue");
         }catch(IOException ioe){
+            System.out.println("Server has disconnected, closing the connection...");
+            quit();
             ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }

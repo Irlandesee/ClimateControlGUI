@@ -84,6 +84,8 @@ public class MainWindowController{
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
 
+    private Alert clientNotConnected;
+
     private Properties props;
 
     private Stage mainWindowStage;
@@ -179,61 +181,72 @@ public class MainWindowController{
         this.resNoSuchElementAlert.setHeaderText("Oggetto inesistente");
         this.resNoSuchElementAlert.setContentText("L'oggetto richiesto non esiste!");
 
+        this.clientNotConnected = new Alert(Alert.AlertType.ERROR);
+        this.clientNotConnected.setHeaderText("Nessuna connessione!");
+        this.clientNotConnected.setContentText("L'applicazione non e' connessa a nessun server!");
+
 
     }
 
     @FXML
     public void handleLogin(ActionEvent actionEvent) {
-        try{
-            //mainWindowStage = ;
-            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
-            fxmlLoader.setController(getLoginViewController());
-            loginStage = new Stage();
-            loginStage.initOwner((Stage)((Node) actionEvent.getSource()).getScene().getWindow());
-            loginStage.initModality(Modality.WINDOW_MODAL);
-            Scene scene = new Scene(fxmlLoader.load(), 400, 300);
-            loginStage.setScene(scene);
-            loginStage.show();
-        }catch(IOException ioe){ioe.printStackTrace();}
+        if(client != null){
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/login-scene.fxml"));
+                fxmlLoader.setController(getLoginViewController());
+                loginStage = new Stage();
+                loginStage.initOwner((Stage)((Node) actionEvent.getSource()).getScene().getWindow());
+                loginStage.initModality(Modality.WINDOW_MODAL);
+                Scene scene = new Scene(fxmlLoader.load(), 400, 300);
+                loginStage.setScene(scene);
+                loginStage.show();
+            }catch(IOException ioe){ioe.printStackTrace();}
+        }else{
+            clientNotConnected.showAndWait();
+        }
     }
 
 
     public void handleRicercaAreaInteresse(ActionEvent actionEvent) {
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        prepTableAreaInteresse();
-        this.paramBox = new VBox(10);
-        paramBox.getStyleClass().add("param-box");
-        //denominazione, stato, latitudine, longitudine
-        this.tDenominazione = new TextField("nome");
-        this.tDenominazione.setOnMouseClicked((event) -> {this.tDenominazione.clear();});
-        this.tStato = new TextField("stato ");
-        this.tStato.setOnMouseClicked((event) -> {this.tStato.clear();});
-        this.tLatitudine = new TextField("latidudine");
-        this.tLatitudine.setOnMouseClicked((event) -> {this.tLatitudine.clear();});
-        this.tLongitudine = new TextField("longitudine");
-        this.tLongitudine.setOnMouseClicked((event) -> {this.tLongitudine.clear();});
-        this.btnRicercaAreaPerDenom = new Button("Ricerca per nome");
-        this.btnRicercaAreaPerStato = new Button("Ricerca per stato");
-        this.btnRicercaAreaCoord = new Button("Ricerca Coord");
+        if(client != null){
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            prepTableAreaInteresse();
+            this.paramBox = new VBox(10);
+            paramBox.getStyleClass().add("param-box");
+            //denominazione, stato, latitudine, longitudine
+            this.tDenominazione = new TextField("nome");
+            this.tDenominazione.setOnMouseClicked((event) -> {this.tDenominazione.clear();});
+            this.tStato = new TextField("stato ");
+            this.tStato.setOnMouseClicked((event) -> {this.tStato.clear();});
+            this.tLatitudine = new TextField("latidudine");
+            this.tLatitudine.setOnMouseClicked((event) -> {this.tLatitudine.clear();});
+            this.tLongitudine = new TextField("longitudine");
+            this.tLongitudine.setOnMouseClicked((event) -> {this.tLongitudine.clear();});
+            this.btnRicercaAreaPerDenom = new Button("Ricerca per nome");
+            this.btnRicercaAreaPerStato = new Button("Ricerca per stato");
+            this.btnRicercaAreaCoord = new Button("Ricerca Coord");
 
-        this.btnRicercaAreaPerDenom.setOnAction(event -> {
-            handleRicercaAreaDenom();
-        });
+            this.btnRicercaAreaPerDenom.setOnAction(event -> {
+                handleRicercaAreaDenom();
+            });
 
-        btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
+            btnRicercaAreaPerStato.setOnAction(event -> {handleRicercaAreaPerStato();});
 
-        this.btnRicercaAreaCoord.setOnAction(event -> {handleRicercaAreaPerCoordinate();});
+            this.btnRicercaAreaCoord.setOnAction(event -> {handleRicercaAreaPerCoordinate();});
 
-        paramBox.getChildren().add(tDenominazione);
-        paramBox.getChildren().add(tStato);
-        paramBox.getChildren().add(tLatitudine);
-        paramBox.getChildren().add(tLongitudine);
-        paramBox.getChildren().add(btnRicercaAreaPerDenom);
-        paramBox.getChildren().add(btnRicercaAreaPerStato);
-        paramBox.getChildren().add(btnRicercaAreaCoord);
+            paramBox.getChildren().add(tDenominazione);
+            paramBox.getChildren().add(tStato);
+            paramBox.getChildren().add(tLatitudine);
+            paramBox.getChildren().add(tLongitudine);
+            paramBox.getChildren().add(btnRicercaAreaPerDenom);
+            paramBox.getChildren().add(btnRicercaAreaPerStato);
+            paramBox.getChildren().add(btnRicercaAreaCoord);
 
-        this.borderPane.setRight(paramBox);
+            this.borderPane.setRight(paramBox);
+        }else{
+            clientNotConnected.showAndWait();
+        }
     }
 
     private void prepTableParamClimatici(){
@@ -494,52 +507,59 @@ public class MainWindowController{
     }
 
     public void handleVisualizzaParametriClimatici(ActionEvent actionEvent) {
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        prepTableParamClimatici();
+        if(client != null){
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            prepTableParamClimatici();
 
-        this.paramBox = new VBox(10);
-        paramBox.getStyleClass().add("param-box");
-        this.tAreaInteresse = new TextField("AreaInteresse");
-        this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
-        this.tCentroMonitoraggio = new TextField("CentroMonitoraggio");
-        this.tCentroMonitoraggio.setOnMouseClicked((event) -> this.tCentroMonitoraggio.clear());
-        this.tglDatePicker = new ToggleButton("Ricerca con data");
-        this.startDatePicker = new DatePicker();
-        this.endDatePicker = new DatePicker();
-        this.btnRicercaPcArea = new Button("Ricerca per area");
-        this.btnRicercaPcArea.setOnAction(this::handleRicercaPc);
-        this.btnRicercaPcCm = new Button("Ricerca Per Cm");
-        this.btnRicercaPcCm.setOnAction(this::handleRicercaPc);
+            this.paramBox = new VBox(10);
+            paramBox.getStyleClass().add("param-box");
+            this.tAreaInteresse = new TextField("AreaInteresse");
+            this.tAreaInteresse.setOnMouseClicked((event) -> this.tAreaInteresse.clear());
+            this.tCentroMonitoraggio = new TextField("CentroMonitoraggio");
+            this.tCentroMonitoraggio.setOnMouseClicked((event) -> this.tCentroMonitoraggio.clear());
+            this.tglDatePicker = new ToggleButton("Ricerca con data");
+            this.startDatePicker = new DatePicker();
+            this.endDatePicker = new DatePicker();
+            this.btnRicercaPcArea = new Button("Ricerca per area");
+            this.btnRicercaPcArea.setOnAction(this::handleRicercaPc);
+            this.btnRicercaPcCm = new Button("Ricerca Per Cm");
+            this.btnRicercaPcCm.setOnAction(this::handleRicercaPc);
 
-        paramBox.getChildren().add(tAreaInteresse);
-        paramBox.getChildren().add(tCentroMonitoraggio);
-        paramBox.getChildren().add(tglDatePicker);
-        paramBox.getChildren().add(startDatePicker);
-        paramBox.getChildren().add(endDatePicker);
-        paramBox.getChildren().add(btnRicercaPcArea);
-        paramBox.getChildren().add(btnRicercaPcCm);
-        this.borderPane.setRight(paramBox);
-
+            paramBox.getChildren().add(tAreaInteresse);
+            paramBox.getChildren().add(tCentroMonitoraggio);
+            paramBox.getChildren().add(tglDatePicker);
+            paramBox.getChildren().add(startDatePicker);
+            paramBox.getChildren().add(endDatePicker);
+            paramBox.getChildren().add(btnRicercaPcArea);
+            paramBox.getChildren().add(btnRicercaPcCm);
+            this.borderPane.setRight(paramBox);
+        }else{
+            clientNotConnected.showAndWait();
+        }
     }
 
     @FXML
     public void handleVisualizzaGrafici(){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        prepTableAreaInteresse();
-        showAreeInserite();
-        this.paramBox = new VBox(2);
-        this.paramBox.getStyleClass().add("param-box");
-        this.tAreaInteresse = new TextField("Nome Area");
-        this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
-        this.btnRicercaArea = new Button("Ricerca area");
-        this.btnRicercaArea.setOnAction(e -> createChart());
+        if(client != null){
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            prepTableAreaInteresse();
+            showAreeInserite();
+            this.paramBox = new VBox(2);
+            this.paramBox.getStyleClass().add("param-box");
+            this.tAreaInteresse = new TextField("Nome Area");
+            this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
+            this.btnRicercaArea = new Button("Ricerca area");
+            this.btnRicercaArea.setOnAction(e -> createChart());
 
-        this.paramBox.getChildren().add(tAreaInteresse);
-        this.paramBox.getChildren().add(btnRicercaArea);
-        this.borderPane.setRight(paramBox);
+            this.paramBox.getChildren().add(tAreaInteresse);
+            this.paramBox.getChildren().add(btnRicercaArea);
+            this.borderPane.setRight(paramBox);
 
+        }else{
+            clientNotConnected.showAndWait();
+        }
     }
 
     private void createChart(){
@@ -771,96 +791,99 @@ public class MainWindowController{
 
     @FXML
     public void handleVisualizzaCentri(){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        if(paramBox != null)
-            if(!paramBox.getChildren().isEmpty()) paramBox.getChildren().clear();
-        Request requestCentro = null;
-        try{
-            requestCentro = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    null);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage());
-            mre.printStackTrace();
-            return;
-        }
-        client.addRequest(requestCentro);
-        Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
+        if(client != null){
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            if(paramBox != null)
+                if(!paramBox.getChildren().isEmpty()) paramBox.getChildren().clear();
+            Request requestCentro = null;
+            try{
+                requestCentro = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.selectAll,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        null);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                mre.printStackTrace();
+                return;
+            }
+            client.addRequest(requestCentro);
+            Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
 
-        if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error){
-            resErrorAlert.showAndWait();
-            return;
-        }
-        if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-            resNoSuchElementAlert.showAndWait();
-            return;
-        }
+            if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error){
+                resErrorAlert.showAndWait();
+                return;
+            }
+            if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                resNoSuchElementAlert.showAndWait();
+                return;
+            }
 
-        List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
-        TableColumn<CentroMonitoraggio, String> denomCentro = new TableColumn("Denominazione");
-        denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-        tableView.getColumns().add(denomCentro);
+            List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
+            TableColumn<CentroMonitoraggio, String> denomCentro = new TableColumn("Denominazione");
+            denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+            tableView.getColumns().add(denomCentro);
 
-        centriMonitoraggio.forEach(cm -> {tableView.getItems().add(cm);});
+            centriMonitoraggio.forEach(cm -> {tableView.getItems().add(cm);});
 
-        tableView.setRowFactory(tv -> {
-            TableRow row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if(event.getClickCount() == 2 && !(row.isEmpty())){
-                    CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
-                    //System.out.println("Item double clicked: " + c);
-                    List<String> areeId = c.getAreeInteresseIdAssociate();
-                    List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
-                    for(String areaId : areeId){
-                        Request requestAi;
+            tableView.setRowFactory(tv -> {
+                TableRow row = new TableRow<>();
+                row.setOnMouseClicked(event -> {
+                    if(event.getClickCount() == 2 && !(row.isEmpty())){
+                        CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
+                        //System.out.println("Item double clicked: " + c);
+                        List<String> areeId = c.getAreeInteresseIdAssociate();
+                        List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
+                        for(String areaId : areeId){
+                            Request requestAi;
+                            try{
+                                Map<String, String> reqAiParams = RequestFactory
+                                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
+                                requestAi = RequestFactory.buildRequest(
+                                        client.getHostName(),
+                                        ServerInterface.RequestType.selectAllWithCond,
+                                        ServerInterface.Tables.AREA_INTERESSE,
+                                        reqAiParams
+                                );
+                            }catch(MalformedRequestException mre){
+                                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                                mre.printStackTrace();
+                                return;
+                            }
+                            client.addRequest(requestAi);
+                            Response responseAi = client.getResponse(requestAi.getRequestId());
+
+                            if(responseAi.getResponseType() == ServerInterface.ResponseType.Error){
+                                resErrorAlert.showAndWait();
+                                return;
+                            }
+                            if(responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                                resNoSuchElementAlert.showAndWait();
+                                return;
+                            }
+
+                            List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
+                            responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
+                        }
                         try{
-                            Map<String, String> reqAiParams = RequestFactory
-                                    .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
-                            requestAi = RequestFactory.buildRequest(
-                                    client.getHostName(),
-                                    ServerInterface.RequestType.selectAllWithCond,
-                                    ServerInterface.Tables.AREA_INTERESSE,
-                                    reqAiParams
-                            );
-                        }catch(MalformedRequestException mre){
-                            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                            mre.printStackTrace();
-                            return;
-                        }
-                        client.addRequest(requestAi);
-                        Response responseAi = client.getResponse(requestAi.getRequestId());
-
-                        if(responseAi.getResponseType() == ServerInterface.ResponseType.Error){
-                            resErrorAlert.showAndWait();
-                            return;
-                        }
-                        if(responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                            resNoSuchElementAlert.showAndWait();
-                            return;
-                        }
-
-                        List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
-                        responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
+                            Stage cmDialogStage = new Stage();
+                            CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
+                            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                            fxmlLoader.setController(cmDialogController);
+                            Scene dialogScene = new Scene(fxmlLoader.load());
+                            cmDialogStage.setScene(dialogScene);
+                            cmDialogStage.show();
+                        }catch(IOException ioe){ioe.printStackTrace();}
                     }
-                    try{
-                        Stage cmDialogStage = new Stage();
-                        CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
-                        FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
-                        fxmlLoader.setController(cmDialogController);
-                        Scene dialogScene = new Scene(fxmlLoader.load());
-                        cmDialogStage.setScene(dialogScene);
-                        cmDialogStage.show();
-                    }catch(IOException ioe){ioe.printStackTrace();}
-                }
+                });
+
+                return row;
             });
-
-            return row;
-        });
-
-        tableView.refresh();
+            tableView.refresh();
+        }else{
+            clientNotConnected.showAndWait();
+        }
     }
 
     public static boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
@@ -997,8 +1020,18 @@ public class MainWindowController{
 
     @FXML
     public void handleDisconnect(){
-        System.out.println("Disconnecting from: ");
+        if(client != null){
+            System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
+            /**
+            Request request = RequestFactory.buildRequest(
+                    client.getHostName(),
+                    ServerInterface.RequestType.quit, )
+             **/
 
+        }
+        else{
+            clientNotConnected.showAndWait();
+        }
     }
 
 }

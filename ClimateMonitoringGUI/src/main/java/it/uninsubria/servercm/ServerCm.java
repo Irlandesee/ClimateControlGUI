@@ -135,7 +135,7 @@ public class ServerCm {
         }catch(IOException ioe){ioe.printStackTrace();}
         finally{
             try{
-                System.out.println("Master server closing server socket" + i);
+                serv.logger.info("Master server closing server socket" + i);
                 serv.ss.close();
         }catch(IOException ioe){
                 ioe.printStackTrace();
