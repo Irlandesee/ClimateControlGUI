@@ -47,7 +47,8 @@ public class Worker extends Thread{
     public void run(){
         System.out.printf("Worker %s started\n", workerId);
         System.out.printf("Worker %s getting request\n", workerId);
-        Request request = server.getRequest(this.workerId);
+        //Request request = server.getRequest(this.workerId);
+        Request request = null;
         this.clientId = request.getClientId();
         this.requestId = request.getRequestId();
         this.responseId = IDGenerator.generateID();
@@ -134,7 +135,7 @@ public class Worker extends Thread{
         }
         //save the result in the server's queue
         System.out.printf("Worker %s saving request %s in server's queue\n", this.workerId, request.getRequestId());
-        server.addResponse(res, this.workerId);
+        //server.addResponse(res, this.workerId);
     }
 
 

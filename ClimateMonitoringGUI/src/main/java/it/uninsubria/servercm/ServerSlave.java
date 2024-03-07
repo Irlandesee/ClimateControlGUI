@@ -1,33 +1,31 @@
 package it.uninsubria.servercm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
-import it.uninsubria.servercm.ServerCm;
-import it.uninsubria.util.IDGenerator;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Properties;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-public class ServerSlave extends Thread{
+public class ServerSlave implements Runnable{
 
     private int slaveId;
-    private ServerCm serv;
     private Socket sock;
-    private Worker worker;
     private ObjectInputStream inStream;
     private ObjectOutputStream outStream;
     private Properties props;
-
-    public ServerSlave(Socket sock, ServerCm serv, int slaveId, Properties props){
+    private final ExecutorService executorService;
+    private final int MAX_NUMBER_OF_THREADS = 5;
+    public ServerSlave(Socket sock, int slaveId, Properties props){
+        executorService = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
         this.sock = sock;
-        this.serv = serv;
         this.slaveId = slaveId;
         this.props = props;
-        this.setName("Slave " +slaveId);
-        this.start();
     }
 
     public void run(){
@@ -44,21 +42,15 @@ public class ServerSlave extends Thread{
                         System.out.printf("Slave %d connected to client %s\n", slaveId, clientId);
                     }
                     case ServerInterface.NEXT -> {
-                        Request req = (Request) inStream.readObject();
-                        serv.addRequest(req, this.getName());
-                        System.err.println("Adding request, size: " + serv.getRequestsQueueSize());
-                        worker = new Worker(IDGenerator.generateID(), serv.getDbUrl(), props, serv);
-                        worker.start();
-                        try {
-                            System.out.printf("%s waiting for worker to join\n", this.getName());
-                            worker.join();
-                            System.out.println("worker joined");
-                        } catch (InterruptedException ie) {
-                            ie.printStackTrace();
+                        Request request = (Request) inStream.readObject();
+                        CallableQuery callableQuery = new CallableQuery(request, props);
+                        Future<Response> futureResponse = executorService.submit(callableQuery);
+                        try{
+                            Response response = futureResponse.get();
+                            outStream.writeObject(response);
+                        }catch(InterruptedException | ExecutionException e){
+                            e.printStackTrace();
                         }
-                        Response res = serv.getResponse(this.getName());
-                        System.err.printf("Slave %d sending %s\n", slaveId, res);
-                        outStream.writeObject(res);
                     }
                     case ServerInterface.TEST -> {
                         int number = (int) inStream.readObject();
@@ -92,6 +84,7 @@ public class ServerSlave extends Thread{
                 ioe.printStackTrace();
             }
         }
+        executorService.shutdown();
 
     }
 

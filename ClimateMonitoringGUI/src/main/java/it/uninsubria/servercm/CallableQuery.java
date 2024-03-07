@@ -18,6 +18,7 @@ import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 
 public class CallableQuery implements Callable<Response> {
@@ -26,13 +27,13 @@ public class CallableQuery implements Callable<Response> {
     private String responseId;
     private Request request;
     private Connection conn;
-    public CallableQuery(Request request){
+    public CallableQuery(Request request, Properties props){
         this.request = request;
         callableQueryId = request.getRequestId();
         clientId = request.getClientId();
         responseId = IDGenerator.generateID();
         try{
-            conn = DriverManager.getConnection(ServerCm.dbUrl);
+            conn = DriverManager.getConnection(ServerCm.dbUrl, props);
         }catch(SQLException sqle){sqle.printStackTrace();}
     }
     @Override
