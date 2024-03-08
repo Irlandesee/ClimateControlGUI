@@ -1,9 +1,7 @@
 package it.uninsubria.graphbuilder;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.*;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;

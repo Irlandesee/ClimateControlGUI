@@ -1,19 +1,18 @@
 package it.uninsubria.servercm;
 
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
+import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
+import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.datamodel.city.City;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.operatore.Operatore;
-import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.NotaParametro;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.operatore.Operatore;
+import it.uninsubria.datamodel.operatore.OperatoreAutorizzato;
+import it.uninsubria.datamodel.parametroClimatico.NotaParametro;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.util.IDGenerator;
 import javafx.util.Pair;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;

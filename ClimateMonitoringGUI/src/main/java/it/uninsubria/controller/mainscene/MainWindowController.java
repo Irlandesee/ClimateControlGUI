@@ -1,7 +1,7 @@
 package it.uninsubria.controller.mainscene;
 import it.uninsubria.MainWindow;
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
+import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.clientCm.ClientProxy;
 import it.uninsubria.controller.dialog.AiDialog;
@@ -13,8 +13,8 @@ import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.controller.registrazione.RegistrazioneController;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.operatore.OperatoreAutorizzato;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
@@ -33,7 +33,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.time.LocalDate;
 import java.util.*;
 

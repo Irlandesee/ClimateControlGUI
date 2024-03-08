@@ -3,7 +3,7 @@ package it.uninsubria.controller.dialog;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.graphbuilder.GraphBuilder;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;

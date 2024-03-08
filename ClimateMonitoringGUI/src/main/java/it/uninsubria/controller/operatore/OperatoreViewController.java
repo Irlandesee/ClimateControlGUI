@@ -1,16 +1,16 @@
 package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
+import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
+import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.datamodel.city.City;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.*;
 import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.operatore.OperatoreAutorizzato;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;

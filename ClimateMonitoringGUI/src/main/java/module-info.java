@@ -33,22 +33,22 @@ module it.uninsubria.climatemonitoringgui {
     exports it.uninsubria.controller.operatore;
     opens it.uninsubria.controller.operatore to javafx.fxml;
 
-    opens it.uninsubria.operatore;
-    exports it.uninsubria.operatore to javafx.base;
+    opens it.uninsubria.datamodel.operatore;
+    exports it.uninsubria.datamodel.operatore to javafx.base;
 
 
-    opens it.uninsubria.areaInteresse;
-    exports it.uninsubria.areaInteresse to javafx.fxml;
+    opens it.uninsubria.datamodel.areaInteresse;
+    exports it.uninsubria.datamodel.areaInteresse to javafx.fxml;
 
-    opens it.uninsubria.city;
-    exports it.uninsubria.city to javafx.base;
+    opens it.uninsubria.datamodel.city;
+    exports it.uninsubria.datamodel.city to javafx.base;
 
-    opens it.uninsubria.centroMonitoraggio;
-    exports it.uninsubria.centroMonitoraggio to javafx.base;
+    opens it.uninsubria.datamodel.centroMonitoraggio;
+    exports it.uninsubria.datamodel.centroMonitoraggio to javafx.base;
 
 
-    opens it.uninsubria.parametroClimatico;
-    exports it.uninsubria.parametroClimatico to javafx.base;
+    opens it.uninsubria.datamodel.parametroClimatico;
+    exports it.uninsubria.datamodel.parametroClimatico to javafx.base;
 
     opens it.uninsubria.controller.dialog;
     exports it.uninsubria.controller.dialog;

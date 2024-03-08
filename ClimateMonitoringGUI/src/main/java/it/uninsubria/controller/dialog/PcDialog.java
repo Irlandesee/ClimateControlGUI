@@ -1,6 +1,6 @@
 package it.uninsubria.controller.dialog;
 
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;

@@ -22,7 +22,8 @@ public class ServerSlave implements Runnable{
     private final ExecutorService executorService;
     private final int MAX_NUMBER_OF_THREADS = 5;
     public ServerSlave(Socket sock, int slaveId, Properties props){
-        executorService = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
+        //executorService = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
+        executorService = Executors.newSingleThreadExecutor();
         this.sock = sock;
         this.slaveId = slaveId;
         this.props = props;
@@ -71,7 +72,7 @@ public class ServerSlave implements Runnable{
             }
         }catch(IOException ioe){
             System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);
-            runCondition = false;
+            //runCondition = false;
             ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){
             cnfe.printStackTrace();
