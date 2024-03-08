@@ -1,4 +1,4 @@
-package it.uninsubria.city;
+package it.uninsubria.datamodel.city;
 
 import java.io.Serial;
 import java.io.Serializable;

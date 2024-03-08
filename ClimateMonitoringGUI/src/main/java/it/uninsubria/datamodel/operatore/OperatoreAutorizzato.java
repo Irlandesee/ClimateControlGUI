@@ -1,4 +1,4 @@
-package it.uninsubria.operatore;
+package it.uninsubria.datamodel.operatore;
 
 import java.io.Serial;
 import java.io.Serializable;

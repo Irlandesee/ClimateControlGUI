@@ -1,13 +1,10 @@
 package it.uninsubria.response;
 
-import it.uninsubria.servercm.ServerInterface.RequestType;
 import it.uninsubria.servercm.ServerInterface.ResponseType;
 import it.uninsubria.servercm.ServerInterface.Tables;
-import it.uninsubria.util.IDGenerator;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Response implements Serializable {
@@ -39,7 +36,7 @@ public class Response implements Serializable {
 
     public String getRequestId(){return this.requestId;}
 
-    public ResponseType getRespType(){
+    public ResponseType getResponseType(){
         return this.respType;
     }
 

@@ -1,7 +1,4 @@
-package it.uninsubria.parametroClimatico;
-
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+package it.uninsubria.datamodel.parametroClimatico;
 
 import java.io.Serial;
 import java.io.Serializable;

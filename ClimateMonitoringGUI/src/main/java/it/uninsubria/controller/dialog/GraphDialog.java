@@ -3,7 +3,7 @@ package it.uninsubria.controller.dialog;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.graphbuilder.GraphBuilder;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
@@ -95,7 +95,7 @@ public class GraphDialog {
             Map<String, String> params = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "denominazione", "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     params
@@ -108,7 +108,7 @@ public class GraphDialog {
         client.addRequest(request);
         Response response = client.getResponse(request.getClientId());
         String denominazione = "";
-        if(response.getRespType() == ServerInterface.ResponseType.Object
+        if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             denominazione = response.getResult().toString();
         }
@@ -161,7 +161,7 @@ public class GraphDialog {
                 Map<String, String> requestParameters = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                 request = RequestFactory.buildRequest(
-                        client.getClientId(),
+                        client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.PARAM_CLIMATICO,
                         requestParameters
@@ -261,7 +261,7 @@ public class GraphDialog {
         try{
             Map<String, String> requestParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     requestParams
@@ -361,7 +361,7 @@ public class GraphDialog {
             Map<String, String> requestParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
             request = RequestFactory.buildRequest(
-                    client.getClientId(),
+                    client.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     requestParams

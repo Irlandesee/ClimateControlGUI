@@ -1,15 +1,10 @@
 package it.uninsubria.util;
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
-import it.uninsubria.parametroClimatico.NotaParametro;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 
 import java.io.*;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.http.HttpResponse;

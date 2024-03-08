@@ -1,13 +1,7 @@
-package it.uninsubria.centroMonitoraggio;
-
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.util.IDGenerator;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+package it.uninsubria.datamodel.centroMonitoraggio;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 

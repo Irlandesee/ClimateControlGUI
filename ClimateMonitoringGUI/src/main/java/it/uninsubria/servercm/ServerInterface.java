@@ -57,8 +57,6 @@ public interface ServerInterface {
         private ResponseType(String label){this.label = label;}
     }
 
-
-
     int PORT = 9999;
     int selectAllWithCondParamsLength = 2;
     int selectObjWithCondParamsLength = 3;
@@ -75,6 +73,7 @@ public interface ServerInterface {
 
     //int insertAiParamsLength ;
 
+    String TEST = "TEST";
     String QUIT = "QUIT";
     String NEXT = "NEXT";
     String ID = "ID";

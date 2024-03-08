@@ -1,17 +1,17 @@
 package it.uninsubria.tableViewBuilder;
 
 import it.uninsubria.MainWindow;
-import it.uninsubria.areaInteresse.AreaInteresse;
-import it.uninsubria.centroMonitoraggio.CentroMonitoraggio;
-import it.uninsubria.city.City;
+import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
+import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
+import it.uninsubria.datamodel.city.City;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.AiDialog;
 import it.uninsubria.controller.dialog.CmDialog;
 import it.uninsubria.controller.dialog.PcDialog;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.operatore.Operatore;
-import it.uninsubria.operatore.OperatoreAutorizzato;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.operatore.Operatore;
+import it.uninsubria.datamodel.operatore.OperatoreAutorizzato;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
@@ -122,7 +122,7 @@ public class TableViewBuilder {
                     Map<String, String> requestParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", a.getAreaid());
                     request = RequestFactory.buildRequest(
-                            client.getClientId(),
+                            client.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             requestParams
@@ -143,7 +143,7 @@ public class TableViewBuilder {
                 }
                 List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
                 if(response.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
-                    && response.getRespType() == ServerInterface.ResponseType.List){
+                    && response.getResponseType() == ServerInterface.ResponseType.List){
                     parametriClimatici = (List<ParametroClimatico>) response.getResult();
                 }
 
@@ -197,7 +197,7 @@ public class TableViewBuilder {
                                             "parameterid", pc.getParameterId());
                             requestDenominazione = RequestFactory
                                     .buildRequest(
-                                            client.getClientId(),
+                                            client.getHostName(),
                                             ServerInterface.RequestType.selectObjJoinWithCond,
                                             ServerInterface.Tables.PARAM_CLIMATICO,
                                             paramsReqDenom);
@@ -217,7 +217,7 @@ public class TableViewBuilder {
                                             pc.getParameterId());
                             requestNomeCentro = RequestFactory
                                     .buildRequest(
-                                            client.getClientId(),
+                                            client.getHostName(),
                                             ServerInterface.RequestType.selectObjJoinWithCond,
                                             ServerInterface.Tables.PARAM_CLIMATICO,
                                             paramsReqNomeCentro
@@ -248,13 +248,13 @@ public class TableViewBuilder {
                         String nomeArea = "";
                         String nomeCentro = "";
 
-                        if(respDenom.getRespType().equals(ServerInterface.ResponseType.Object) &&
+                        if(respDenom.getResponseType().equals(ServerInterface.ResponseType.Object) &&
                                 respDenom.getTable().equals(ServerInterface.Tables.AREA_INTERESSE)){
                             nomeArea = respDenom.getResult().toString();
                         }else{
                             nomeArea = "Error while retrieving denominazione area";
                         }
-                        if(respNomeCentro.getRespType().equals(ServerInterface.ResponseType.Object)
+                        if(respNomeCentro.getResponseType().equals(ServerInterface.ResponseType.Object)
                                 && respNomeCentro.getTable().equals(ServerInterface.Tables.CENTRO_MONITORAGGIO)){
                             nomeCentro = respNomeCentro.getResult().toString();
                         }else{
@@ -302,7 +302,7 @@ public class TableViewBuilder {
                         Map<String, String> reqAiParams = RequestFactory
                                 .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
                         requestAi = RequestFactory.buildRequest(
-                                client.getClientId(),
+                                client.getHostName(),
                                 ServerInterface.RequestType.selectAllWithCond,
                                 ServerInterface.Tables.AREA_INTERESSE,
                                 reqAiParams
