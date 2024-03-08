@@ -77,6 +77,7 @@ public interface ServerInterface {
     String QUIT = "QUIT";
     String NEXT = "NEXT";
     String ID = "ID";
+    String LOGIN = "LOGIN";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
     String SUCCESSFULL_INSERT = "SUCCESSFUL_INSERT";
     String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";

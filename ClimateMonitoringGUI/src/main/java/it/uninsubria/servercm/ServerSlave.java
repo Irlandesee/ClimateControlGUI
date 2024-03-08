@@ -1,7 +1,9 @@
 package it.uninsubria.servercm;
+import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.io.IOException;
@@ -59,6 +61,27 @@ public class ServerSlave implements Runnable{
                         number += 1;
                         System.out.printf("Slave %d sending: %d\n", slaveId, number);
                         outStream.writeObject(number);
+                    }
+                    case ServerInterface.LOGIN -> {
+                        Request loginRequest = (Request) inStream.readObject();
+                        CallableQuery callableQuery = new CallableQuery(loginRequest, props);
+                        Future<Response> futureResponse = executorService.submit(callableQuery);
+                        try{
+                            Response loginResponse = futureResponse.get();
+                            if(loginResponse.getResponseType() == ServerInterface.ResponseType.loginKo){
+                                outStream.writeObject(loginResponse);
+                            }else{
+                                outStream.writeObject(loginResponse);
+                                Map<String, String> params = loginRequest.getParams();
+                                String userId = params.get(RequestFactory.userKey);
+                                String password = params.get(RequestFactory.passwordKey);
+                                this.props = new Properties();
+                                props.setProperty("user", userId);
+                                props.setProperty("password", password);
+                            }
+                        }catch(InterruptedException | ExecutionException e){
+                            e.printStackTrace();
+                        }
                     }
                     case ServerInterface.QUIT -> {
                         System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);
