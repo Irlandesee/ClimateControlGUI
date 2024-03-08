@@ -84,6 +84,7 @@ public class MainWindowController{
     private Alert resNoSuchElementAlert;
 
     private Alert clientNotConnected;
+    private Alert clientHasDisconnected;
 
     private Properties props;
 
@@ -184,6 +185,9 @@ public class MainWindowController{
         this.clientNotConnected.setHeaderText("Nessuna connessione!");
         this.clientNotConnected.setContentText("L'applicazione non e' connessa a nessun server!");
 
+        this.clientHasDisconnected = new Alert(Alert.AlertType.CONFIRMATION);
+        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata");
+        this.clientHasDisconnected.setContentText("Disconessione dal server effettuata con successo!");
 
     }
 
@@ -1021,12 +1025,9 @@ public class MainWindowController{
     public void handleDisconnect(){
         if(client != null){
             System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
-            /**
-            Request request = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.quit, )
-             **/
-
+            client.getClientProxy().sendQuitRequest();
+            client = null;
+            clientProxy = null;
         }
         else{
             clientNotConnected.showAndWait();
