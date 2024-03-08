@@ -1,4 +1,4 @@
-package it.uninsubria.parametroClimatico;
+package it.uninsubria.datamodel.parametroClimatico;
 
 import java.io.Serial;
 import java.io.Serializable;

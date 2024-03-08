@@ -8,8 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class ServerCm {
@@ -17,70 +16,33 @@ public class ServerCm {
     private ServerSocket ss;
     private final int PORT = ServerInterface.PORT;
     private final String name = "ServerCm";
-    private LinkedBlockingQueue<Request> requests;
-    private LinkedBlockingQueue<Response> responses;
     private LinkedBlockingQueue<ServerSlave> slaves;
-    private LinkedBlockingQueue<Worker> workers;
-
     protected static final String dbUrl = "jdbc:postgresql://localhost/postgres";
-
     private final Properties props;
 
     private final Logger logger;
     private final String user = "postgres";
     private final String password = "qwerty";
+
+    private final ExecutorService clientHandler;
+    private final ExecutorService connectionChecker;
+    private final int MAX_NUMBER_OF_THREADS = 10;
+
     public ServerCm(){
         try{
             ss = new ServerSocket(PORT);
             System.err.printf("%s started on port: %d\n", this.name, this.PORT);
         }catch(IOException ioe){ioe.printStackTrace();}
+
         props = new Properties();
         props.setProperty("user", user);
         props.setProperty("password", password);
 
+        clientHandler = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
+        connectionChecker = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
+
         slaves = new LinkedBlockingQueue<ServerSlave>();
-        requests = new LinkedBlockingQueue<Request>();
-        responses = new LinkedBlockingQueue<Response>();
-        workers = new LinkedBlockingQueue<Worker>();
         this.logger = Logger.getLogger(this.name);
-    }
-
-    public void addResponse(Response res, String threadId){
-        //System.out.printf("%s puts response in queue\n", threadId);
-        try{
-            responses.put(res);
-            //System.out.println("Queue size: " + responses.size());
-        }catch(InterruptedException ie){
-            ie.printStackTrace();
-        }
-    }
-
-    public Response getResponse(String threadId){
-        //System.out.printf("%s gets response\n", threadId);
-        try{
-            return responses.take();
-        }catch(InterruptedException ie){ie.printStackTrace(); return null;}
-    }
-
-    public void addRequest(Request r, String threadId){
-        //System.out.printf("%s adds request\n", threadId);
-        try{
-            requests.put(r);
-            //System.out.println("Added request to queue: " + requests.size());
-        }catch(InterruptedException ie){ie.printStackTrace();}
-    }
-
-    public Request getRequest(String threadId){
-        //System.out.printf("%s gets request\n", threadId);
-        try{
-            return requests.take();
-        }catch(InterruptedException ie){ie.printStackTrace(); return null;}
-    }
-
-    public void addWorker(Worker w){
-        try{
-            workers.put(w);
-        }catch(InterruptedException ie){ie.printStackTrace();}
     }
 
     public void addSlave(ServerSlave ss){
@@ -89,28 +51,12 @@ public class ServerCm {
         }catch(InterruptedException ie){ie.printStackTrace();}
     }
 
-    public boolean removeWorker(Worker w){
-        return workers.remove(w);
-    }
-
     public boolean removeSlave(ServerSlave s){
         return slaves.remove(s);
     }
 
-    public int getResponsesQueueSize(){
-        return this.responses.size();
-    }
-
-    public int getRequestsQueueSize(){
-        return this.requests.size();
-    }
-
     public int getSlavesSize(){
         return this.slaves.size();
-    }
-
-    public int getWorkersSize(){
-        return this.workers.size();
     }
 
     public String getDbUrl(){
@@ -125,18 +71,26 @@ public class ServerCm {
             while(true){
                 Socket sock = serv.ss.accept();
                 serv.logger.info("New connection accepted");
-                ServerSlave slave = new ServerSlave(sock, serv, i, serv.props);
-                i++;
-                try{
-                    serv.slaves.put(slave);
-                    System.out.printf("%s starting new worker\n", serv.name);
-                }catch(InterruptedException ie){ie.printStackTrace();}
+                ServerSlave serverSlave = new ServerSlave(sock, i, serv.props);
+                serv.slaves.add(serverSlave);
+                Future<?> future = serv.clientHandler.submit(serverSlave);
+
+                serv.connectionChecker.execute(() -> {
+                    try{
+                        future.get();
+                        System.out.println("Client has disconnected");
+                    }catch(InterruptedException | ExecutionException exception){
+                        exception.printStackTrace();
+                    }
+                });
+
             }
         }catch(IOException ioe){ioe.printStackTrace();}
         finally{
             try{
-                System.out.println("Master server closing server socket" + i);
+                serv.logger.info("Master server closing server socket" + i);
                 serv.ss.close();
+                serv.clientHandler.shutdown();
         }catch(IOException ioe){
                 ioe.printStackTrace();
             }

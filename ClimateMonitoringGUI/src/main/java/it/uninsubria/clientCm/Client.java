@@ -3,56 +3,44 @@ package it.uninsubria.clientCm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
-import java.util.logging.Logger;
+
 import java.io.IOException;
-import java.net.InetAddress;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Inet4Address;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread{
 
-    private final ClientProxy clientProxy;
-    private final String clientId;
-    private Socket sock;
+    private ClientProxy clientProxy;
+    private String hostName;
     private boolean runCondition;
 
     private LinkedBlockingQueue<Request> requests;
     private LinkedBlockingQueue<Response> responses;
     private Logger logger;
 
-    public Client(String clientId){
-        this.clientId = clientId;
-        this.setName(clientId);
+    public Client(){
         logger = Logger.getLogger("Client");
-        try{
-            sock = new Socket(InetAddress.getLocalHost(), ServerInterface.PORT);
-        }catch(IOException ioe){ioe.printStackTrace();}
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        this.clientProxy = new ClientProxy(this, sock, clientId);
-        this.runCondition = true;
+        //this.clientProxy = new ClientProxy(this, hostName);
     }
 
-    public synchronized void setRunCondition(boolean runCondition) {
-        try{
-            wait();
-            this.runCondition = runCondition;
-        }catch(InterruptedException ie){
-            logger.info(ie.getMessage());
-        }
-        notify();
+    public String getHostName(){return this.hostName;}
+    public void setHostName(String hostName){
+        this.hostName = hostName;
     }
 
-    public String getClientId(){
-        return this.clientId;
-    }
-
-    public synchronized boolean getRunCondition(){
-        //does this method release the lock on the object?
-        try{
-            wait();
-        }catch(InterruptedException ie){logger.info(ie.getMessage());}
+    public boolean getRunCondition(){
         return this.runCondition;
+    }
+
+    public void setRunCondition(boolean runCondition){
+        this.runCondition = runCondition;
     }
 
     public void addRequest(Request req){
@@ -79,9 +67,17 @@ public class Client extends Thread{
         }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}
     }
 
+    public ClientProxy getClientProxy(){
+        return this.clientProxy;
+    }
+
+    public void setClientProxy(ClientProxy clientProxy){
+        this.clientProxy = clientProxy;
+    }
+
     public void run(){
         logger.info("Client started");
-        while (true) {
+        while (getRunCondition()) {
             //wait for requests from the gui
             logger.info("waiting for a request");
             Request request = getRequest();
@@ -89,7 +85,6 @@ public class Client extends Thread{
             logger.info("Sending Request");
             clientProxy.sendRequest(request);
         }
-        //Close the socket?
     }
 
 }

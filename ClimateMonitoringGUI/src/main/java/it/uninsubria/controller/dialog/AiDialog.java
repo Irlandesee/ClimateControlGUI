@@ -1,9 +1,9 @@
 package it.uninsubria.controller.dialog;
 
-import it.uninsubria.areaInteresse.AreaInteresse;
+import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.parametroClimatico.ParametroClimatico;
+import it.uninsubria.datamodel.parametroClimatico.ParametroClimatico;
 import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
@@ -80,7 +80,7 @@ public class AiDialog {
                         Map<String, String> params = RequestFactory
                                 .buildParams(ServerInterface.RequestType.selectObjWithCond, "nomecentro",
                                         "centroid", centroId);
-                        request = RequestFactory.buildRequest(client.getClientId(),
+                        request = RequestFactory.buildRequest(client.getHostName(),
                                 ServerInterface.RequestType.selectObjWithCond,
                                 ServerInterface.Tables.CENTRO_MONITORAGGIO,
                                 params);
@@ -93,7 +93,7 @@ public class AiDialog {
 
                     Response res = client.getResponse(request.getRequestId());
                     String denomCentro = "";
-                    if(res.getRespType() == ServerInterface.ResponseType.Object){
+                    if(res.getResponseType() == ServerInterface.ResponseType.Object){
                         denomCentro = res.getResult().toString();
                     }
 
