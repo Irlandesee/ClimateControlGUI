@@ -70,6 +70,7 @@ public class ServerCm {
         try{
             while(true){
                 Socket sock = serv.ss.accept();
+                i++;
                 serv.logger.info("New connection accepted");
                 ServerSlave serverSlave = new ServerSlave(sock, i, serv.props);
                 serv.slaves.add(serverSlave);
