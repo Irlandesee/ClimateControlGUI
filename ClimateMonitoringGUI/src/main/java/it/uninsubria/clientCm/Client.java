@@ -1,8 +1,10 @@
 package it.uninsubria.clientCm;
 
+import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,7 +29,7 @@ public class Client extends Thread{
         logger = Logger.getLogger("Client");
         this.requests = new LinkedBlockingQueue<Request>();
         this.responses = new LinkedBlockingQueue<Response>();
-        //this.clientProxy = new ClientProxy(this, hostName);
+        this.setDaemon(true);
     }
 
     public String getHostName(){return this.hostName;}
@@ -83,7 +85,14 @@ public class Client extends Thread{
             Request request = getRequest();
             //send request
             logger.info("Sending Request");
-            clientProxy.sendRequest(request);
+            try{
+                clientProxy.sendRequest(request);
+            } catch(IOException ioe){
+                System.out.println("Server has disconnected, closing the connection...");
+                //Platform.runLater(mainWindowController::handleServerDisconnect);
+                clientProxy.quit();
+                ioe.printStackTrace();
+            }
         }
     }
 

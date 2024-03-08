@@ -82,8 +82,8 @@ public interface ServerInterface {
     String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";
     String DUPLICATE_ITEM = "DUPLICATE_ITEM";
 
-    //public void quit() throws IOException;
-    void sendRequest(Request r);
+    public void quit();
+    void sendRequest(Request r) throws IOException;
 
 
 }

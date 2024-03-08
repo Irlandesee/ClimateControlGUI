@@ -3,6 +3,7 @@ package it.uninsubria.clientCm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import javafx.scene.control.Alert;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -83,7 +84,7 @@ public class ClientProxy implements ServerInterface {
         return res;
     }
 
-    public void sendRequest(Request req){
+    public void sendRequest(Request req) throws IOException{
         try{
 
             System.out.printf("Proxy %s sending id to server\n", this.hostName);
@@ -105,10 +106,6 @@ public class ClientProxy implements ServerInterface {
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
             logger.info("Adding response to queue");
-        }catch(IOException ioe){
-            System.out.println("Server has disconnected, closing the connection...");
-            quit();
-            ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }
 
@@ -122,9 +119,12 @@ public class ClientProxy implements ServerInterface {
 
     public void quit(){
         try{
-            outStream.close();
-            inStream.close();
-            sock.close();
+            if(sock != null)
+                sock.close();
+            if(outStream != null)
+                outStream.close();
+            if(inStream != null)
+                inStream.close();
             client.setRunCondition(false);
         }catch(IOException ioe){ioe.printStackTrace();}
     }

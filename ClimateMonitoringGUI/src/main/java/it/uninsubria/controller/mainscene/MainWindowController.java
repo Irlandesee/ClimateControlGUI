@@ -85,6 +85,7 @@ public class MainWindowController{
 
     private Alert clientNotConnected;
     private Alert clientHasDisconnected;
+    private Alert serverHasDisconnected;
 
     private Properties props;
 
@@ -186,8 +187,12 @@ public class MainWindowController{
         this.clientNotConnected.setContentText("L'applicazione non e' connessa a nessun server!");
 
         this.clientHasDisconnected = new Alert(Alert.AlertType.CONFIRMATION);
-        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata");
+        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata.");
         this.clientHasDisconnected.setContentText("Disconessione dal server effettuata con successo!");
+
+        this.serverHasDisconnected = new Alert(Alert.AlertType.INFORMATION);
+        this.serverHasDisconnected.setHeaderText("Server disconnesso.");
+        this.serverHasDisconnected.setContentText("Il server si e' disconnesso, tentare una nuova connessione oppure connettersi a un nuovo server.");
 
     }
 
@@ -1032,6 +1037,10 @@ public class MainWindowController{
         else{
             clientNotConnected.showAndWait();
         }
+    }
+
+    public void handleServerDisconnect(){
+        serverHasDisconnected.showAndWait();
     }
 
 }
