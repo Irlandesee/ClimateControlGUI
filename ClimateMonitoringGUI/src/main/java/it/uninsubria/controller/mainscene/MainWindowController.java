@@ -87,8 +87,6 @@ public class MainWindowController{
     private Alert clientHasDisconnected;
     private Alert serverHasDisconnected;
 
-    private Properties props;
-
     private Stage mainWindowStage;
     private Stage loginStage;
     private Stage registrazioneStage;
@@ -925,6 +923,7 @@ public class MainWindowController{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
                 fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
+
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");

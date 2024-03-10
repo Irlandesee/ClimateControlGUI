@@ -21,8 +21,8 @@ public class ServerCm {
     private final Properties props;
 
     private final Logger logger;
-    private final String user = "server_slave";
-    private final String password = "serverslave";
+    protected static final String user = "server_slave";
+    protected static final String password = "serverslave";
 
     private final ExecutorService clientHandler;
     private final ExecutorService connectionChecker;

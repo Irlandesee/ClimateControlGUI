@@ -1,5 +1,6 @@
 package it.uninsubria.servercm;
 import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.factories.ResponseFactory;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 
@@ -82,6 +83,12 @@ public class ServerSlave implements Runnable{
                         }catch(InterruptedException | ExecutionException e){
                             e.printStackTrace();
                         }
+                    }
+                    case ServerInterface.LOGOUT -> {
+                        outStream.writeObject(ServerInterface.ResponseType.logoutOk);
+                        this.props = new Properties();
+                        this.props.setProperty("user", ServerCm.user);
+                        this.props.setProperty("password", ServerCm.password);
                     }
                     case ServerInterface.QUIT -> {
                         System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);

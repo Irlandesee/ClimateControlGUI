@@ -28,6 +28,7 @@ public interface ServerInterface {
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond"),
         executeLogin("executeLogin"),
+        executeLogout("executeLogout"),
         executeUpdateAi("executeUpdateAi"),
         insert("insert"),
         requestSignUp("requestSignUp"),
@@ -47,6 +48,8 @@ public interface ServerInterface {
         insertKo("insertKo"),
         loginOk("loginOk"),
         loginKo("loginKo"),
+        logoutOk("logoutOk"),
+        logoutKo("logoutKo"),
         updateOk("updateOk"),
         updateKo("updateKo"),
         requestSignUpOk("requestSignUpOk"),
@@ -78,6 +81,7 @@ public interface ServerInterface {
     String NEXT = "NEXT";
     String ID = "ID";
     String LOGIN = "LOGIN";
+    String LOGOUT = "LOGOUT";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
     String SUCCESSFULL_INSERT = "SUCCESSFUL_INSERT";
     String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";

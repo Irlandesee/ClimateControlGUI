@@ -177,6 +177,18 @@ public class OperatoreViewController {
 
     @FXML
     public void exit(ActionEvent actionEvent){
+
+        try{
+            Request logoutRequest = RequestFactory.buildRequest(client.getHostName(), ServerInterface.RequestType.executeLogout, null, null);
+            client.addRequest(logoutRequest);
+            Response response = client.getResponse(logoutRequest.getRequestId());
+            if(response.getResponseType() == ServerInterface.ResponseType.logoutOk){
+                new Alert(Alert.AlertType.CONFIRMATION, "Logout avvenuto con successo!").showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Errore durante il logout!").showAndWait();
+            }
+        }catch(MalformedRequestException mre){}
+
         if(operatoreWindowStage != null) operatoreWindowStage.close();
         //go back to the main window stage
         if(mainWindowStage != null){
