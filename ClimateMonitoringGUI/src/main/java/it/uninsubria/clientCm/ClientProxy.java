@@ -84,7 +84,7 @@ public class ClientProxy implements ServerInterface {
         return res;
     }
 
-    public void sendRequest(Request req) throws IOException{
+    public void sendRequest(Request request) throws IOException{
         try{
 
             System.out.printf("Proxy %s sending id to server\n", this.hostName);
@@ -94,14 +94,21 @@ public class ClientProxy implements ServerInterface {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }
             catch(InterruptedException ie){ie.printStackTrace();}
-
-            System.out.printf("Proxy %s sending request to server\n", this.hostName);
-            outStream.writeObject(ServerInterface.NEXT);
-            outStream.writeObject(req);
-            try{
-                Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
-            }catch(InterruptedException ie){ie.printStackTrace();}
-
+            if(request.getRequestType() == RequestType.executeLogin){
+                System.out.printf("Proxy %s sending login request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.LOGIN);
+                outStream.writeObject(request);
+                try{
+                    Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
+                }catch(InterruptedException ie){ie.printStackTrace();}
+            }else{
+                System.out.printf("Proxy %s sending request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.NEXT);
+                outStream.writeObject(request);
+                try{
+                    Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
+                }catch(InterruptedException ie){ie.printStackTrace();}
+            }
             System.out.printf("Proxy %s waiting for response from server\n", this.hostName);
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
