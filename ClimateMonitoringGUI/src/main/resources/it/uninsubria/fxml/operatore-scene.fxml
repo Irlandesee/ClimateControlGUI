@@ -34,6 +34,8 @@
         <VBox styleClass="sidebar-section">
             <children>
                 <!-->Insert action buttons here<!-->
+                <Button text="Nuova connessione" fx:id="buttonNewConnection" onAction="#handleNewConnection"/>
+                <Button text="Disconnessione" fx:id="buttonDisconnect" onAction="#handleDisconnect"/>
                 <Button text="Ricerca area interesse" fx:id="buttonRicercaAreaInteresse" onAction="#handleRicercaAreaInteresse"/>
                 <Button text="Visualizza parametri climatici" fx:id="buttonVisualizzaParametri" onAction="#handleVisualizzaParametriClimatici"/>
                 <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#handleVisualizzaGrafici"/>

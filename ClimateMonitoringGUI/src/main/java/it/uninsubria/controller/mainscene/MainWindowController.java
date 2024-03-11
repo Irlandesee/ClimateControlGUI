@@ -20,6 +20,7 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
+import it.uninsubria.util.Util;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -443,24 +444,6 @@ public class MainWindowController{
 
     }
 
-    //Calculate the parameter passed in radians
-    private static Float toRad(Float value){
-        return (float) (value * Math.PI / 180);
-    }
-
-    public static Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
-        final int earthRadius = 6731; // in kms
-        float latDistance = toRad(latSecondPoint - latFirstPoint);
-        float longDistance = toRad(longSecondPoint - longFirstPoint);
-
-        float a = (float) (Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
-                        Math.cos(toRad(latFirstPoint)) * Math.cos(toRad(latSecondPoint)) *
-                                Math.sin(toRad(longDistance / 2))  * Math.sin(longDistance / 2));
-        float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-
-        return earthRadius * c;
-    }
-
     private void handleRicercaAreaPerCoordinate(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
@@ -499,7 +482,7 @@ public class MainWindowController{
             List<AreaInteresse> areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
-                float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
+                float distance = Util.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
                 if(distance < 50) { //50 km
                     System.out.println(area);
                     areeVicine.add(area);
@@ -703,7 +686,7 @@ public class MainWindowController{
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.removeIf(parametroClimatico -> isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
+                    parametriClimatici.removeIf(parametroClimatico -> Util.isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
@@ -786,7 +769,7 @@ public class MainWindowController{
                     LocalDate finalEndDate = endDate;
                     parametriClimatici.forEach((param) -> {
                         parametriClimatici.removeIf((pc) -> {
-                            return isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
+                            return Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
                         });
                     });
                 }
@@ -892,10 +875,6 @@ public class MainWindowController{
         }
     }
 
-    public static boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
-        return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
-    }
-
     public boolean onExecuteLoginQuery(String userID, String password){
         System.out.printf("Userid & password: %s %s\n", userID, password);
 
@@ -922,8 +901,7 @@ public class MainWindowController{
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
-
+                fxmlLoader.setController(new OperatoreViewController(operatoreStage, client, clientProxy, userID, password));
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");

@@ -84,12 +84,6 @@ public class ServerSlave implements Runnable{
                             e.printStackTrace();
                         }
                     }
-                    case ServerInterface.LOGOUT -> {
-                        outStream.writeObject(ServerInterface.ResponseType.logoutOk);
-                        this.props = new Properties();
-                        this.props.setProperty("user", ServerCm.user);
-                        this.props.setProperty("password", ServerCm.password);
-                    }
                     case ServerInterface.QUIT -> {
                         System.out.printf("Client %s has disconnected, Slave %d terminating\n", clientId, slaveId);
                         runCondition = false;

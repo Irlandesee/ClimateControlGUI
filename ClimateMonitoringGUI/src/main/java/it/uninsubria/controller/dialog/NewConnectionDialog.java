@@ -3,6 +3,7 @@ package it.uninsubria.controller.dialog;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.clientCm.ClientProxy;
 import it.uninsubria.controller.mainscene.MainWindowController;
+import it.uninsubria.controller.operatore.OperatoreViewController;
 import it.uninsubria.servercm.ServerInterface;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -21,9 +22,17 @@ public class NewConnectionDialog {
     private TextField portField;
     @FXML
     private Button buttonConnect;
-    private final MainWindowController mainWindowController;
+    private MainWindowController mainWindowController;
+    private OperatoreViewController operatoreViewController;
+    private boolean whichController;
     public NewConnectionDialog(MainWindowController mainWindowController){
         this.mainWindowController = mainWindowController;
+        whichController = true;
+    }
+
+    public NewConnectionDialog(OperatoreViewController operatoreViewController){
+        this.operatoreViewController = operatoreViewController;
+        whichController = false;
     }
 
     @FXML
@@ -50,8 +59,13 @@ public class NewConnectionDialog {
 
             if(clientProxy.testConnection()){
                 new Alert(Alert.AlertType.CONFIRMATION, "Connessione al server stabilita!").showAndWait();
-                mainWindowController.setClient(client);
-                mainWindowController.setClientProxy(clientProxy);
+                if(whichController){
+                    mainWindowController.setClient(client);
+                    mainWindowController.setClientProxy(clientProxy);
+                }else{
+                    operatoreViewController.setClient(client);
+                    operatoreViewController.setClientProxy(clientProxy);
+                }
                 client.setRunCondition(true);
                 client.start();
             }else{
