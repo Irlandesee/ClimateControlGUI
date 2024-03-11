@@ -1,6 +1,7 @@
 package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
+import it.uninsubria.clientCm.ClientProxy;
 import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
 import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.datamodel.city.City;
@@ -27,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Logger;
@@ -98,25 +100,26 @@ public class OperatoreViewController {
     private Alert centroMonitoraggioAlert;
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
-
     private Properties props;
-    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
-    private final String url = "jdbc:postgresql://localhost/postgres";
-
     private Stage mainWindowStage;
     private Stage operatoreWindowStage;
-    private final Client client;
+    private final Client operatoreClient;
     private final MainWindowController mainWindowController;
 
     private final ParametroClimaticoController parametroClimaticoController;
     private final Logger logger;
     private ServerInterface.Tables tableShown;
 
-    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client, String userId, String password){
+    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, String hostname, Inet4Address ipv4Address, int portNumber, String userId, String password){
         this.mainWindowController = mainWindowController;
         this.mainWindowStage = mainWindowStage;
         this.operatoreWindowStage = operatoreWindowStage;
-        this.client = client;
+        this.operatoreClient = new Client();
+        ClientProxy operatoreProxy = new ClientProxy(operatoreClient, hostname);
+        operatoreProxy.setIpAddr(ipv4Address);
+        operatoreProxy.setPortNumber(portNumber);
+        operatoreProxy.init();
+        operatoreClient.setClientProxy(operatoreProxy);
 
         this.logger = Logger.getLogger("OperatoreWindow");
 
@@ -179,9 +182,10 @@ public class OperatoreViewController {
     public void exit(ActionEvent actionEvent){
 
         try{
-            Request logoutRequest = RequestFactory.buildRequest(client.getHostName(), ServerInterface.RequestType.executeLogout, null, null);
-            client.addRequest(logoutRequest);
-            Response response = client.getResponse(logoutRequest.getRequestId());
+            Request logoutRequest = RequestFactory.buildRequest(operatoreClient.getHostName(), ServerInterface.RequestType.executeLogout, null, null);
+            operatoreClient.addRequest(logoutRequest);
+            Response response = operatoreClient.getResponse(logoutRequest.getRequestId());
+            System.out.println(response.getResponseType());
             if(response.getResponseType() == ServerInterface.ResponseType.logoutOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Logout avvenuto con successo!").showAndWait();
             }else{
@@ -268,7 +272,7 @@ public class OperatoreViewController {
 
         tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
 
-        tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(client));
+        tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(operatoreClient));
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
@@ -277,7 +281,7 @@ public class OperatoreViewController {
         Request request = null;
         try{
             request = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.AREA_INTERESSE,
                     new HashMap<>());//select all does not need parameters
@@ -286,9 +290,9 @@ public class OperatoreViewController {
             mre.printStackTrace();
             return;
         }
-        client.addRequest(request);
+        operatoreClient.addRequest(request);
         //get response
-        Response response = client.getResponse(request.getRequestId());
+        Response response = operatoreClient.getResponse(request.getRequestId());
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -308,7 +312,7 @@ public class OperatoreViewController {
         tableView.refresh();
         try{
             request = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null
@@ -318,8 +322,8 @@ public class OperatoreViewController {
             mre.printStackTrace();
             return;
         }
-        client.addRequest(request);
-        Response response = client.getResponse(request.getRequestId());
+        operatoreClient.addRequest(request);
+        Response response = operatoreClient.getResponse(request.getRequestId());
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -340,7 +344,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
                 request = RequestFactory.buildRequest(
-                        client.getHostName(),
+                        operatoreClient.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -350,8 +354,8 @@ public class OperatoreViewController {
                 mre.printStackTrace();
                 return;
             }
-            client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            operatoreClient.addRequest(request);
+            Response response = operatoreClient.getResponse(request.getRequestId());
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -380,7 +384,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
                 request = RequestFactory.buildRequest(
-                        client.getHostName(),
+                        operatoreClient.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
@@ -390,8 +394,8 @@ public class OperatoreViewController {
                 return;
             }
 
-            client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            operatoreClient.addRequest(request);
+            Response response = operatoreClient.getResponse(request.getRequestId());
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -424,7 +428,7 @@ public class OperatoreViewController {
             Request request;
             try{
                 request = RequestFactory.buildRequest(
-                        client.getHostName(),
+                        operatoreClient.getHostName(),
                         ServerInterface.RequestType.selectAll,
                         ServerInterface.Tables.AREA_INTERESSE,
                         null);
@@ -433,9 +437,9 @@ public class OperatoreViewController {
                 mre.printStackTrace();
                 return;
             }
-            client.addRequest(request);
+            operatoreClient.addRequest(request);
             List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
-            Response response = client.getResponse(request.getRequestId());
+            Response response = operatoreClient.getResponse(request.getRequestId());
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
                 return;
@@ -466,7 +470,7 @@ public class OperatoreViewController {
 
         tableView.getColumns().add(TableViewBuilder.getDateColumn());
         tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
-        tableView.setRowFactory(tv -> TableViewBuilder.getRowPc(client));
+        tableView.setRowFactory(tv -> TableViewBuilder.getRowPc(operatoreClient));
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
@@ -538,7 +542,7 @@ public class OperatoreViewController {
                     Map<String, String> reqAreaIdParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
                     requestAreaId = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectObjWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             reqAreaIdParams);
@@ -547,8 +551,8 @@ public class OperatoreViewController {
                     mre.printStackTrace();
                     return;
                 }
-                client.addRequest(requestAreaId);
-                Response resAreaId = client.getResponse(requestAreaId.getRequestId());
+                operatoreClient.addRequest(requestAreaId);
+                Response resAreaId = operatoreClient.getResponse(requestAreaId.getRequestId());
 
                 if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -566,7 +570,7 @@ public class OperatoreViewController {
                     Map<String, String> reqParamClimatici = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
                     requestParamClimatici = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             reqParamClimatici
@@ -576,8 +580,8 @@ public class OperatoreViewController {
                     mre.printStackTrace();
                     return;
                 }
-                client.addRequest(requestParamClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
+                operatoreClient.addRequest(requestParamClimatici);
+                Response responseParametriClimatici = operatoreClient.getResponse(requestParamClimatici.getRequestId());
 
                 if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -617,7 +621,7 @@ public class OperatoreViewController {
                                     denomCmCercato
                             );
                     requestCentroId = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectObjJoinWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
                             requestCentroIdParams);
@@ -627,8 +631,8 @@ public class OperatoreViewController {
                     mre.printStackTrace();
                     return;
                 }
-                client.addRequest(requestCentroId);
-                Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
+                operatoreClient.addRequest(requestCentroId);
+                Response responseCentroId = operatoreClient.getResponse(requestCentroId.getRequestId());
                 if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
                     return;
@@ -645,7 +649,7 @@ public class OperatoreViewController {
                     Map<String, String> requestParametriClimaticiParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
                     requestParametriClimatici = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.PARAM_CLIMATICO,
                             requestParametriClimaticiParams);
@@ -654,8 +658,8 @@ public class OperatoreViewController {
                     mre.printStackTrace();
                     return;
                 }
-                client.addRequest(requestParametriClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
+                operatoreClient.addRequest(requestParametriClimatici);
+                Response responseParametriClimatici = operatoreClient.getResponse(requestParametriClimatici.getRequestId());
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
 
                 tableView.getItems().clear();
@@ -718,7 +722,7 @@ public class OperatoreViewController {
         if(country.isEmpty()){
             try{
                 cmRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null
@@ -731,7 +735,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> cmParams = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "country", country);
                 cmRequest = RequestFactory.buildRequest(
-                        client.getHostName(),
+                        operatoreClient.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         cmParams
@@ -741,8 +745,8 @@ public class OperatoreViewController {
                 return;
             }
         }
-        client.addRequest(cmRequest);
-        Response response = client.getResponse(client.getHostName());
+        operatoreClient.addRequest(cmRequest);
+        Response response = operatoreClient.getResponse(operatoreClient.getHostName());
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -770,7 +774,7 @@ public class OperatoreViewController {
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CITY,
                             null);
@@ -784,7 +788,7 @@ public class OperatoreViewController {
                     Map<String, String> params = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.CITY,
                             params);
@@ -792,14 +796,14 @@ public class OperatoreViewController {
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     return;
                 }
-                client.addRequest(request);
-                Response responseCity = client.getResponse(request.getRequestId());
+                operatoreClient.addRequest(request);
+                Response responseCity = operatoreClient.getResponse(request.getRequestId());
                 String statoDaFiltrare = tFilterCountry.getText();
                 try{
                     Map<String, String> paramsAiRequest = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     requestAi  = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             paramsAiRequest
@@ -808,8 +812,8 @@ public class OperatoreViewController {
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     return;
                 }
-                client.addRequest(requestAi);
-                Response responseAi = client.getResponse(requestAi.getRequestId());
+                operatoreClient.addRequest(requestAi);
+                Response responseAi = operatoreClient.getResponse(requestAi.getRequestId());
                 List<City> cities = (List<City>) responseCity.getResult();
                 List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAi.getResult();
                 for(AreaInteresse area : areeInteresse){
@@ -827,7 +831,7 @@ public class OperatoreViewController {
             if(tFilterCountry.getText().isEmpty() || tFilterCountry.getText().equals("Filtra per stato")){
                 try{
                     request = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.AREA_INTERESSE,
                             null
@@ -842,7 +846,7 @@ public class OperatoreViewController {
                     Map<String, String> paramsCityRequest = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             paramsCityRequest
@@ -852,8 +856,8 @@ public class OperatoreViewController {
                     return;
 
                 }
-                client.addRequest(request);
-                Response responseAreaInteresse = client.getResponse(request.getRequestId());
+                operatoreClient.addRequest(request);
+                Response responseAreaInteresse = operatoreClient.getResponse(request.getRequestId());
                 List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAreaInteresse.getResult();
                 areeInteresse.forEach(ai -> tableView.getItems().add(ai));
             }
@@ -865,7 +869,7 @@ public class OperatoreViewController {
                 Request centriMonitoraggioRequest;
                 try{
                     citiesRequest = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CITY,
                             null);
@@ -874,12 +878,12 @@ public class OperatoreViewController {
                     return;
                 }
 
-                client.addRequest(citiesRequest);
-                Response responseCities = client.getResponse(citiesRequest.getRequestId());
+                operatoreClient.addRequest(citiesRequest);
+                Response responseCities = operatoreClient.getResponse(citiesRequest.getRequestId());
 
                 try{
                     centriMonitoraggioRequest = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CENTRO_MONITORAGGIO,
                             null
@@ -889,8 +893,8 @@ public class OperatoreViewController {
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     return;
                 }
-                client.addRequest(centriMonitoraggioRequest);
-                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+                operatoreClient.addRequest(centriMonitoraggioRequest);
+                Response responseCentriMonitoraggio = operatoreClient.getResponse(centriMonitoraggioRequest.getRequestId());
 
                 List<City> citiesWithoutCm = new LinkedList<City>();
                 List<City> cities = (List<City>) responseCities.getResult();
@@ -904,7 +908,7 @@ public class OperatoreViewController {
                 Request centriMonitoraggioRequest;
                 try{
                     centriMonitoraggioRequest = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAll,
                             ServerInterface.Tables.CENTRO_MONITORAGGIO,
                             null
@@ -914,15 +918,15 @@ public class OperatoreViewController {
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     return;
                 }
-                client.addRequest(centriMonitoraggioRequest);
-                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+                operatoreClient.addRequest(centriMonitoraggioRequest);
+                Response responseCentriMonitoraggio = operatoreClient.getResponse(centriMonitoraggioRequest.getRequestId());
                 List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>)responseCentriMonitoraggio.getResult();
                 String statoDaFiltrare = tFilterCountry.getText();
                 try{
                     Map<String, String> params = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectAllWithCond, "country", statoDaFiltrare);
                     request = RequestFactory.buildRequest(
-                            client.getHostName(),
+                            operatoreClient.getHostName(),
                             ServerInterface.RequestType.selectAllWithCond,
                             ServerInterface.Tables.CITY,
                             params);
@@ -930,8 +934,8 @@ public class OperatoreViewController {
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     return;
                 }
-                client.addRequest(request);
-                Response responseCity = client.getResponse(request.getRequestId());
+                operatoreClient.addRequest(request);
+                Response responseCity = operatoreClient.getResponse(request.getRequestId());
                 List<City> cities = (List<City>)responseCity.getResult();
                 List<City> citiesWithoutCm = new LinkedList<City>();
                 for(CentroMonitoraggio cm : centriMonitoraggio){
@@ -966,7 +970,7 @@ public class OperatoreViewController {
             insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.AREA_INTERESSE,
                     IDGenerator.generateID(), denom, stato, latitudine, longitudine);
             insertRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.AREA_INTERESSE,
                     insertParams
@@ -975,8 +979,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(insertRequest);
-        Response insertResponse = client.getResponse(insertRequest.getClientId());
+        operatoreClient.addRequest(insertRequest);
+        Response insertResponse = operatoreClient.getResponse(insertRequest.getClientId());
         if(insertResponse.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
             return;
@@ -1040,7 +1044,7 @@ public class OperatoreViewController {
                             "denominazione",
                             nomeArea);
             requestAreaId = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     reqAreaIdParams);
@@ -1048,8 +1052,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(requestAreaId);
-        Response respAreaId = client.getResponse(requestAreaId.getRequestId());
+        operatoreClient.addRequest(requestAreaId);
+        Response respAreaId = operatoreClient.getResponse(requestAreaId.getRequestId());
 
         Request requestCentroId;
         try{
@@ -1060,7 +1064,7 @@ public class OperatoreViewController {
                             "nomecentro",
                             centroMon);
             requestCentroId = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     reqCentroIdParams
@@ -1069,8 +1073,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(requestCentroId);
-        Response respCentroId = client.getResponse(requestCentroId.getRequestId());
+        operatoreClient.addRequest(requestCentroId);
+        Response respCentroId = operatoreClient.getResponse(requestCentroId.getRequestId());
         /**
          * TODO:
          * NullPointerException se non c'e' risultato... add checks...
@@ -1102,7 +1106,7 @@ public class OperatoreViewController {
         notaInsertParams.replace(RequestFactory.notaIdKey, notaId);
         try{
             insertNotaRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
                     notaInsertParams);
@@ -1111,8 +1115,8 @@ public class OperatoreViewController {
             logger.info("Mre costruzione insertNota");
             return;
         }
-        client.addRequest(insertNotaRequest);
-        Response responseNota = client.getResponse(insertNotaRequest.getRequestId());
+        operatoreClient.addRequest(insertNotaRequest);
+        Response responseNota = operatoreClient.getResponse(insertNotaRequest.getRequestId());
         if(responseNota.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "errore inserimento nota").showAndWait();
             return;
@@ -1128,7 +1132,7 @@ public class OperatoreViewController {
                     paramValues.get(RequestFactory.valoreTemperaturaKey), paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
                     paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
             insertPcRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     insertParams
@@ -1138,8 +1142,8 @@ public class OperatoreViewController {
             logger.info("Mre costruzione insertPc");
             return;
         }
-        client.addRequest(insertPcRequest);
-        Response insertPcResponse = client.getResponse(insertPcRequest.getRequestId());
+        operatoreClient.addRequest(insertPcRequest);
+        Response insertPcResponse = operatoreClient.getResponse(insertPcRequest.getRequestId());
         if(insertPcResponse.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
         }else{
@@ -1209,7 +1213,7 @@ public class OperatoreViewController {
             Map<String, String> comuneParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectAllWithCond, "ascii_name", comuneCentro);
             reqStato = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAllWithCond,
                     ServerInterface.Tables.CITY,
                     comuneParams);
@@ -1218,8 +1222,8 @@ public class OperatoreViewController {
             mre.printStackTrace();
             return;
         }
-        client.addRequest(reqStato);
-        Response responseStato = client.getResponse(reqStato.getRequestId());
+        operatoreClient.addRequest(reqStato);
+        Response responseStato = operatoreClient.getResponse(reqStato.getRequestId());
         List<City> cities = (List<City>) responseStato.getResult();
         System.out.println(cities.size());
         if(cities.isEmpty()){
@@ -1242,7 +1246,7 @@ public class OperatoreViewController {
             insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
                 nomeCentro, comuneCentro, statoCentro, areaList.toString());
             insertCmRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     insertParams);
@@ -1250,8 +1254,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(insertCmRequest);
-        Response res = client.getResponse(insertCmRequest.getRequestId());
+        operatoreClient.addRequest(insertCmRequest);
+        Response res = operatoreClient.getResponse(insertCmRequest.getRequestId());
         boolean result = (boolean)res.getResult();
         if(result){
             new Alert(Alert.AlertType.CONFIRMATION, "inserimento completato").showAndWait();
@@ -1285,7 +1289,7 @@ public class OperatoreViewController {
         Request opAutorizzatiRequest;
         try{
             opAutorizzatiRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     null
@@ -1295,8 +1299,8 @@ public class OperatoreViewController {
             return;
         }
 
-        client.addRequest(opAutorizzatiRequest);
-        Response response = client.getResponse(opAutorizzatiRequest.getRequestId());
+        operatoreClient.addRequest(opAutorizzatiRequest);
+        Response response = operatoreClient.getResponse(opAutorizzatiRequest.getRequestId());
         List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
 
         opAutorizzati.forEach(op -> tableView.getItems().add(op));
@@ -1315,7 +1319,7 @@ public class OperatoreViewController {
         try{
             insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
             insertAuthOpRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     insertAuthOpParams);
@@ -1323,8 +1327,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(insertAuthOpRequest);
-        Response res = client.getResponse(insertAuthOpRequest.getRequestId());
+        operatoreClient.addRequest(insertAuthOpRequest);
+        Response res = operatoreClient.getResponse(insertAuthOpRequest.getRequestId());
         //TODO: Test, add better checks, refresh table view in order to show the newly inserted op
         if((boolean)res.getResult()){
             new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo").showAndWait();
@@ -1371,7 +1375,7 @@ public class OperatoreViewController {
             Map<String, String> paramsCheckAi = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAi);
             requestAi = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     paramsCheckAi);
@@ -1379,8 +1383,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(requestAi);
-        Response responseAi = client.getResponse(requestAi.getRequestId());
+        operatoreClient.addRequest(requestAi);
+        Response responseAi = operatoreClient.getResponse(requestAi.getRequestId());
         String areaId = responseAi.getResult().toString();
         if (areaId.isEmpty()) {
             new Alert(Alert.AlertType.ERROR, "Area non esistente").showAndWait();
@@ -1392,7 +1396,7 @@ public class OperatoreViewController {
         try {
             Map<String, String> paramsCheckCm = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "nomecentro", denomCm);
             requestCm = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     paramsCheckCm
@@ -1401,8 +1405,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(requestCm);
-        Response responseCm = client.getResponse(requestCm.getRequestId());
+        operatoreClient.addRequest(requestCm);
+        Response responseCm = operatoreClient.getResponse(requestCm.getRequestId());
         String centroId = responseCm.getResult().toString();
         if (centroId.isEmpty()) {
             new Alert(Alert.AlertType.ERROR, "Centro non esistente").showAndWait();
@@ -1415,7 +1419,7 @@ public class OperatoreViewController {
             Map<String, String> paramsCheckAiInCm = RequestFactory
                     .buildParams(ServerInterface.RequestType.selectObjWithCond, "aree_interesse_ids", "centroid", centroId);
             req = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     paramsCheckAiInCm
@@ -1424,8 +1428,8 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
             return;
         }
-        client.addRequest(req);
-        Response response = client.getResponse(req.getRequestId());
+        operatoreClient.addRequest(req);
+        Response response = operatoreClient.getResponse(req.getRequestId());
         String areeAssociateAlCentro = response.getResult().toString();
         if (areeAssociateAlCentro.contains(areaId)) {
             new Alert(Alert.AlertType.INFORMATION, "area già associata al centro").showAndWait();
@@ -1436,7 +1440,7 @@ public class OperatoreViewController {
             try{
                 Map<String, String> updateParams = RequestFactory.buildParams(ServerInterface.RequestType.executeUpdateAi, areaId, centroId);
                 insertAreaRequest = RequestFactory.buildRequest(
-                        client.getHostName(),
+                        operatoreClient.getHostName(),
                         ServerInterface.RequestType.executeUpdateAi,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         updateParams
@@ -1446,8 +1450,8 @@ public class OperatoreViewController {
                 mre.printStackTrace();
                 return;
             }
-            client.addRequest(insertAreaRequest);
-            Response updateAi = client.getResponse(insertAreaRequest.getRequestId());
+            operatoreClient.addRequest(insertAreaRequest);
+            Response updateAi = operatoreClient.getResponse(insertAreaRequest.getRequestId());
             if(updateAi.getResponseType() == ServerInterface.ResponseType.updateOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Area aggiunta al centro").showAndWait();
             }else{
@@ -1487,7 +1491,7 @@ public class OperatoreViewController {
             Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond,
                     "areaid", "denominazione", nomeArea);
             request = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     params
@@ -1497,9 +1501,9 @@ public class OperatoreViewController {
             mre.printStackTrace();
             return;
         }
-        client.addRequest(request);
+        operatoreClient.addRequest(request);
         if(request == null){return;}
-        Response response = client.getResponse(request.getRequestId());
+        Response response = operatoreClient.getResponse(request.getRequestId());
         String areaId = "";
         if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
@@ -1509,7 +1513,7 @@ public class OperatoreViewController {
         System.out.println("areaid ->" + areaId);
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
-            fxmlLoader.setController(new GraphDialog(client, areaId));
+            fxmlLoader.setController(new GraphDialog(operatoreClient, areaId));
             Stage chartStage = new Stage();
             Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
             chartStage.setScene(scene);
@@ -1531,7 +1535,7 @@ public class OperatoreViewController {
         Request requestCentro;
         try{
             requestCentro = RequestFactory.buildRequest(
-                    client.getHostName(),
+                    operatoreClient.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     null);
@@ -1540,8 +1544,8 @@ public class OperatoreViewController {
             mre.printStackTrace();
             return;
         }
-        client.addRequest(requestCentro);
-        Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
+        operatoreClient.addRequest(requestCentro);
+        Response responseCentriMonitoraggio = operatoreClient.getResponse(requestCentro.getClientId());
 
         List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
 
@@ -1551,7 +1555,7 @@ public class OperatoreViewController {
             tableView.getItems().add(cm);
         });
 
-        tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
+        tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(operatoreClient));
 
         tableView.refresh();
 

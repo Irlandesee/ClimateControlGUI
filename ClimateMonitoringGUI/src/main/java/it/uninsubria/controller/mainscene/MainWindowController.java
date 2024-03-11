@@ -922,7 +922,14 @@ public class MainWindowController{
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
+                fxmlLoader.setController(new OperatoreViewController(mainWindowStage,
+                        operatoreStage,
+                        this,
+                        client.getHostName(),
+                        client.getClientProxy().getIpAddr(),
+                        client.getClientProxy().getPortNumber(),
+                        userID,
+                        password));
 
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);

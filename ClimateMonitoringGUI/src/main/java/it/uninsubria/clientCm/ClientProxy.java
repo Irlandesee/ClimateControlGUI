@@ -94,21 +94,27 @@ public class ClientProxy implements ServerInterface {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }
             catch(InterruptedException ie){ie.printStackTrace();}
-            if(request.getRequestType() == RequestType.executeLogin){
-                System.out.printf("Proxy %s sending login request to server\n", this.hostName);
-                outStream.writeObject(ServerInterface.LOGIN);
-                outStream.writeObject(request);
-                try{
-                    Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
-                }catch(InterruptedException ie){ie.printStackTrace();}
-            }else{
-                System.out.printf("Proxy %s sending request to server\n", this.hostName);
-                outStream.writeObject(ServerInterface.NEXT);
-                outStream.writeObject(request);
-                try{
-                    Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
-                }catch(InterruptedException ie){ie.printStackTrace();}
+            logger.info("Request type: " + request.getRequestType().toString());
+            switch(request.getRequestType()){
+                case executeLogin -> {
+                    System.out.printf("Proxy %s sending login request to server\n", this.hostName);
+                    outStream.writeObject(ServerInterface.LOGIN);
+                    outStream.writeObject(request);
+                }
+                case executeLogout -> {
+                    System.out.printf("Proxy %s sending logout request to server\n", this.hostName);
+                    outStream.writeObject(ServerInterface.LOGOUT);
+                }
+                default -> {
+                    System.out.printf("Proxy %s sending request to server\n", this.hostName);
+                    outStream.writeObject(ServerInterface.NEXT);
+                    outStream.writeObject(request);
+                }
             }
+            outStream.flush();
+            try{
+                Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
+            }catch(InterruptedException ie){ie.printStackTrace();}
             System.out.printf("Proxy %s waiting for response from server\n", this.hostName);
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
