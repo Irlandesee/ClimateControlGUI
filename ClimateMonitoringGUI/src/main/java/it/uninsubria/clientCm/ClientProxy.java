@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
@@ -95,22 +96,14 @@ public class ClientProxy implements ServerInterface {
             }
             catch(InterruptedException ie){ie.printStackTrace();}
             System.out.println(request.getRequestType());
-            switch(request.getRequestType()){
-                case executeLogin -> {
-                    System.out.printf("Proxy %s sending login request to server\n", this.hostName);
-                    outStream.writeObject(ServerInterface.LOGIN);
-                    outStream.writeObject(request);
-                }
-                case executeLogout -> {
-                    System.out.printf("Proxy %s sending logout request to server\n", this.hostName);
-                    outStream.writeObject(ServerInterface.LOGOUT);
-                    outStream.writeObject(request);
-                }
-                default -> {
-                    System.out.printf("Proxy %s sending request to server\n", this.hostName);
-                    outStream.writeObject(ServerInterface.NEXT);
-                    outStream.writeObject(request);
-                }
+            if (Objects.requireNonNull(request.getRequestType()) == RequestType.executeLogin) {
+                System.out.printf("Proxy %s sending login request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.LOGIN);
+                outStream.writeObject(request);
+            } else {
+                System.out.printf("Proxy %s sending request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.NEXT);
+                outStream.writeObject(request);
             }
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
