@@ -14,6 +14,7 @@ public interface ServerInterface {
         NOTA_PARAM_CLIMATICO("nota_parametro_climatico"),
         OPERATORE("operatore"),
         OP_AUTORIZZATO("operatore_autorizzati"),
+         UPDATE("update"),
         PARAM_CLIMATICO("parametro_climatico");
 
         public final String label;
@@ -32,7 +33,8 @@ public interface ServerInterface {
         executeUpdateAi("executeUpdateAi"),
         insert("insert"),
         requestSignUp("requestSignUp"),
-        executeSignUp("executeSignUp");
+        executeSignUp("executeSignUp"),
+        requestUpdate("requestUpdate");
         public final String label;
         private RequestType(String label){
             this.label = label;
@@ -52,6 +54,7 @@ public interface ServerInterface {
         logoutKo("logoutKo"),
         updateOk("updateOk"),
         updateKo("updateKo"),
+        updateInfo("updateInfo"),
         requestSignUpOk("requestSignUpOk"),
         requestSignUpKo("requestSignUpKo"),
         executeSignUpOk("executeSignUpOk"),
@@ -61,6 +64,7 @@ public interface ServerInterface {
     }
 
     int PORT = 9999;
+    int UPDATE_PORT = 9998;
     int selectAllWithCondParamsLength = 2;
     int selectObjWithCondParamsLength = 3;
     int selectObjJoinWithCondParamsLength = 4;
@@ -82,6 +86,7 @@ public interface ServerInterface {
     String ID = "ID";
     String LOGIN = "LOGIN";
     String LOGOUT = "LOGOUT";
+    String UPDATE = "UPDATE";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
     String SUCCESSFULL_INSERT = "SUCCESSFUL_INSERT";
     String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";

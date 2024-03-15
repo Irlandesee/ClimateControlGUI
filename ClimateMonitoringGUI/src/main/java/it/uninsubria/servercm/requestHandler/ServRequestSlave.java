@@ -1,8 +1,9 @@
-package it.uninsubria.servercm;
+package it.uninsubria.servercm.requestHandler;
 import it.uninsubria.factories.RequestFactory;
-import it.uninsubria.factories.ResponseFactory;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
+import it.uninsubria.servercm.CallableQuery;
+import it.uninsubria.servercm.ServerInterface;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -15,7 +16,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class ServerSlave implements Runnable{
+public class ServRequestSlave implements Runnable{
 
     private int slaveId;
     private Socket sock;
@@ -23,14 +24,14 @@ public class ServerSlave implements Runnable{
     private ObjectOutputStream outStream;
     private Properties props;
     private final ExecutorService executorService;
-    private final int MAX_NUMBER_OF_THREADS = 5;
-    public ServerSlave(Socket sock, int slaveId, Properties props){
-        //executorService = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
+    public ServRequestSlave(Socket sock, int slaveId, Properties props){
         executorService = Executors.newSingleThreadExecutor();
         this.sock = sock;
         this.slaveId = slaveId;
         this.props = props;
     }
+
+    public Socket getSocket(){return this.sock;}
 
     public void run(){
         String clientId = "";

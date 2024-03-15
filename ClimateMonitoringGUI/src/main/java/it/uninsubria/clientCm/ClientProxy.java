@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-public class ClientProxy implements ServerInterface {
+public class ClientProxy implements ServerInterface{
     private Socket sock;
     private final Client client;
     private final Logger logger;
@@ -134,7 +134,5 @@ public class ClientProxy implements ServerInterface {
             client.setRunCondition(false);
         }catch(IOException ioe){ioe.printStackTrace();}
     }
-
-
 
 }

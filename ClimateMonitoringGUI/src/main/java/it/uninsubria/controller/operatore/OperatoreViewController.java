@@ -1066,6 +1066,7 @@ public class OperatoreViewController {
     }
 
 
+    //Bugged -> throws malformed request exception even though the parameters lengths are correct
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
         logger.info("Noem centro: " + centroMon);
