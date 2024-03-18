@@ -1,5 +1,4 @@
 package it.uninsubria.update;
-
 import it.uninsubria.servercm.ServerInterface.Tables;
 import java.io.Serial;
 import java.io.Serializable;
