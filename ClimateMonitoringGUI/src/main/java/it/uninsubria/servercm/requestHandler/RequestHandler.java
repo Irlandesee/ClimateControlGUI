@@ -28,13 +28,14 @@ public class RequestHandler extends Thread{
         this.requestsLogger = Logger.getLogger(this.name);
         try{
             requestsSocket = new ServerSocket(ServerInterface.PORT);
-            requestsLogger.fine(this.name + " Started on port: " + ServerInterface.PORT);
+            requestsLogger.info(this.name + " Started on port: " + ServerInterface.PORT);
         }catch(IOException ioe){
             ioe.printStackTrace();
         }
         clientHandler = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
         connChecker = Executors.newFixedThreadPool(MAX_NUMBER_OF_THREADS);
         slaves = new LinkedBlockingQueue<ServRequestSlave>();
+        setRunCondition(true);
 
     }
 
@@ -55,28 +56,27 @@ public class RequestHandler extends Thread{
     @Override
     public void run(){
         int i = 0;
-        while(getRunCondition()){
-            try{
+        try{
+            while(getRunCondition()){
                 Socket sock = requestsSocket.accept();
                 i++;
-                requestsLogger.fine("New connection accepted");
+                requestsLogger.info("New connection accepted");
                 ServRequestSlave slave = new ServRequestSlave(sock, i, props);
                 addSlave(slave);
                 Future<?> future = clientHandler.submit(slave);
-
-            }catch(IOException ioe){
-                requestsLogger.fine(ioe.getMessage());
-
-            }finally{
-                requestsLogger.fine("Master server closing server socket");
-                try{
-                    requestsSocket.close();
-                }catch(IOException ioe){
-                    ioe.printStackTrace();}
-                clientHandler.shutdown();
-                connChecker.shutdown();
-
             }
+        }catch(IOException ioe){
+            requestsLogger.info(ioe.getMessage());
+            //setRunCondition(false);
+
+        }finally{
+            requestsLogger.info("Master server closing server socket");
+            try{
+                requestsSocket.close();
+            }catch(IOException ioe){
+                ioe.printStackTrace();}
+            clientHandler.shutdown();
+            connChecker.shutdown();
 
         }
     }

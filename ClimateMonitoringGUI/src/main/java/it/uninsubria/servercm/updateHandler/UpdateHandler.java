@@ -47,28 +47,29 @@ public class UpdateHandler extends Thread {
     @Override
     public void run(){
         int i = 0;
-        while(getRunCondition()){
-            try{
+        try{
+            while(getRunCondition()){
                 Socket updateSocket = updatesSocket.accept();
                 i++;
-                updatesLogger.fine("New connection accepted");
+                updatesLogger.info("New connection accepted");
                 ServUpdaterSlave slave = new ServUpdaterSlave(updateSocket, i, props);
                 addSlave(slave);
                 Future<?> future = clientHandler.submit(slave);
 
+            }
+
+        }catch(IOException ioe){
+            updatesLogger.info(ioe.getMessage());
+            //setRunCondition(false);
+        }finally{
+            updatesLogger.fine("Master Server closing server socket");
+            try{
+                updatesSocket.close();
             }catch(IOException ioe){
                 updatesLogger.fine(ioe.getMessage());
-
-            }finally{
-                updatesLogger.fine("Master Server closing server socket");
-                try{
-                    updatesSocket.close();
-                }catch(IOException ioe){
-                    updatesLogger.fine(ioe.getMessage());
-                }
-                clientHandler.shutdown();
-                connChecker.shutdown();
             }
+            clientHandler.shutdown();
+            connChecker.shutdown();
 
         }
 
