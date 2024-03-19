@@ -88,6 +88,7 @@ public class MainWindowController{
     private Alert clientNotConnected;
     private Alert clientHasDisconnected;
     private Alert serverHasDisconnected;
+    private Alert disconnectSuccessful;
 
     private Stage mainWindowStage;
     private Stage loginStage;
@@ -197,7 +198,6 @@ public class MainWindowController{
         this.areaWithNoPc = new Alert(Alert.AlertType.INFORMATION);
         this.areaWithNoPc.setHeaderText("Area senza parametri climatici.");
         this.areaWithNoPc.setContentText("L'area selezionata non presenta alcun parametro climatico associato.");
-
 
     }
 
@@ -1015,6 +1015,16 @@ public class MainWindowController{
             client.getClientProxy().sendQuitRequest();
             client = null;
             clientProxy = null;
+
+            if(paramBox != null){
+                paramBox.getChildren().clear();
+            }
+            if(tableView != null){
+                tableView.getColumns().clear();
+                tableView.getItems().clear();
+            }
+
+            this.clientHasDisconnected.showAndWait();
         }
         else{
             clientNotConnected.showAndWait();
