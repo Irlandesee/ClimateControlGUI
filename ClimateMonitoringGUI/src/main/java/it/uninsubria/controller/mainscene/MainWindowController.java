@@ -20,6 +20,7 @@ import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
+import it.uninsubria.util.Util;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -82,11 +83,12 @@ public class MainWindowController{
 
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
+    private Alert areaWithNoPc;
 
     private Alert clientNotConnected;
     private Alert clientHasDisconnected;
-
-    private Properties props;
+    private Alert serverHasDisconnected;
+    private Alert disconnectSuccessful;
 
     private Stage mainWindowStage;
     private Stage loginStage;
@@ -186,8 +188,16 @@ public class MainWindowController{
         this.clientNotConnected.setContentText("L'applicazione non e' connessa a nessun server!");
 
         this.clientHasDisconnected = new Alert(Alert.AlertType.CONFIRMATION);
-        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata");
+        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata.");
         this.clientHasDisconnected.setContentText("Disconessione dal server effettuata con successo!");
+
+        this.serverHasDisconnected = new Alert(Alert.AlertType.INFORMATION);
+        this.serverHasDisconnected.setHeaderText("Server disconnesso.");
+        this.serverHasDisconnected.setContentText("Il server si e' disconnesso, tentare una nuova connessione oppure connettersi a un nuovo server.");
+
+        this.areaWithNoPc = new Alert(Alert.AlertType.INFORMATION);
+        this.areaWithNoPc.setHeaderText("Area senza parametri climatici.");
+        this.areaWithNoPc.setContentText("L'area selezionata non presenta alcun parametro climatico associato.");
 
     }
 
@@ -312,11 +322,10 @@ public class MainWindowController{
                         return;
                     }
                     if(res.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                        resNoSuchElementAlert.showAndWait();
+                        areaWithNoPc.showAndWait();
                         return;
                     }
                     List<ParametroClimatico> params = (List<ParametroClimatico>) res.getResult();
-                    params.forEach(System.out::println);
 
                     try{
                         Stage aiDialogStage = new Stage();
@@ -440,24 +449,6 @@ public class MainWindowController{
 
     }
 
-    //Calculate the parameter passed in radians
-    private static Float toRad(Float value){
-        return (float) (value * Math.PI / 180);
-    }
-
-    public static Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
-        final int earthRadius = 6731; // in kms
-        float latDistance = toRad(latSecondPoint - latFirstPoint);
-        float longDistance = toRad(longSecondPoint - longFirstPoint);
-
-        float a = (float) (Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
-                        Math.cos(toRad(latFirstPoint)) * Math.cos(toRad(latSecondPoint)) *
-                                Math.sin(toRad(longDistance / 2))  * Math.sin(longDistance / 2));
-        float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-
-        return earthRadius * c;
-    }
-
     private void handleRicercaAreaPerCoordinate(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
@@ -496,7 +487,7 @@ public class MainWindowController{
             List<AreaInteresse> areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
-                float distance = haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
+                float distance = Util.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
                 if(distance < 50) { //50 km
                     System.out.println(area);
                     areeVicine.add(area);
@@ -700,7 +691,7 @@ public class MainWindowController{
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.removeIf(parametroClimatico -> isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
+                    parametriClimatici.removeIf(parametroClimatico -> Util.isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
@@ -783,7 +774,7 @@ public class MainWindowController{
                     LocalDate finalEndDate = endDate;
                     parametriClimatici.forEach((param) -> {
                         parametriClimatici.removeIf((pc) -> {
-                            return isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
+                            return Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
                         });
                     });
                 }
@@ -889,10 +880,6 @@ public class MainWindowController{
         }
     }
 
-    public static boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
-        return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
-    }
-
     public boolean onExecuteLoginQuery(String userID, String password){
         System.out.printf("Userid & password: %s %s\n", userID, password);
 
@@ -919,7 +906,7 @@ public class MainWindowController{
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/operatore-scene.fxml"));
                 operatoreStage = new Stage();
-                fxmlLoader.setController(new OperatoreViewController(mainWindowStage, operatoreStage, this, client, userID, password));
+                fxmlLoader.setController(new OperatoreViewController(operatoreStage, client, clientProxy, userID, password));
                 Scene scene = new Scene(fxmlLoader.load(), 800, 1200);
                 operatoreStage.setScene(scene);
                 operatoreStage.setTitle("operatoreView");
@@ -1028,10 +1015,24 @@ public class MainWindowController{
             client.getClientProxy().sendQuitRequest();
             client = null;
             clientProxy = null;
+
+            if(paramBox != null){
+                paramBox.getChildren().clear();
+            }
+            if(tableView != null){
+                tableView.getColumns().clear();
+                tableView.getItems().clear();
+            }
+
+            this.clientHasDisconnected.showAndWait();
         }
         else{
             clientNotConnected.showAndWait();
         }
+    }
+
+    public void handleServerDisconnect(){
+        serverHasDisconnected.showAndWait();
     }
 
 }

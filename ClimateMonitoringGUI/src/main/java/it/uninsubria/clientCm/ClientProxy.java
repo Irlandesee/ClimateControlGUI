@@ -3,16 +3,18 @@ package it.uninsubria.clientCm;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
+import javafx.scene.control.Alert;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-public class ClientProxy implements ServerInterface {
+public class ClientProxy implements ServerInterface{
     private Socket sock;
     private final Client client;
     private final Logger logger;
@@ -83,7 +85,7 @@ public class ClientProxy implements ServerInterface {
         return res;
     }
 
-    public void sendRequest(Request req){
+    public void sendRequest(Request request) throws IOException{
         try{
 
             System.out.printf("Proxy %s sending id to server\n", this.hostName);
@@ -93,22 +95,23 @@ public class ClientProxy implements ServerInterface {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }
             catch(InterruptedException ie){ie.printStackTrace();}
-
-            System.out.printf("Proxy %s sending request to server\n", this.hostName);
-            outStream.writeObject(ServerInterface.NEXT);
-            outStream.writeObject(req);
+            System.out.println(request.getRequestType());
+            if (Objects.requireNonNull(request.getRequestType()) == RequestType.executeLogin) {
+                System.out.printf("Proxy %s sending login request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.LOGIN);
+                outStream.writeObject(request);
+            } else {
+                System.out.printf("Proxy %s sending request to server\n", this.hostName);
+                outStream.writeObject(ServerInterface.NEXT);
+                outStream.writeObject(request);
+            }
             try{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }catch(InterruptedException ie){ie.printStackTrace();}
-
             System.out.printf("Proxy %s waiting for response from server\n", this.hostName);
             Response res =  (Response) inStream.readObject();
             client.addResponse(res);
             logger.info("Adding response to queue");
-        }catch(IOException ioe){
-            System.out.println("Server has disconnected, closing the connection...");
-            quit();
-            ioe.printStackTrace();
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }
 
@@ -122,13 +125,14 @@ public class ClientProxy implements ServerInterface {
 
     public void quit(){
         try{
-            outStream.close();
-            inStream.close();
-            sock.close();
+            if(sock != null)
+                sock.close();
+            if(outStream != null)
+                outStream.close();
+            if(inStream != null)
+                inStream.close();
             client.setRunCondition(false);
         }catch(IOException ioe){ioe.printStackTrace();}
     }
-
-
 
 }

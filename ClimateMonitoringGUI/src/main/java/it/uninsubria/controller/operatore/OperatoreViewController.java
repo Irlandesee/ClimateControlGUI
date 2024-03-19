@@ -1,12 +1,13 @@
 package it.uninsubria.controller.operatore;
 
 import it.uninsubria.MainWindow;
+import it.uninsubria.clientCm.ClientProxy;
+import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.datamodel.areaInteresse.AreaInteresse;
 import it.uninsubria.datamodel.centroMonitoraggio.CentroMonitoraggio;
 import it.uninsubria.datamodel.city.City;
 import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.dialog.*;
-import it.uninsubria.controller.mainscene.MainWindowController;
 import it.uninsubria.controller.parametroclimatico.ParametroClimaticoController;
 import it.uninsubria.factories.RequestFactory;
 import it.uninsubria.datamodel.operatore.OperatoreAutorizzato;
@@ -17,9 +18,11 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import it.uninsubria.util.IDGenerator;
+import it.uninsubria.util.Util;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -98,43 +101,32 @@ public class OperatoreViewController {
     private Alert centroMonitoraggioAlert;
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
+    private Alert clientNotConnected;
+    private Alert clientHasDisconnected;
+    private Alert serverHasDisconnected;
 
     private Properties props;
-    //private final String url = "jdbc:postgresql://192.168.1.26/postgres";
-    private final String url = "jdbc:postgresql://localhost/postgres";
 
-    private Stage mainWindowStage;
     private Stage operatoreWindowStage;
-    private final Client client;
-    private final MainWindowController mainWindowController;
+    private Client client;
+    private ClientProxy clientProxy;
 
     private final ParametroClimaticoController parametroClimaticoController;
     private final Logger logger;
     private ServerInterface.Tables tableShown;
 
-    public OperatoreViewController(Stage mainWindowStage, Stage operatoreWindowStage, MainWindowController mainWindowController, Client client, String userId, String password){
-        this.mainWindowController = mainWindowController;
-        this.mainWindowStage = mainWindowStage;
-        this.operatoreWindowStage = operatoreWindowStage;
+    public OperatoreViewController(Stage operatoreWindowStage,Client client, ClientProxy clientProxy, String userId, String password){
         this.client = client;
-
+        this.clientProxy = clientProxy;
+        this.operatoreWindowStage = operatoreWindowStage;
+        operatoreWindowStage.setMinHeight(800);
+        operatoreWindowStage.setMinWidth(1200);
+        initAlerts();
         this.logger = Logger.getLogger("OperatoreWindow");
-
-        this.operatoreWindowStage.setMinHeight(800);
-        this.operatoreWindowStage.setWidth(1200);
         this.parametroClimaticoController = new ParametroClimaticoController(this);
-
         props = new Properties();
         props.put("user", userId);
         props.put("password", password);
-    }
-
-
-    @FXML
-    public void initialize(){
-        initAlerts();
-        //show aree interesse presenti
-        showAreeInserite();
     }
 
     private void initAlerts(){
@@ -173,16 +165,77 @@ public class OperatoreViewController {
         this.resNoSuchElementAlert = new Alert(Alert.AlertType.ERROR);
         this.resNoSuchElementAlert.setHeaderText("Oggetto inesistente");
         this.resNoSuchElementAlert.setContentText("L'oggetto richiesto non esiste!");
+
+        this.clientNotConnected = new Alert(Alert.AlertType.ERROR);
+        this.clientNotConnected.setHeaderText("Nessuna connessione!");
+        this.clientNotConnected.setContentText("L'applicazione non e' connessa a nessun server!");
+
+        this.clientHasDisconnected = new Alert(Alert.AlertType.CONFIRMATION);
+        this.clientHasDisconnected.setHeaderText("Disconnessione effettuata.");
+        this.clientHasDisconnected.setContentText("Disconessione dal server effettuata con successo!");
+
+        this.serverHasDisconnected = new Alert(Alert.AlertType.INFORMATION);
+        this.serverHasDisconnected.setHeaderText("Server disconnesso.");
+        this.serverHasDisconnected.setContentText("Il server si e' disconnesso, tentare una nuova connessione oppure connettersi a un nuovo server.");
     }
 
     @FXML
     public void exit(ActionEvent actionEvent){
-        if(operatoreWindowStage != null) operatoreWindowStage.close();
+
+        client.getClientProxy().sendQuitRequest();
+        Stage operatoreStage = (Stage)((Node) actionEvent.getSource()).getScene().getWindow();
+
         //go back to the main window stage
-        if(mainWindowStage != null){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/main-scene.fxml"));
+            Stage mainWindowStage = new Stage();
+            fxmlLoader.setController(new MainWindowController(mainWindowStage));
+            Scene scene = new Scene(fxmlLoader.load(), 800, 800);
+            mainWindowStage.setScene(scene);
+            mainWindowStage.setTitle("ClimateMonitoringApp");
+            operatoreStage.close();
             mainWindowStage.show();
+        }catch(IOException ioe){}
+    }
+
+    @FXML
+    public void handleNewConnection(){
+        System.out.println("New connection");
+        try{
+            Stage connectionStage = new Stage();
+            NewConnectionDialog connectionDialog = new NewConnectionDialog(this);
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
+            fxmlLoader.setController(connectionDialog);
+            Scene dialogScene = new Scene(fxmlLoader.load());
+            connectionStage.setScene(dialogScene);
+            connectionStage.show();
+        }catch(IOException ioe){ioe.printStackTrace();}
+    }
+
+    @FXML
+    public void handleDisconnect(){
+        if(client != null){
+            System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
+            client.getClientProxy().sendQuitRequest();
+            client = null;
+            clientProxy = null;
+        }
+        else{
+            clientNotConnected.showAndWait();
         }
     }
+
+    public void handleServerDisconnect(){
+        serverHasDisconnected.showAndWait();
+    }
+
+    public Client getClient(){return this.client;}
+    public void setClient(Client client){
+        this.client = client;
+    }
+    public ClientProxy getClientProxy(){return this.clientProxy;}
+    public void setClientProxy(ClientProxy clientProxy){this.clientProxy = clientProxy;}
+
 
     private void prepTableCity(){
 
@@ -436,7 +489,7 @@ public class OperatoreViewController {
             areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
             List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
             areeInteresse.forEach(area -> {
-                float distance = MainWindowController.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
+                float distance = Util.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
                 //50 km
                 if(distance < 50) areeVicine.add(area);
             });
@@ -581,7 +634,7 @@ public class OperatoreViewController {
                 if(ricercaPerData){
                     LocalDate finalStartDate = startDate;
                     LocalDate finalEndDate = endDate;
-                    parametriClimatici.removeIf((pc) -> MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
+                    parametriClimatici.removeIf((pc) -> Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate()));
                 }
                 parametriClimatici.forEach((pc) -> {
                     System.out.println(pc);
@@ -652,7 +705,7 @@ public class OperatoreViewController {
                     LocalDate finalEndDate = endDate;
                     parametriClimatici.forEach((param) -> {
                         parametriClimatici.removeIf((pc) -> {
-                            return MainWindowController.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
+                            return Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
                         });
                     });
                 }
@@ -1013,6 +1066,7 @@ public class OperatoreViewController {
     }
 
 
+    //Bugged -> throws malformed request exception even though the parameters lengths are correct
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
         logger.info("Noem centro: " + centroMon);
