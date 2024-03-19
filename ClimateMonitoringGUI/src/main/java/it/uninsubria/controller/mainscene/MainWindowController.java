@@ -21,6 +21,7 @@ import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import it.uninsubria.util.Util;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -105,6 +106,14 @@ public class MainWindowController{
     public MainWindowController(Stage stage){
 
         this.mainWindowStage = stage;
+        this.mainWindowStage.setOnCloseRequest(e -> {
+            if(client != null){
+                this.client.getClientProxy().sendQuitRequest();
+                this.client.setRunCondition(false);
+            }
+            System.out.println("Exiting");
+            Platform.exit();
+        });
 
         mainWindowStage.setMinHeight(800);
         mainWindowStage.setMinWidth(1200);
@@ -1013,8 +1022,8 @@ public class MainWindowController{
         if(client != null){
             System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
             client.getClientProxy().sendQuitRequest();
+            client.setRunCondition(false);
             client = null;
-            clientProxy = null;
 
             if(paramBox != null){
                 paramBox.getChildren().clear();

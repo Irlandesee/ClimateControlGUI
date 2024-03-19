@@ -89,7 +89,6 @@ public class Client extends Thread{
                 clientProxy.sendRequest(request);
             } catch(IOException ioe){
                 System.out.println("Server has disconnected, closing the connection...");
-                //Platform.runLater(mainWindowController::handleServerDisconnect);
                 clientProxy.quit();
                 ioe.printStackTrace();
             }
