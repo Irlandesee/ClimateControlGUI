@@ -22,6 +22,7 @@ public class MainWindow extends Application {
         stage.setScene(scene);
         stage.show();
     }
+    //ip address iphone: 172.20.10.3
 
     public static void main(String[] args) {
         launch();
