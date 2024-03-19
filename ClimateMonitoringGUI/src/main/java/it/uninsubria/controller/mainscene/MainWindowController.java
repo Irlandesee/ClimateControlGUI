@@ -83,6 +83,7 @@ public class MainWindowController{
 
     private Alert resErrorAlert;
     private Alert resNoSuchElementAlert;
+    private Alert areaWithNoPc;
 
     private Alert clientNotConnected;
     private Alert clientHasDisconnected;
@@ -192,6 +193,11 @@ public class MainWindowController{
         this.serverHasDisconnected = new Alert(Alert.AlertType.INFORMATION);
         this.serverHasDisconnected.setHeaderText("Server disconnesso.");
         this.serverHasDisconnected.setContentText("Il server si e' disconnesso, tentare una nuova connessione oppure connettersi a un nuovo server.");
+
+        this.areaWithNoPc = new Alert(Alert.AlertType.INFORMATION);
+        this.areaWithNoPc.setHeaderText("Area senza parametri climatici.");
+        this.areaWithNoPc.setContentText("L'area selezionata non presenta alcun parametro climatico associato.");
+
 
     }
 
@@ -316,11 +322,10 @@ public class MainWindowController{
                         return;
                     }
                     if(res.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                        resNoSuchElementAlert.showAndWait();
+                        areaWithNoPc.showAndWait();
                         return;
                     }
                     List<ParametroClimatico> params = (List<ParametroClimatico>) res.getResult();
-                    params.forEach(System.out::println);
 
                     try{
                         Stage aiDialogStage = new Stage();
