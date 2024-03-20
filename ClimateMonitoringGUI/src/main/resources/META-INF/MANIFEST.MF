@@ -1,15 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: it.uninsubria.MainWindow
-Class-Path: javafx-media-17.0.6-linux.jar httpclient-4.5.14.jar hamcrest
- -core-1.3.jar org.osgi.core-6.0.0.jar javafx-web-17.0.6-linux.jar forms
- fx-core-11.6.0.jar checker-qual-3.31.0.jar testfx-junit5-4.0.17.jar jav
- afx-fxml-17.0.6.jar hamcrest-2.1.jar javafx-media-17.0.6.jar testfx-cor
- e-4.0.17.jar validatorfx-0.4.0.jar javafx-graphics-17.0.6.jar postgresq
- l-42.6.0.jar json-20230618.jar javafx-base-17.0.6-linux.jar javafx-web-
- 17.0.6.jar javafx-swing-17.0.2-linux.jar javafx-controls-17.0.6-linux.j
- ar javafx-fxml-17.0.6-linux.jar junit-4.13.1.jar javafx-swing-17.0.2.ja
- r controlsfx-11.1.2.jar javafx-controls-17.0.6.jar javafx-graphics-17.0
- .6-linux.jar commons-codec-1.11.jar ikonli-javafx-12.3.1.jar httpcore-4
- .4.16.jar commons-logging-1.2.jar javafx-base-17.0.6.jar ikonli-core-12
- .3.1.jar bootstrapfx-core-0.4.0.jar
 
