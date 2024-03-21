@@ -19,6 +19,7 @@ import it.uninsubria.servercm.ServerInterface;
 import it.uninsubria.tableViewBuilder.TableViewBuilder;
 import it.uninsubria.util.IDGenerator;
 import it.uninsubria.util.Util;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -91,6 +92,14 @@ public class OperatoreViewController {
     private TextField tCodFiscField;
     private Button buttonAbilitaOp; //abilita alla registrazione
 
+    //update - delete buttons
+    private Button buttonRimuoviAreaInteresse;
+    private Button buttonRimuoviCentroMonitoraggio;
+    private Button buttonRimuoviParametroClimatico;
+    private Button buttonAggiornaParametroClimatico;
+    private Button buttonAggiornaAreaInteresse;
+    private Button buttonAggiornaCentroMonitoraggio;
+
     //alerts
     private Alert coordAlert;
     private Alert denomAlert;
@@ -104,6 +113,7 @@ public class OperatoreViewController {
     private Alert clientNotConnected;
     private Alert clientHasDisconnected;
     private Alert serverHasDisconnected;
+    private Alert areaWithNoPc;
 
     private Properties props;
 
@@ -115,10 +125,18 @@ public class OperatoreViewController {
     private final Logger logger;
     private ServerInterface.Tables tableShown;
 
-    public OperatoreViewController(Stage operatoreWindowStage,Client client, ClientProxy clientProxy, String userId, String password){
+    public OperatoreViewController(Stage operatoreWindowStage, Client client, ClientProxy clientProxy, String userId, String password){
         this.client = client;
         this.clientProxy = clientProxy;
         this.operatoreWindowStage = operatoreWindowStage;
+        this.operatoreWindowStage.setOnCloseRequest(e -> {
+            if(client != null){
+                this.client.getClientProxy().sendQuitRequest();
+                this.client.setRunCondition(false);
+            }
+            System.out.println("Exiting");
+            Platform.exit();
+        });
         operatoreWindowStage.setMinHeight(800);
         operatoreWindowStage.setMinWidth(1200);
         initAlerts();
@@ -177,6 +195,10 @@ public class OperatoreViewController {
         this.serverHasDisconnected = new Alert(Alert.AlertType.INFORMATION);
         this.serverHasDisconnected.setHeaderText("Server disconnesso.");
         this.serverHasDisconnected.setContentText("Il server si e' disconnesso, tentare una nuova connessione oppure connettersi a un nuovo server.");
+
+        this.areaWithNoPc = new Alert(Alert.AlertType.INFORMATION);
+        this.areaWithNoPc.setHeaderText("Area senza parametri climatici.");
+        this.areaWithNoPc.setContentText("L'area selezionata non presenta alcun parametro climatico associato.");
     }
 
     @FXML
@@ -217,8 +239,18 @@ public class OperatoreViewController {
         if(client != null){
             System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
             client.getClientProxy().sendQuitRequest();
+            client.setRunCondition(false);
             client = null;
-            clientProxy = null;
+
+            if(paramBox != null){
+                paramBox.getChildren().clear();
+            }
+            if(tableView != null){
+                tableView.getColumns().clear();
+                tableView.getItems().clear();
+            }
+
+            this.clientHasDisconnected.showAndWait();
         }
         else{
             clientNotConnected.showAndWait();
@@ -302,6 +334,8 @@ public class OperatoreViewController {
     }
 
     private void prepTableAreaInteresse(){
+        if(paramBox != null && !paramBox.getChildren().isEmpty())
+            paramBox.getChildren().clear();
         tableView.getItems().clear();
         tableView.getColumns().clear();
         tableView.refresh();
@@ -1596,6 +1630,93 @@ public class OperatoreViewController {
         tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
 
         tableView.refresh();
+
+    }
+
+    private void rimuoviAreaPerDenom(){
+        String denominazioneAreaDaRimuovere = tDenominazione.getText();
+        if(denominazioneAreaDaRimuovere.isEmpty() || denominazioneAreaDaRimuovere.equals("Nome")){
+            new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
+            return;
+        }
+        Request areaIdRequest;
+        try{
+            Map<String, String> requestParams = RequestFactory.buildParams(
+                    ServerInterface.RequestType.selectObjWithCond,
+                    "areaid",
+                    "denominazione",
+                    denominazioneAreaDaRimuovere);
+            areaIdRequest = RequestFactory.buildRequest(
+                    client.getHostName(),
+                    ServerInterface.RequestType.selectObjWithCond,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    requestParams);
+        }catch(MalformedRequestException mre){
+            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            return;
+        }
+        client.addRequest(areaIdRequest);
+        Response areaIdResponse = client.getResponse(areaIdRequest.getRequestId());
+        if(areaIdResponse.getResponseType().equals(ServerInterface.ResponseType.Error)){
+            new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta.").showAndWait();
+            return;
+        }
+        if(areaIdResponse.getResponseType().equals(ServerInterface.ResponseType.NoSuchElement)){
+            new Alert(Alert.AlertType.ERROR, "Elemento inesistente.").showAndWait();
+            return;
+        }
+        try{
+            Map<String, String> deleteParams = RequestFactory.buildParams(
+
+            );
+            Request deleteRequest = RequestFactory.buildRequest(
+                    client.getHostName(),
+                    ServerInterface.RequestType.delete,
+                    ServerInterface.Tables.AREA_INTERESSE,
+                    deleteParams);
+        }catch(MalformedRequestException mre){
+
+        }
+    }
+
+    @FXML
+    public void handleRimuoviAreaInteresse(ActionEvent event){
+        this.paramBox = new VBox(2);
+        paramBox.getStyleClass().add("param-box");
+        this.tDenominazione = new TextField("Nome");
+        this.tDenominazione.setOnMouseClicked((e) -> {this.tDenominazione.clear();});
+        this.btnRicercaAreaPerDenom.setOnAction(e -> {rimuoviAreaPerDenom();});
+        paramBox.getChildren().add(tDenominazione);
+        paramBox.getChildren().add(btnRicercaAreaPerDenom);
+
+        prepTableAreaInteresse();
+        showAreeInserite();
+        this.borderPane.setRight(paramBox);
+
+    }
+
+    @FXML
+    public void handleRimuoviCentroMonitoraggio(ActionEvent event){
+
+    }
+
+    @FXML
+    public void handleRimuoviParametroClimatico(ActionEvent event){
+
+    }
+
+    @FXML
+    public void handleAggiornaAreaInteresse(ActionEvent event){
+
+    }
+
+    @FXML
+    public void handleAggiornaCentroMonitoraggio(ActionEvent event){
+
+    }
+
+    @FXML
+    public void handleAggiornaParametroClimatico(ActionEvent event){
 
     }
 

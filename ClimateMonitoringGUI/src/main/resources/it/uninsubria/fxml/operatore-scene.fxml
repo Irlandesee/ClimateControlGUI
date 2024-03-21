@@ -44,6 +44,12 @@
                 <Button text="Aggiungi Area a centro" fx:id="buttonAggiungiArea" onAction="#handleAggiungiAreaACentro"/>
                 <Button text="Inserisci Parametro climatico" fx:id="buttonInserisciParametri" onAction="#handleInserisciParametriClimatici"/>
                 <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleInserisciCentroMonitoraggio"/>
+                <Button text="Elimina area interesse" fx:id="buttonRimuoviAreaInteresse" onAction="#handleRimuoviAreaInteresse"/>
+                <Button text="Elimina centro monitoraggio" fx:id="buttonRimuoviCentroMonitoraggio" onAction="#handleRimuoviCentroMonitoraggio"/>
+                <Button text="Elimina Parametro climatico" fx:id="buttonRimuoviParametroClimatico" onAction="#handleRimuoviParametroClimatico"/>
+                <Button text="Aggiorna Area Interesse" fx:id="buttonAggiornaAreaInteresse" onAction="#handleAggiornaAreaInteresse"/>
+                <Button text="Aggiorna centro monitoraggio" fx:id="buttonAggiornaCentroMonitoraggio" onAction="#handleAggiornaCentroMonitoraggio"/>
+                <Button text="Aggiorna Parametro climatico" fx:id="buttonAggiornaParametroClimatico" onAction="#handleAggiornaParametroClimatico"/>
                 <Button text="Abilita nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleAbilitaNuovoOperatore"/>
             </children>
         </VBox>

@@ -95,12 +95,11 @@ public class ClientProxy implements ServerInterface{
                 Thread.sleep(ThreadLocalRandom.current().nextInt(50, 100));
             }
             catch(InterruptedException ie){ie.printStackTrace();}
-            System.out.println(request.getRequestType());
-            if (Objects.requireNonNull(request.getRequestType()) == RequestType.executeLogin) {
+            if(request.getRequestType() == ServerInterface.RequestType.executeLogin){
                 System.out.printf("Proxy %s sending login request to server\n", this.hostName);
                 outStream.writeObject(ServerInterface.LOGIN);
                 outStream.writeObject(request);
-            } else {
+            }else{
                 System.out.printf("Proxy %s sending request to server\n", this.hostName);
                 outStream.writeObject(ServerInterface.NEXT);
                 outStream.writeObject(request);

@@ -137,17 +137,17 @@ public class TableViewBuilder {
                 //get response
                 Response response = null;
                 response = client.getResponse(request.getRequestId());
-                if(response == null){
-                    new Alert(Alert.AlertType.ERROR, "Error in the response object").showAndWait();
+
+                if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                    new Alert(Alert.AlertType.ERROR, "Errore in risposta").showAndWait();
                     return;
                 }
-                List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
-                if(response.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
-                    && response.getResponseType() == ServerInterface.ResponseType.List){
-                    parametriClimatici = (List<ParametroClimatico>) response.getResult();
+                if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    new Alert(Alert.AlertType.INFORMATION, "Area senza prametri Climatici").showAndWait();
+                    return;
                 }
 
-
+                List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
                 try{
                     Stage aiDialogStage = new Stage();
                     AiDialog aiDialogController = new AiDialog(aiDialogStage, client, a, parametriClimatici);

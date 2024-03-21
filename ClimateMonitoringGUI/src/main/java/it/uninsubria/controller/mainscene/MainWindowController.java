@@ -907,6 +907,7 @@ public class MainWindowController{
             mre.printStackTrace();
             return false;
         }
+        System.out.println(loginRequest);
         client.addRequest(loginRequest);
         Response response = client.getResponse(loginRequest.getRequestId());
         if(response.getResponseType() == ServerInterface.ResponseType.loginKo) return false;
