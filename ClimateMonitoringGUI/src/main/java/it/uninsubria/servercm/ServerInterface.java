@@ -14,6 +14,7 @@ public interface ServerInterface {
         NOTA_PARAM_CLIMATICO("nota_parametro_climatico"),
         OPERATORE("operatore"),
         OP_AUTORIZZATO("operatore_autorizzati"),
+         UPDATE("update"),
         PARAM_CLIMATICO("parametro_climatico");
 
         public final String label;
@@ -28,11 +29,12 @@ public interface ServerInterface {
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond"),
         executeLogin("executeLogin"),
+        executeLogout("executeLogout"),
+        executeUpdateAi("executeUpdateAi"),
         insert("insert"),
-        delete("delete"),
-        update("update"),
         requestSignUp("requestSignUp"),
-        executeSignUp("executeSignUp");
+        executeSignUp("executeSignUp"),
+        requestUpdate("requestUpdate");
         public final String label;
         private RequestType(String label){
             this.label = label;
@@ -48,10 +50,11 @@ public interface ServerInterface {
         insertKo("insertKo"),
         loginOk("loginOk"),
         loginKo("loginKo"),
+        logoutOk("logoutOk"),
+        logoutKo("logoutKo"),
         updateOk("updateOk"),
         updateKo("updateKo"),
-        deleteOk("deleteOk"),
-        deleteKo("deleteKo"),
+        updateInfo("updateInfo"),
         requestSignUpOk("requestSignUpOk"),
         requestSignUpKo("requestSignUpKo"),
         executeSignUpOk("executeSignUpOk"),
@@ -61,6 +64,7 @@ public interface ServerInterface {
     }
 
     int PORT = 9999;
+    int UPDATE_PORT = 9998;
     int selectAllWithCondParamsLength = 2;
     int selectObjWithCondParamsLength = 3;
     int selectObjJoinWithCondParamsLength = 4;
@@ -73,7 +77,6 @@ public interface ServerInterface {
     int insertAiParamsLength = 5;
     int insertNpcParamsLength = 7;
     int executeUpdateParamsLength = 2;
-    int executeDeleteParamsLength = 3;
 
     //int insertAiParamsLength ;
 
@@ -82,11 +85,15 @@ public interface ServerInterface {
     String NEXT = "NEXT";
     String ID = "ID";
     String LOGIN = "LOGIN";
+    String LOGOUT = "LOGOUT";
+    String UPDATE = "UPDATE";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
+    String SUCCESSFULL_INSERT = "SUCCESSFUL_INSERT";
+    String UNSUCCESSFULL_INSERT = "UNSUCCESSFUL_INSERT";
     String DUPLICATE_ITEM = "DUPLICATE_ITEM";
 
-    public void quit() throws IOException;
-    void sendRequest(Request r);
+    public void quit();
+    void sendRequest(Request r) throws IOException;
 
 
 }
