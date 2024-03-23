@@ -1,5 +1,7 @@
 package it.uninsubria.clientCm;
 
+import it.uninsubria.factories.RequestFactory;
+import it.uninsubria.request.MalformedRequestException;
 import it.uninsubria.request.Request;
 import it.uninsubria.response.Response;
 import it.uninsubria.servercm.ServerInterface;
@@ -120,6 +122,33 @@ public class ClientProxy implements ServerInterface{
                 outStream.writeObject(ServerInterface.QUIT);
         }catch(IOException ioe){ioe.printStackTrace();}
         this.quit();
+    }
+
+    public void sendLogoutRequest(){
+        logger.info("Logger %s sending quit request".formatted(client.getHostName()));
+        try{
+            if(outStream != null) {
+                try{
+                    Request logoutRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            RequestType.executeLogout,
+                            null,
+                            null);
+                    outStream.writeObject(ServerInterface.LOGOUT);
+                    outStream.writeObject(logoutRequest);
+                    Response logoutResponse = (Response) inStream.readObject();
+                    if(logoutResponse.getResponseType() == ServerInterface.ResponseType.logoutOk){
+                        logger.info("Logger %s has logged out successfully".formatted(client.getHostName()));
+                    }else{
+                        logger.info("Logger %s has failed to log out".formatted(client.getHostName()));
+                    }
+                }catch(MalformedRequestException mre){
+                    mre.printStackTrace();
+                }
+            }
+        }catch(IOException | ClassNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
     public void quit(){

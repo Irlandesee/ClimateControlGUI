@@ -32,6 +32,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -115,8 +116,10 @@ public class MainWindowController{
             Platform.exit();
         });
 
-        mainWindowStage.setMinHeight(800);
-        mainWindowStage.setMinWidth(1200);
+        mainWindowStage.setMinHeight(Screen.getPrimary().getBounds().getHeight());
+        mainWindowStage.setMaxHeight(Screen.getPrimary().getBounds().getHeight());
+        mainWindowStage.setMinWidth(Screen.getPrimary().getBounds().getWidth());
+        mainWindowStage.setMaxWidth(Screen.getPrimary().getBounds().getWidth());
         createControllers();
         initAlerts();
     }

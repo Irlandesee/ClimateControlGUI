@@ -28,6 +28,7 @@ public interface ServerInterface {
         selectObjWithCond("selectObjectWithCond"),
         selectObjJoinWithCond("selectObjectJoinWithCond"),
         executeLogin("executeLogin"),
+        executeLogout("executeLogout"),
         insert("insert"),
         executeDelete("executeDelete"),
         executeUpdate("executeUpdate"),
@@ -48,6 +49,8 @@ public interface ServerInterface {
         insertKo("insertKo"),
         loginOk("loginOk"),
         loginKo("loginKo"),
+        logoutOk("logoutOk"),
+        logoutKo("logoutKo"),
         updateOk("updateOk"),
         updateKo("updateKo"),
         deleteOk("deleteOk"),
@@ -74,6 +77,11 @@ public interface ServerInterface {
     int insertNpcParamsLength = 7;
     int executeUpdateParamsLength = 3;
     int executeDeleteParamsLength = 1;
+    int executeDeletePcParamsLength = 2;
+    int executeDeleteAiParamsLength = 1;
+    int executeDeleteCmParamsLength = 1;
+    int executeDeleteNpcParamsLength = 1;
+    int executeDeleteOpParamsLength = 1;
 
     //int insertAiParamsLength ;
 
@@ -82,11 +90,12 @@ public interface ServerInterface {
     String NEXT = "NEXT";
     String ID = "ID";
     String LOGIN = "LOGIN";
+    String LOGOUT = "LOGOUT";
     String UNDEFINED_BEHAVIOUR = "UNDEFINED";
     String DUPLICATE_ITEM = "DUPLICATE_ITEM";
 
     public void quit() throws IOException;
-    void sendRequest(Request r);
+    void sendRequest(Request r) throws IOException;
 
 
 }
