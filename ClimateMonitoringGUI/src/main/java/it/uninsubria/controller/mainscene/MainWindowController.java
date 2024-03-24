@@ -25,6 +25,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -116,10 +117,16 @@ public class MainWindowController{
             Platform.exit();
         });
 
-        mainWindowStage.setMinHeight(Screen.getPrimary().getBounds().getHeight());
-        mainWindowStage.setMaxHeight(Screen.getPrimary().getBounds().getHeight());
-        mainWindowStage.setMinWidth(Screen.getPrimary().getBounds().getWidth());
-        mainWindowStage.setMaxWidth(Screen.getPrimary().getBounds().getWidth());
+        int width = (int) Screen.getPrimary().getVisualBounds().getWidth();
+        int height = (int) Screen.getPrimary().getVisualBounds().getHeight() - 50;
+        mainWindowStage.setMinWidth(width);
+        mainWindowStage.setMaxWidth(width);
+        mainWindowStage.setMinHeight(height);
+        mainWindowStage.setMaxHeight(height);
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        mainWindowStage.setX(screenBounds.getMinX() + (screenBounds.getWidth() - mainWindowStage.getWidth()) / 2);
+        mainWindowStage.setY(screenBounds.getMinY() + (screenBounds.getHeight() - mainWindowStage.getHeight()) / 2);
+        mainWindowStage.setResizable(false);
         createControllers();
         initAlerts();
     }

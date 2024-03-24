@@ -24,6 +24,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -132,10 +133,16 @@ public class OperatoreViewController {
         this.clientProxy = clientProxy;
         this.operatoreWindowStage = operatoreWindowStage;
 
-        operatoreWindowStage.setMinHeight(Screen.getPrimary().getBounds().getHeight());
-        operatoreWindowStage.setMaxHeight(Screen.getPrimary().getBounds().getHeight());
-        operatoreWindowStage.setMinWidth(Screen.getPrimary().getBounds().getWidth());
-        operatoreWindowStage.setMaxWidth(Screen.getPrimary().getBounds().getWidth());
+        int width = (int) Screen.getPrimary().getVisualBounds().getWidth();
+        int height = (int) Screen.getPrimary().getVisualBounds().getHeight() - 50;
+        this.operatoreWindowStage.setMinWidth(width);
+        this.operatoreWindowStage.setMaxWidth(width);
+        this.operatoreWindowStage.setMinHeight(height);
+        this.operatoreWindowStage.setMaxHeight(height);
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        this.operatoreWindowStage.setX(screenBounds.getMinX() + (screenBounds.getWidth() - this.operatoreWindowStage.getWidth()) / 2);
+        this.operatoreWindowStage.setY(screenBounds.getMinY() + (screenBounds.getHeight() - this.operatoreWindowStage.getHeight()) / 2);
+        this.operatoreWindowStage.setResizable(false);
 
         this.operatoreWindowStage.setOnCloseRequest(e -> {
             if(client != null){
