@@ -142,7 +142,6 @@ public class OperatoreViewController {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         this.operatoreWindowStage.setX(screenBounds.getMinX() + (screenBounds.getWidth() - this.operatoreWindowStage.getWidth()) / 2);
         this.operatoreWindowStage.setY(screenBounds.getMinY() + (screenBounds.getHeight() - this.operatoreWindowStage.getHeight()) / 2);
-        this.operatoreWindowStage.setResizable(false);
 
         this.operatoreWindowStage.setOnCloseRequest(e -> {
             if(client != null){
@@ -1421,31 +1420,7 @@ public class OperatoreViewController {
 
     }
 
-    @FXML
-    public void handleAggiungiAreaACentro(ActionEvent event){
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        this.paramBox = new VBox();
-        paramBox.getStyleClass().add("param-box");
-        this.tAreaInteresse = new TextField("Nome Area");
-        this.tAreaInteresse.setOnMouseClicked(e -> this.tAreaInteresse.clear());
-        this.tCentroMonitoraggio = new TextField("Nome Centro");
-        this.visualizeAiData = new Button("Visualizza aree");
-        this.visualizeAiData.setOnAction(e -> {showAreeInserite();});
-        this.visualizeCmData = new Button("Visualizza centri");
-        this.visualizeCmData.setOnAction(e -> {
-            showCentriInseriti();
-        });
-        this.tCentroMonitoraggio.setOnMouseClicked(e -> this.tCentroMonitoraggio.clear());
-        btnAggiungiAreaACentro = new Button("Aggiungi");
-        btnAggiungiAreaACentro.setOnAction(this::aggiungiAreaCentro);
-
-        this.paramBox.getChildren().addAll(tAreaInteresse, tCentroMonitoraggio, visualizeAiData, visualizeCmData, btnAggiungiAreaACentro);
-        this.borderPane.setRight(paramBox);
-
-    }
-
-    private void aggiungiAreaCentro(ActionEvent event) {
+    private void aggiungiAreaCentro() {
         String denomAi = tAreaInteresse.getText();
         String denomCm = tCentroMonitoraggio.getText();
         if (denomAi.isEmpty() || denomCm.isEmpty()) {
@@ -1542,6 +1517,14 @@ public class OperatoreViewController {
                 new Alert(Alert.AlertType.ERROR, "Errore nell'aggiunta dell'area").showAndWait();
             }
         }
+    }
+
+    private void rimuoviAreaCentro(){
+
+    }
+
+    private void updateDenomCentro(){
+
     }
 
     @FXML
@@ -1964,18 +1947,133 @@ public class OperatoreViewController {
     }
 
     @FXML
-    public void handleAggiornaAreaInteresse(ActionEvent event){
-
-    }
-
-    @FXML
     public void handleAggiornaCentroMonitoraggio(ActionEvent event){
+        this.paramBox = new VBox();
+        this.paramBox.getStyleClass().add("param-box");
+        Button bVisualizzaAree = new Button("Visualizza aree");
+        bVisualizzaAree.setOnAction(e -> {
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(client));
+            Request reqAi = PredefinedRequest.getRequestAi(client.getHostName());
+            client.addRequest(reqAi);
+            Response resAi = client.getResponse(reqAi.getRequestId());
+            if(resAi.getResponseType() == ServerInterface.ResponseType.Error ||
+                    resAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.WARNING, resAi.getResponseType().label).showAndWait();
+                return;
+            }
+            List<AreaInteresse> aree = (List<AreaInteresse>) resAi.getResult();
+            aree.forEach(area -> tableView.getItems().add(area));
+        });
+        Button bVisualizzaCentri = new Button("Visualizza centri");
+        bVisualizzaCentri.setOnAction(e -> {
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
 
+            Request reqCm = PredefinedRequest.getRequestCm(client.getHostName());
+            client.addRequest(reqCm);
+            Response resCm = client.getResponse(client.getHostName());
+            if(resCm.getResponseType() == ServerInterface.ResponseType.Error ||
+                resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.WARNING, resCm.getResponseType().label).showAndWait();
+                return;
+            }
+            List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) resCm.getResult();
+            centri.forEach(centro -> tableView.getItems().add(centro));
+        });
+
+
+        TextField tRicercaCentro = new TextField("Nome del centro: ");
+        tRicercaCentro.setOnMouseClicked(e -> tRicercaCentro.clear());
+        TextField tUpdateDenominazione = new TextField("Nuova denominazione");
+        tUpdateDenominazione.setOnMouseClicked(e -> tUpdateDenominazione.clear());
+        TextField tUpdateAreeAssociate = new TextField("area da aggiungere");
+        tUpdateAreeAssociate.setOnMouseClicked(e -> tUpdateAreeAssociate.clear());
+        TextField tRemoveAreaAssociata = new TextField("area da rimuovere");
+        tRemoveAreaAssociata.setOnMouseClicked(e -> tRemoveAreaAssociata.clear());
+
+        Button ricercaCentro = new Button("Avvia ricerca");
+        ricercaCentro.setOnAction(e -> {
+            String nomeCentro = tRicercaCentro.getText();
+            Request reqCm;
+            try{
+                Map<String, String> reqCmParams = RequestFactory.buildParams(
+                        ServerInterface.RequestType.selectAllWithCond,
+                        "nomecentro",
+                        nomeCentro
+                );
+                reqCm = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.selectAllWithCond,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        reqCmParams
+                        );
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                return;
+            }
+            client.addRequest(reqCm);
+            Response resCm = client.getResponse(reqCm.getRequestId());
+            if(resCm.getResponseType() == ServerInterface.ResponseType.Error){
+                new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
+                return;
+            }
+            if(resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.INFORMATION, "L'elemento richiesto non esiste").showAndWait();
+                return;
+            }
+            List<CentroMonitoraggio> result = (List<CentroMonitoraggio>) resCm.getResult();
+            result.forEach(cm -> tableView.getItems().add(cm));
+        });
+
+        Button bUpdateDenom = new Button("Aggiorna denominazione");
+        bUpdateDenom.setOnAction(e -> updateDenomCentro());
+        Button bAggiungiAreaAssociata = new Button("Aggiungi area associata");
+        bAggiungiAreaAssociata.setOnAction(e -> aggiungiAreaCentro());
+        Button bRimuoviAreaAssociata = new Button("Rimuovi area associata");
+        bRimuoviAreaAssociata.setOnAction(e -> rimuoviAreaCentro());
+
+        this.paramBox.getChildren()
+                .addAll(
+                        bVisualizzaAree,
+                        bVisualizzaCentri,
+                        tRicercaCentro,
+                        tUpdateDenominazione,
+                        tUpdateAreeAssociate,
+                        tRemoveAreaAssociata,
+                        bUpdateDenom,
+                        bAggiungiAreaAssociata,
+                        bRimuoviAreaAssociata);
+        this.borderPane.setRight(paramBox);
     }
 
     @FXML
     public void handleAggiornaParametroClimatico(ActionEvent event){
+        this.paramBox = new VBox();
+        this.paramBox.getStyleClass().add("param-box");
+        TextField tArea = new TextField("Nome dell'area");
+        Button bRicercaArea = new Button("Ricerca area");
 
+        tArea.setOnMouseClicked(e -> tArea.clear());
+        ComboBox<String> itemBox = new ComboBox<String>();
+        ComboBox<Integer> valueBox = new ComboBox<Integer>();
+        String[] items = {"vento", "umidita", "pressione", "temperatura", "precipitazioni", "alt. ghiacciai", "m. ghiacciai"};
+        for(String item : items) itemBox.getItems().add(item);
+        for(int i = 1; i < 6; i++) valueBox.getItems().add(i);
+
+        Button aggiornaPc = new Button("Aggiorna");
+        aggiornaPc.setOnMouseClicked(e -> {
+            String item = itemBox.getSelectionModel().getSelectedItem();
+            int value = valueBox.getSelectionModel().getSelectedItem();
+            System.out.println(item + ":" + value);
+        });
+
+        paramBox.getChildren().addAll(tArea, bRicercaArea, itemBox, valueBox, aggiornaPc);
+        this.borderPane.setRight(paramBox);
     }
 
 }

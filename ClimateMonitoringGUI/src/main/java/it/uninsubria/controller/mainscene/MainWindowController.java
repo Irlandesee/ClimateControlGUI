@@ -126,7 +126,6 @@ public class MainWindowController{
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         mainWindowStage.setX(screenBounds.getMinX() + (screenBounds.getWidth() - mainWindowStage.getWidth()) / 2);
         mainWindowStage.setY(screenBounds.getMinY() + (screenBounds.getHeight() - mainWindowStage.getHeight()) / 2);
-        mainWindowStage.setResizable(false);
         createControllers();
         initAlerts();
     }
