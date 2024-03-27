@@ -61,7 +61,7 @@
     -fx-padding: 1px;
 }
 
-.param-box ComboBox{
+.combo-box{
     -fx-min-width: 200px;
     -fx-max-width: 200px;
     -fx-min-height: 40px;

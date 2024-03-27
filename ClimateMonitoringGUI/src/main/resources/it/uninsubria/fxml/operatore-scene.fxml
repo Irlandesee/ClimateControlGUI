@@ -10,6 +10,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Pane?>
 <BorderPane xmlns="http://javafx.com/javafx/17.02.2-ea"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="borderPane">
@@ -67,6 +68,6 @@
         </HBox>
     </bottom>
     <stylesheets>
-        <URL value="@../stylesheets/main-window.css"/>
+        <URL value="@../stylesheets/operatore-window.css"/>
     </stylesheets>
 </BorderPane>
