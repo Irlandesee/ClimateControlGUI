@@ -32,6 +32,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -1122,7 +1123,7 @@ public class OperatoreViewController {
     //TODO: Bugged -> throws malformed request exception even though the parameters lengths are correct
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
-        logger.info("Noem centro: " + centroMon);
+        logger.info("Nome centro: " + centroMon);
         logger.info("Parameterid: " +parameterId);
         logger.info("Notaid:  "+ notaId);
 
@@ -1533,48 +1534,49 @@ public class OperatoreViewController {
 
     }
 
-    private void rimuoviAreaPerDenom(){
-        String denominazioneAreaDaRimuovere = tDenominazione.getText();
+    private void rimuoviAreaPerDenom(String denominazioneAreaDaRimuovere){
         if(denominazioneAreaDaRimuovere.isEmpty() || denominazioneAreaDaRimuovere.equals("Nome")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
-            return;
-        }
-        try{
-            Map<String, String> requestParams = RequestFactory.buildParams(
-                    ServerInterface.RequestType.selectObjWithCond,
-                    "areaid",
-                    "denominazione",
-                    denominazioneAreaDaRimuovere);
-            Request areaIdRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.selectObjWithCond,
-                    ServerInterface.Tables.AREA_INTERESSE,
-                    requestParams);
-            client.addRequest(areaIdRequest);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-        }
-        Response areaIdResponse = client.getResponse();
-        if((areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error) || (areaIdResponse.getResponseType() != ServerInterface.ResponseType.NoSuchElement)){
-            new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label);
         }else{
+            logger.info("Removing: " + denominazioneAreaDaRimuovere);
             try{
-                Map<String, String> deleteParams = RequestFactory.buildParams(
-                        ServerInterface.RequestType.executeDelete, areaIdResponse.getResult().toString());
-                Request deleteRequest = RequestFactory.buildRequest(
+                Map<String, String> requestParams = RequestFactory.buildParams(
+                        ServerInterface.RequestType.selectObjWithCond,
+                        "areaid",
+                        "denominazione",
+                        denominazioneAreaDaRimuovere);
+                Request areaIdRequest = RequestFactory.buildRequest(
                         client.getHostName(),
-                        ServerInterface.RequestType.executeDelete,
+                        ServerInterface.RequestType.selectObjWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
-                        deleteParams);
-                client.addRequest(deleteRequest);
-            }catch(MalformedRequestException mre){
-                mre.printStackTrace();
-            }
-            Response deleteResponse = client.getResponse();
-            if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
-                new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+                        requestParams);
+                client.addRequest(areaIdRequest);
+            }catch(MalformedRequestException mre){new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();}
+            Response areaIdResponse = client.getResponse();
+            if((areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error)
+                    || (areaIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label);
             }else{
-                new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+                String areaId = areaIdResponse.getResult().toString();
+                try{
+                    Map<String, String> deleteParams = RequestFactory.buildDeleteParams(
+                            ServerInterface.Tables.AREA_INTERESSE, areaId);
+                    Request deleteRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.executeDelete,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            deleteParams);
+                    logger.info(deleteRequest.toString());
+                    client.addRequest(deleteRequest);
+                }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
+                Response deleteResponse = client.getResponse();
+                if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+                    tableView.getItems().clear();
+                    showAreeInserite();
+                }else{
+                    new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+                }
             }
         }
     }
@@ -1585,12 +1587,12 @@ public class OperatoreViewController {
             paramBox.getChildren().clear();
         this.paramBox = new VBox(2);
         paramBox.getStyleClass().add("param-box");
-        this.tDenominazione = new TextField("Nome");
-        this.tDenominazione.setOnMouseClicked(e -> this.tDenominazione.clear());
-        this.btnRicercaAreaPerDenom = new Button("Rimuovi");
-        this.btnRicercaAreaPerDenom.setOnAction(e -> rimuoviAreaPerDenom());
-        paramBox.getChildren().add(tDenominazione);
-        paramBox.getChildren().add(btnRicercaAreaPerDenom);
+        TextField tDenomAreaDaRimuovere = new TextField("Denominazione area da rimuovere");
+        tDenomAreaDaRimuovere.setOnMouseClicked(e -> tDenomAreaDaRimuovere.clear());
+        Button btnRimuoviArea = new Button("Rimuovi Area");
+        btnRimuoviArea.setOnAction(e -> rimuoviAreaPerDenom(tDenomAreaDaRimuovere.getText()));
+        paramBox.getChildren().add(tDenomAreaDaRimuovere);
+        paramBox.getChildren().add(btnRimuoviArea);
 
         //Set up tableView
         tableView.getItems().clear();
@@ -1601,7 +1603,7 @@ public class OperatoreViewController {
             row.setOnMouseClicked(e -> {
                 if(e.getClickCount() == 2 && (!row.isEmpty())){
                     AreaInteresse ai = (AreaInteresse) row.getItem();
-                    tDenominazione.setText(ai.getDenominazione());
+                    tDenomAreaDaRimuovere.setText(ai.getDenominazione());
                 }
             });
             return row;
@@ -1610,7 +1612,6 @@ public class OperatoreViewController {
 
         showAreeInserite();
         this.borderPane.setRight(paramBox);
-
     }
 
     private void rimuoviCentroPerDenom(){

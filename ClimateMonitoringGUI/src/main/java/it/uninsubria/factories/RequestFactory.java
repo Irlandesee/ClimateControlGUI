@@ -6,6 +6,7 @@ import it.uninsubria.servercm.ServerInterface;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestFactory {
 
@@ -99,18 +100,14 @@ public class RequestFactory {
                 }
             }
             case executeDelete -> {
-                if(table == ServerInterface.Tables.PARAM_CLIMATICO){
-                    if(params.keySet().size() < ServerInterface.executeDeletePcParamsLength){
+                if (Objects.requireNonNull(table) == ServerInterface.Tables.PARAM_CLIMATICO) {
+                    if (params.keySet().size() < ServerInterface.executeDeletePcParamsLength)
                         throw new MalformedRequestException(paramLengthError);
-                    }else{
-                        return new Request(clientId, requestType, table, params);
-                    }
+                    else return new Request(clientId, requestType, table, params);
                 }
-                if(params.keySet().size() < ServerInterface.executeDeleteParamsLength){
+                if (params.keySet().isEmpty())
                     throw new MalformedRequestException(paramLengthError);
-                }else{
-                    return new Request(clientId, requestType, table, params);
-                }
+                else return new Request(clientId, requestType, table, params);
             }
             case executeUpdate ->{
                 if(params.keySet().size() < ServerInterface.executeUpdateParamsLength){
