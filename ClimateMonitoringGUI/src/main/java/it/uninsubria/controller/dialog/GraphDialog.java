@@ -106,7 +106,7 @@ public class GraphDialog {
             mre.printStackTrace();
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getClientId());
+        Response response = client.getResponse();
         String denominazione = "";
         if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
@@ -172,7 +172,7 @@ public class GraphDialog {
                 return;
             }
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
             params = (List<ParametroClimatico>) response.getResult();
 
             listViewDati.setEditable(false);
@@ -272,7 +272,7 @@ public class GraphDialog {
             return;
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
         params = (List<ParametroClimatico>) response.getResult();
         List<ParametroClimatico> filteredParams = filterListByYear(params, year);
 
@@ -372,7 +372,7 @@ public class GraphDialog {
             return;
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
         List<ParametroClimatico> params = (List<ParametroClimatico>)response.getResult();
         List<ParametroClimatico> filteredParams = filterListByMonth(filterListByYear(params, year), Month.of(month));
 

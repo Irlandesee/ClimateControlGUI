@@ -332,7 +332,7 @@ public class MainWindowController{
 
                     //get response
                     Response res;
-                    res = client.getResponse(req.getRequestId());
+                    res = client.getResponse();
 
                     //Check Response for errors
                     if(res.getResponseType() == ServerInterface.ResponseType.Error){
@@ -377,7 +377,7 @@ public class MainWindowController{
         }
         client.addRequest(request);
         //get response
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
         //Check response
         if(response.getResponseType() == ServerInterface.ResponseType.List && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
             prepTableAreaInteresse();
@@ -406,7 +406,7 @@ public class MainWindowController{
                 return;
             }
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -446,7 +446,7 @@ public class MainWindowController{
                 return;
             }
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -491,7 +491,7 @@ public class MainWindowController{
                 return;
             }
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -598,7 +598,7 @@ public class MainWindowController{
             return;
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -665,7 +665,7 @@ public class MainWindowController{
                     return;
                 }
                 client.addRequest(requestAreaId);
-                Response resAreaId = client.getResponse(requestAreaId.getRequestId());
+                Response resAreaId = client.getResponse();
 
                 if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -693,7 +693,7 @@ public class MainWindowController{
                     return;
                 }
                 client.addRequest(requestParamClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
+                Response responseParametriClimatici = client.getResponse();
 
                 if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -740,7 +740,7 @@ public class MainWindowController{
                     return;
                 }
                 client.addRequest(requestCentroId);
-                Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
+                Response responseCentroId = client.getResponse();
 
                 if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -773,7 +773,7 @@ public class MainWindowController{
                     return;
                 }
                 client.addRequest(requestParametriClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
+                Response responseParametriClimatici = client.getResponse();
 
                 if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -821,7 +821,7 @@ public class MainWindowController{
                 return;
             }
             client.addRequest(requestCentro);
-            Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
+            Response responseCentriMonitoraggio = client.getResponse();
 
             if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -864,7 +864,7 @@ public class MainWindowController{
                                 return;
                             }
                             client.addRequest(requestAi);
-                            Response responseAi = client.getResponse(requestAi.getRequestId());
+                            Response responseAi = client.getResponse();
 
                             if(responseAi.getResponseType() == ServerInterface.ResponseType.Error){
                                 resErrorAlert.showAndWait();
@@ -918,7 +918,7 @@ public class MainWindowController{
         }
         System.out.println(loginRequest);
         client.addRequest(loginRequest);
-        Response response = client.getResponse(loginRequest.getRequestId());
+        Response response = client.getResponse();
         if(response.getResponseType() == ServerInterface.ResponseType.loginKo) return false;
         else{
             mainWindowStage.close();
@@ -949,7 +949,7 @@ public class MainWindowController{
             return false;
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getClientId());
+        Response response = client.getResponse();
         List<OperatoreAutorizzato> operatoriAutorizzati = (List<OperatoreAutorizzato>) response.getResult();
         for(OperatoreAutorizzato op : operatoriAutorizzati){
             if(op.getEmail().equals(email) && op.getCodFiscale().equals(codFisc))
@@ -978,7 +978,7 @@ public class MainWindowController{
                 return false;
             }
             client.addRequest(requestCentroId);
-            Response responseCmId = client.getResponse(requestCentroId.getRequestId());
+            Response responseCmId = client.getResponse();
             String centroId = responseCmId.getResult().toString();
 
             if(responseCmId.getResponseType() == ServerInterface.ResponseType.Error){
@@ -1007,7 +1007,7 @@ public class MainWindowController{
             }
             System.out.println(signUpRequest);
             client.addRequest(signUpRequest);
-            Response responseSignUp = client.getResponse(signUpRequest.getRequestId());
+            Response responseSignUp = client.getResponse();
             System.out.println(responseSignUp);
             return (boolean) responseSignUp.getResult();
         }

@@ -80,6 +80,7 @@ public interface ServerInterface {
     int executeDeletePcParamsLength = 2;
     int executeDeleteAiParamsLength = 1;
     int executeDeleteCmParamsLength = 1;
+    int executeDeleteAiCmParamsLength = 2;
     int executeDeleteNpcParamsLength = 1;
     int executeDeleteOpParamsLength = 1;
 

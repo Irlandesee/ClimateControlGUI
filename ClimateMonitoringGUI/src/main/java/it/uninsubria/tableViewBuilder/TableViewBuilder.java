@@ -136,7 +136,7 @@ public class TableViewBuilder {
 
                 //get response
                 Response response = null;
-                response = client.getResponse(request.getRequestId());
+                response = client.getResponse();
 
                 if(response.getResponseType() == ServerInterface.ResponseType.Error){
                     new Alert(Alert.AlertType.ERROR, "Errore in risposta").showAndWait();
@@ -235,8 +235,8 @@ public class TableViewBuilder {
                         Response respDenom = null;
                         Response respNomeCentro = null;
                         if(requestDenominazione != null && requestNomeCentro != null){
-                            respDenom = client.getResponse(requestDenominazione.getRequestId());
-                            respNomeCentro = client.getResponse(requestNomeCentro.getRequestId());
+                            respDenom = client.getResponse();
+                            respNomeCentro = client.getResponse();
 
                         }
 
@@ -314,7 +314,7 @@ public class TableViewBuilder {
                     }
 
                     client.addRequest(requestAi);
-                    Response responseAi = client.getResponse(requestAi.getRequestId());
+                    Response responseAi = client.getResponse();
                     if(responseAi == null){
                         new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
                         return;

@@ -63,7 +63,7 @@ public class Client extends Thread{
         }catch(InterruptedException ie){logger.info(ie.getMessage());}
     }
 
-    public Response getResponse(String responseId){
+    public Response getResponse(){
         try{
             return responses.take();
         }catch(InterruptedException ie){logger.info(ie.getMessage());return null;}

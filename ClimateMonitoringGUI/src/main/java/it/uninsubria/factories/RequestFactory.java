@@ -227,30 +227,35 @@ public class RequestFactory {
         return params;
     }
 
+    public static Map<String, String> buildDeleteAiCmParams(String areaId, String centroId){
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(RequestFactory.areaIdKey, areaId);
+        params.put(RequestFactory.centroIdKey, centroId);
+        return params;
+    }
     public static Map<String, String> buildDeleteParams(ServerInterface.Tables table, String... s) throws MalformedRequestException{
         Map<String, String> params = new HashMap<String, String>();
         switch(table){
             case AREA_INTERESSE -> {
                 if(s.length < ServerInterface.executeDeleteAiParamsLength) throw new MalformedRequestException(paramLengthError);
-                params.put(RequestFactory.objectIdKey, s[0]);
+                params.put(RequestFactory.areaIdKey, s[0]);
             }
             case CENTRO_MONITORAGGIO -> {
                 if(s.length < ServerInterface.executeDeleteCmParamsLength) throw new MalformedRequestException(paramLengthError);
-                params.put(RequestFactory.objectIdKey, s[0]);
+                params.put(RequestFactory.centroIdKey, s[0]);
             }
-
             case PARAM_CLIMATICO -> {
                 if(s.length < ServerInterface.executeDeletePcParamsLength) throw new MalformedRequestException(paramLengthError);
-                params.put(RequestFactory.objectIdKey, s[0]);
+                params.put(RequestFactory.parameterIdKey, s[0]);
                 params.put(RequestFactory.pubDateKey, s[1]);
             }
             case NOTA_PARAM_CLIMATICO -> {
                 if(s.length < ServerInterface.executeDeleteNpcParamsLength) throw new MalformedRequestException(paramLengthError);
-                params.put(RequestFactory.objectIdKey, s[0]);
+                params.put(RequestFactory.notaIdKey, s[0]);
             }
             case OPERATORE -> {
                 if(s.length < ServerInterface.executeDeleteOpParamsLength) throw new MalformedRequestException(paramLengthError);
-                params.put(RequestFactory.objectIdKey, s[0]);
+                params.put(RequestFactory.codFiscOpKey, s[0]);
             }
             default -> {return null;}
         }

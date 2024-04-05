@@ -91,7 +91,7 @@ public class AiDialog {
                     }
                     client.addRequest(request);
 
-                    Response res = client.getResponse(request.getRequestId());
+                    Response res = client.getResponse();
                     String denomCentro = "";
                     if(res.getResponseType() == ServerInterface.ResponseType.Object){
                         denomCentro = res.getResult().toString();

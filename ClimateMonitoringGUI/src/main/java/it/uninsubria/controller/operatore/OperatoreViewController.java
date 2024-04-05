@@ -248,9 +248,10 @@ public class OperatoreViewController {
             connectionStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
-
     @FXML
     public void handleDisconnect(){
+
+
         if(client != null){
             System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
             client.getClientProxy().sendQuitRequest();
@@ -378,7 +379,7 @@ public class OperatoreViewController {
         }
         client.addRequest(request);
         //get response
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -409,7 +410,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(request);
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -441,7 +442,7 @@ public class OperatoreViewController {
                 return;
             }
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -481,7 +482,7 @@ public class OperatoreViewController {
             }
 
             client.addRequest(request);
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
@@ -525,7 +526,7 @@ public class OperatoreViewController {
             }
             client.addRequest(request);
             List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
-            Response response = client.getResponse(request.getRequestId());
+            Response response = client.getResponse();
             if(response.getResponseType() == ServerInterface.ResponseType.Error){
                 resErrorAlert.showAndWait();
                 return;
@@ -636,7 +637,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestAreaId);
-                Response resAreaId = client.getResponse(requestAreaId.getRequestId());
+                Response resAreaId = client.getResponse();
 
                 if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -665,7 +666,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestParamClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParamClimatici.getRequestId());
+                Response responseParametriClimatici = client.getResponse();
 
                 if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
@@ -716,7 +717,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestCentroId);
-                Response responseCentroId = client.getResponse(requestCentroId.getRequestId());
+                Response responseCentroId = client.getResponse();
                 if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
                     resErrorAlert.showAndWait();
                     return;
@@ -743,7 +744,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestParametriClimatici);
-                Response responseParametriClimatici = client.getResponse(requestParametriClimatici.getRequestId());
+                Response responseParametriClimatici = client.getResponse();
                 List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
 
                 tableView.getItems().clear();
@@ -830,7 +831,7 @@ public class OperatoreViewController {
             }
         }
         client.addRequest(cmRequest);
-        Response response = client.getResponse(client.getHostName());
+        Response response = client.getResponse();
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
@@ -881,7 +882,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(request);
-                Response responseCity = client.getResponse(request.getRequestId());
+                Response responseCity = client.getResponse();
                 String statoDaFiltrare = tFilterCountry.getText();
                 try{
                     Map<String, String> paramsAiRequest = RequestFactory
@@ -897,7 +898,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestAi);
-                Response responseAi = client.getResponse(requestAi.getRequestId());
+                Response responseAi = client.getResponse();
                 List<City> cities = (List<City>) responseCity.getResult();
                 List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAi.getResult();
                 for(AreaInteresse area : areeInteresse){
@@ -941,7 +942,7 @@ public class OperatoreViewController {
 
                 }
                 client.addRequest(request);
-                Response responseAreaInteresse = client.getResponse(request.getRequestId());
+                Response responseAreaInteresse = client.getResponse();
                 List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAreaInteresse.getResult();
                 areeInteresse.forEach(ai -> tableView.getItems().add(ai));
             }
@@ -963,7 +964,7 @@ public class OperatoreViewController {
                 }
 
                 client.addRequest(citiesRequest);
-                Response responseCities = client.getResponse(citiesRequest.getRequestId());
+                Response responseCities = client.getResponse();
 
                 try{
                     centriMonitoraggioRequest = RequestFactory.buildRequest(
@@ -978,7 +979,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(centriMonitoraggioRequest);
-                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+                Response responseCentriMonitoraggio = client.getResponse();
 
                 List<City> citiesWithoutCm = new LinkedList<City>();
                 List<City> cities = (List<City>) responseCities.getResult();
@@ -1003,7 +1004,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(centriMonitoraggioRequest);
-                Response responseCentriMonitoraggio = client.getResponse(centriMonitoraggioRequest.getRequestId());
+                Response responseCentriMonitoraggio = client.getResponse();
                 List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>)responseCentriMonitoraggio.getResult();
                 String statoDaFiltrare = tFilterCountry.getText();
                 try{
@@ -1019,7 +1020,7 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(request);
-                Response responseCity = client.getResponse(request.getRequestId());
+                Response responseCity = client.getResponse();
                 List<City> cities = (List<City>)responseCity.getResult();
                 List<City> citiesWithoutCm = new LinkedList<City>();
                 for(CentroMonitoraggio cm : centriMonitoraggio){
@@ -1064,7 +1065,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(insertRequest);
-        Response insertResponse = client.getResponse(insertRequest.getClientId());
+        Response insertResponse = client.getResponse();
         if(insertResponse.getResponseType() == ServerInterface.ResponseType.Error){
             resErrorAlert.showAndWait();
             return;
@@ -1143,7 +1144,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(requestAreaId);
-        Response respAreaId = client.getResponse(requestAreaId.getRequestId());
+        Response respAreaId = client.getResponse();
 
         Request requestCentroId;
         try{
@@ -1164,7 +1165,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(requestCentroId);
-        Response respCentroId = client.getResponse(requestCentroId.getRequestId());
+        Response respCentroId = client.getResponse();
         /**
          * TODO:
          * NullPointerException se non c'e' risultato... add checks...
@@ -1206,7 +1207,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(insertNotaRequest);
-        Response responseNota = client.getResponse(insertNotaRequest.getRequestId());
+        Response responseNota = client.getResponse();
         if(responseNota.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "errore inserimento nota").showAndWait();
             return;
@@ -1233,7 +1234,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(insertPcRequest);
-        Response insertPcResponse = client.getResponse(insertPcRequest.getRequestId());
+        Response insertPcResponse = client.getResponse();
         if(insertPcResponse.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
         }else{
@@ -1313,7 +1314,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(reqStato);
-        Response responseStato = client.getResponse(reqStato.getRequestId());
+        Response responseStato = client.getResponse();
         List<City> cities = (List<City>) responseStato.getResult();
         System.out.println(cities.size());
         if(cities.isEmpty()){
@@ -1345,7 +1346,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(insertCmRequest);
-        Response res = client.getResponse(insertCmRequest.getRequestId());
+        Response res = client.getResponse();
         boolean result = (boolean)res.getResult();
         if(result){
             new Alert(Alert.AlertType.CONFIRMATION, "inserimento completato").showAndWait();
@@ -1390,7 +1391,7 @@ public class OperatoreViewController {
         }
 
         client.addRequest(opAutorizzatiRequest);
-        Response response = client.getResponse(opAutorizzatiRequest.getRequestId());
+        Response response = client.getResponse();
         List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
 
         opAutorizzati.forEach(op -> tableView.getItems().add(op));
@@ -1418,7 +1419,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(insertAuthOpRequest);
-        Response res = client.getResponse(insertAuthOpRequest.getRequestId());
+        Response res = client.getResponse();
         //TODO: Test, add better checks, refresh table view in order to show the newly inserted op
         if((boolean)res.getResult()){
             new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo").showAndWait();
@@ -1474,7 +1475,7 @@ public class OperatoreViewController {
         }
         client.addRequest(request);
         if(request == null){return;}
-        Response response = client.getResponse(request.getRequestId());
+        Response response = client.getResponse();
         String areaId = "";
         if(response.getResponseType() == ServerInterface.ResponseType.Object
                 && response.getTable() == ServerInterface.Tables.AREA_INTERESSE){
@@ -1516,7 +1517,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(requestCentro);
-        Response responseCentriMonitoraggio = client.getResponse(requestCentro.getClientId());
+        Response responseCentriMonitoraggio = client.getResponse();
 
         List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
 
@@ -1538,51 +1539,43 @@ public class OperatoreViewController {
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
             return;
         }
-        Request areaIdRequest;
         try{
             Map<String, String> requestParams = RequestFactory.buildParams(
                     ServerInterface.RequestType.selectObjWithCond,
                     "areaid",
                     "denominazione",
                     denominazioneAreaDaRimuovere);
-            areaIdRequest = RequestFactory.buildRequest(
+            Request areaIdRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     requestParams);
+            client.addRequest(areaIdRequest);
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
         }
-        client.addRequest(areaIdRequest);
-        Response areaIdResponse = client.getResponse(areaIdRequest.getRequestId());
-        if(areaIdResponse.getResponseType().equals(ServerInterface.ResponseType.Error)){
-            new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta.").showAndWait();
-            return;
-        }
-        if(areaIdResponse.getResponseType().equals(ServerInterface.ResponseType.NoSuchElement)){
-            new Alert(Alert.AlertType.ERROR, "Elemento inesistente.").showAndWait();
-            return;
-        }
-        Request deleteRequest;
-        try{
-            Map<String, String> deleteParams = RequestFactory.buildParams(
-                    ServerInterface.RequestType.executeDelete, areaIdResponse.getResult().toString());
-            deleteRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.executeDelete,
-                    ServerInterface.Tables.AREA_INTERESSE,
-                    deleteParams);
-        }catch(MalformedRequestException mre){
-            mre.printStackTrace();
-            return;
-        }
-        client.addRequest(deleteRequest);
-        Response deleteResponse = client.getResponse(deleteRequest.getRequestId());
-        if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
-            new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+        Response areaIdResponse = client.getResponse();
+        if((areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error) || (areaIdResponse.getResponseType() != ServerInterface.ResponseType.NoSuchElement)){
+            new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label);
         }else{
-            new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+            try{
+                Map<String, String> deleteParams = RequestFactory.buildParams(
+                        ServerInterface.RequestType.executeDelete, areaIdResponse.getResult().toString());
+                Request deleteRequest = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.executeDelete,
+                        ServerInterface.Tables.AREA_INTERESSE,
+                        deleteParams);
+                client.addRequest(deleteRequest);
+            }catch(MalformedRequestException mre){
+                mre.printStackTrace();
+            }
+            Response deleteResponse = client.getResponse();
+            if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
+                new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+            }
         }
     }
 
@@ -1624,53 +1617,46 @@ public class OperatoreViewController {
         String nomeCentroDaRimuovere = tDenominazione.getText();
         if(nomeCentroDaRimuovere.isEmpty() || nomeCentroDaRimuovere.equals("Nome")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
-            return;
-        }
-        Request centroIdRequest;
-        try{
-            Map<String, String> requestParams = RequestFactory.buildParams(
-                    ServerInterface.RequestType.selectObjWithCond,
-                    "centroid",
-                    "denominazione",
-                    nomeCentroDaRimuovere);
-            centroIdRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.selectObjWithCond,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    requestParams);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
-        }
-        client.addRequest(centroIdRequest);
-        Response centroIdResponse = client.getResponse(centroIdRequest.getRequestId());
-        if(centroIdResponse.getResponseType().equals(ServerInterface.ResponseType.Error)){
-            new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta.").showAndWait();
-            return;
-        }
-        if(centroIdResponse.getResponseType().equals(ServerInterface.ResponseType.NoSuchElement)){
-            new Alert(Alert.AlertType.ERROR, "Elemento inesistente.").showAndWait();
-            return;
-        }
-        Request deleteRequest;
-        try{
-            Map<String, String> deleteParams = RequestFactory.buildParams(
-                    ServerInterface.RequestType.executeDelete, centroIdResponse.getResult().toString());
-            deleteRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.executeDelete,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    deleteParams);
-        }catch(MalformedRequestException mre){
-            mre.printStackTrace();
-            return;
-        }
-        client.addRequest(deleteRequest);
-        Response deleteResponse = client.getResponse(deleteRequest.getRequestId());
-        if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
-            new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
         }else{
-            new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+            try{
+                Map<String, String> requestParams = RequestFactory.buildParams(
+                        ServerInterface.RequestType.selectObjWithCond,
+                        "centroid",
+                        "denominazione",
+                        nomeCentroDaRimuovere);
+                Request centroIdRequest = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.selectObjWithCond,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        requestParams);
+                client.addRequest(centroIdRequest);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            }
+            Response centroIdResponse = client.getResponse();
+            if((centroIdResponse.getResponseType() == ServerInterface.ResponseType.Error) ||
+                    (centroIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label);
+            }else{
+                try{
+                    Map<String, String> deleteParams = RequestFactory.buildParams(
+                            ServerInterface.RequestType.executeDelete, centroIdResponse.getResult().toString());
+                    Request deleteRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.executeDelete,
+                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                            deleteParams);
+                    client.addRequest(deleteRequest);
+                }catch(MalformedRequestException mre){
+                    mre.printStackTrace();
+                }
+                Response deleteResponse = client.getResponse();
+                if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+                }else{
+                    new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+                }
+            }
         }
     }
     @FXML
@@ -1704,7 +1690,7 @@ public class OperatoreViewController {
 
         Request centriMonitoraggioRequest = PredefinedRequest.getRequestCm(client.getHostName());
         client.addRequest(centriMonitoraggioRequest);
-        Response centriMonitoraggioResponse = client.getResponse(centriMonitoraggioRequest.getRequestId());
+        Response centriMonitoraggioResponse = client.getResponse();
         if(centriMonitoraggioResponse.getResponseType() == ServerInterface.ResponseType.Error){
             new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
         }else{
@@ -1730,21 +1716,19 @@ public class OperatoreViewController {
             LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
             LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
             //delete query
-            Request deleteRequest;
             try{
                 Map<String, String> deleteParams = RequestFactory.buildDeleteParams(ServerInterface.Tables.PARAM_CLIMATICO, parameterId, date.toString());
-                deleteRequest = RequestFactory.buildRequest(
+                Request deleteRequest = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.executeDelete,
                         ServerInterface.Tables.PARAM_CLIMATICO,
                         deleteParams
                 );
+                client.addRequest(deleteRequest);
             }catch(MalformedRequestException mre){
                 mre.printStackTrace();
-                return;
             }
-            client.addRequest(deleteRequest);
-            Response deleteResponse = client.getResponse(deleteRequest.getRequestId());
+            Response deleteResponse = client.getResponse();
             if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Operazione avvenuta con successo").showAndWait();
                 Request requestAreaId;
@@ -1756,11 +1740,11 @@ public class OperatoreViewController {
                     return;
                 }
                 client.addRequest(requestAreaId);
-                Response areaIdResponse = client.getResponse(requestAreaId.getRequestId());
+                Response areaIdResponse = client.getResponse();
                 String areaId = areaIdResponse.getResult().toString();
                 Request paramClimaticiRequest = PredefinedRequest.getRequestPc(client.getHostName(), "areaid", areaId);
                 client.addRequest(paramClimaticiRequest);
-                Response paramClimaticiResponse = client.getResponse(paramClimaticiRequest.getRequestId());
+                Response paramClimaticiResponse = client.getResponse();
                 List<ParametroClimatico> paramClimatici = (List<ParametroClimatico>)paramClimaticiResponse.getResult();
                 tableView.getItems().clear();
                 paramClimatici.forEach(pc -> tableView.getItems().add(pc));
@@ -1773,53 +1757,42 @@ public class OperatoreViewController {
             String areaDenom = tDenominazione.getText();
             if(areaDenom.isEmpty() || areaDenom.equals("Cerca")){
                 new Alert(Alert.AlertType.ERROR, "Nome area non valido").showAndWait();
-                return;
+            }else{
+                try{
+                    Map<String, String> areaIdReqParams =
+                            RequestFactory.buildParams(
+                                    ServerInterface.RequestType.selectObjWithCond,
+                                    "areaid",
+                                    "denominazione",
+                                    areaDenom);
+                    Request areaIdRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.selectObjWithCond,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            areaIdReqParams
+                    );
+                    client.addRequest(areaIdRequest);
+                }catch(MalformedRequestException mre){
+                    mre.printStackTrace();
+                }
+                Response areaIdResponse = client.getResponse();
+                if((areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error)
+                        || (areaIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                    new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label).showAndWait();
+                }else{
+                    String areaId = areaIdResponse.getResult().toString();
+                    Request paramClimaticiRequest = PredefinedRequest.getRequestPc(client.getHostName(), "areaid", areaId);
+                    client.addRequest(paramClimaticiRequest);
+                    Response paramClimaticiResponse = client.getResponse();
+                    if((paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.Error) ||
+                            (paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                        new Alert(Alert.AlertType.ERROR, paramClimaticiResponse.getResponseType().label).showAndWait();
+                    }else{
+                        List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>) paramClimaticiResponse.getResult();
+                        parametriClimatici.forEach(pc -> tableView.getItems().add(pc));
+                    }
+                }
             }
-
-            Request areaIdRequest;
-            try{
-                Map<String, String> areaIdReqParams =
-                        RequestFactory.buildParams(
-                                ServerInterface.RequestType.selectObjWithCond,
-                                "areaid",
-                                "denominazione",
-                                areaDenom);
-                areaIdRequest = RequestFactory.buildRequest(
-                        client.getHostName(),
-                        ServerInterface.RequestType.selectObjWithCond,
-                        ServerInterface.Tables.AREA_INTERESSE,
-                        areaIdReqParams
-                );
-            }catch(MalformedRequestException mre){
-                mre.printStackTrace();
-                return;
-            }
-            client.addRequest(areaIdRequest);
-            Response areaIdResponse = client.getResponse(areaIdRequest.getRequestId());
-            if(areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error){
-                new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
-                return;
-            }
-            if(areaIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.INFORMATION, "L'oggetto cercato non esiste!").showAndWait();
-                return;
-            }
-            String areaId = areaIdResponse.getResult().toString();
-
-            Request paramClimaticiRequest = PredefinedRequest.getRequestPc(client.getHostName(), "areaid", areaId);
-            client.addRequest(paramClimaticiRequest);
-            Response paramClimaticiResponse = client.getResponse(paramClimaticiRequest.getRequestId());
-            if(paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.Error){
-                new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
-                return;
-            }
-            if(paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.INFORMATION, "L'oggetto cercato non esiste!").showAndWait();
-                return;
-            }
-            List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>) paramClimaticiResponse.getResult();
-            parametriClimatici.forEach(pc -> tableView.getItems().add(pc));
-
         });
 
         //set up tableView
@@ -1850,48 +1823,44 @@ public class OperatoreViewController {
 
     }
 
+    private void updateDenomCentro(String nuovaDenominazione, String centroId){
+        if(nuovaDenominazione.isEmpty() || nuovaDenominazione.equals("Nuova denominazone")){
+            new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
+        }else{
+            try{
+                Map<String, String> updateParams = RequestFactory.buildParams(
+                        ServerInterface.RequestType.executeUpdate,
+                        "denominazione",
+                        nuovaDenominazione,
+                        centroId
+                );
+                Request updateDenomRequest = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.executeUpdate,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        updateParams
+                );
+                client.addRequest(updateDenomRequest);
+            }catch(MalformedRequestException mre){
+                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+            }
+            Response updateResponse = client.getResponse();
+            if(updateResponse.getResponseType() == ServerInterface.ResponseType.updateOk){
+                new Alert(Alert.AlertType.CONFIRMATION, "Aggiornamento avvenuto con successo!").showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Aggiornamento fallito").showAndWait();
+            }
+        }
+    }
+
     @FXML
     public void handleAggiornaCentroMonitoraggio(ActionEvent event){
         this.paramBox = new VBox();
         this.paramBox.getStyleClass().add("param-box");
         tableView.getColumns().clear();
         tableView.getItems().clear();
-        Button bVisualizzaAree = new Button("Visualizza aree");
-        bVisualizzaAree.setOnAction(e -> {
-            tableView.getColumns().clear();
-            tableView.getItems().clear();
-            tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
-            tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(client));
-            Request reqAi = PredefinedRequest.getRequestAi(client.getHostName());
-            client.addRequest(reqAi);
-            Response resAi = client.getResponse(reqAi.getRequestId());
-            if(resAi.getResponseType() == ServerInterface.ResponseType.Error ||
-                    resAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.WARNING, resAi.getResponseType().label).showAndWait();
-                return;
-            }
-            List<AreaInteresse> aree = (List<AreaInteresse>) resAi.getResult();
-            aree.forEach(area -> tableView.getItems().add(area));
-        });
-        Button bVisualizzaCentri = new Button("Visualizza centri");
-        bVisualizzaCentri.setOnAction(e -> {
-            tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
-            tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
 
-            Request reqCm = PredefinedRequest.getRequestCm(client.getHostName());
-            client.addRequest(reqCm);
-            Response resCm = client.getResponse(client.getHostName());
-            if(resCm.getResponseType() == ServerInterface.ResponseType.Error ||
-                resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.WARNING, resCm.getResponseType().label).showAndWait();
-                return;
-            }
-            List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) resCm.getResult();
-            centri.forEach(centro -> tableView.getItems().add(centro));
-        });
-
-
-        TextField tRicercaCentro = new TextField("Nome del centro: ");
+        TextField tRicercaCentro = new TextField("Nome del centro");
         tRicercaCentro.setOnMouseClicked(e -> tRicercaCentro.clear());
         TextField tUpdateDenominazione = new TextField("Nuova denominazione");
         tUpdateDenominazione.setOnMouseClicked(e -> tUpdateDenominazione.clear());
@@ -1900,99 +1869,156 @@ public class OperatoreViewController {
         TextField tRemoveAreaAssociata = new TextField("area da rimuovere");
         tRemoveAreaAssociata.setOnMouseClicked(e -> tRemoveAreaAssociata.clear());
 
-        Button ricercaCentro = new Button("Avvia ricerca");
-        ricercaCentro.setOnAction(e -> {
-            String nomeCentro = tRicercaCentro.getText();
-            Request reqCm;
-            try{
-                Map<String, String> reqCmParams = RequestFactory.buildParams(
-                        ServerInterface.RequestType.selectAllWithCond,
-                        "nomecentro",
-                        nomeCentro
-                );
-                reqCm = RequestFactory.buildRequest(
-                        client.getHostName(),
-                        ServerInterface.RequestType.selectAllWithCond,
-                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                        reqCmParams
-                        );
-            }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                return;
+        Button bVisualizzaAree = new Button("Visualizza aree");
+        bVisualizzaAree.setOnAction(e -> {
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(client));
+            Request reqAi = PredefinedRequest.getRequestAi(client.getHostName());
+            client.addRequest(reqAi);
+            Response resAi = client.getResponse();
+            if(resAi.getResponseType() == ServerInterface.ResponseType.Error ||
+                    resAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.WARNING, resAi.getResponseType().label).showAndWait();
+            }else{
+                List<AreaInteresse> aree = (List<AreaInteresse>) resAi.getResult();
+                aree.forEach(area -> tableView.getItems().add(area));
             }
+        });
+        Button bVisualizzaCentri = new Button("Visualizza centri");
+        bVisualizzaCentri.setOnAction(e -> {
+            tableView.getColumns().clear();
+            tableView.getItems().clear();
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
+
+            Request reqCm = PredefinedRequest.getRequestCm(client.getHostName());
             client.addRequest(reqCm);
-            Response resCm = client.getResponse(reqCm.getRequestId());
-            if(resCm.getResponseType() == ServerInterface.ResponseType.Error){
-                new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
-                return;
+            Response resCm = client.getResponse();
+            if((resCm.getResponseType() == ServerInterface.ResponseType.Error) ||
+                    (resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                new Alert(Alert.AlertType.WARNING, resCm.getResponseType().label).showAndWait();
+            }else{
+                List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) resCm.getResult();
+                centri.forEach(centro -> tableView.getItems().add(centro));
             }
-            if(resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.INFORMATION, "L'elemento richiesto non esiste").showAndWait();
-                return;
-            }
-            List<CentroMonitoraggio> result = (List<CentroMonitoraggio>) resCm.getResult();
-            result.forEach(cm -> tableView.getItems().add(cm));
         });
 
-        //TODO
+        Button ricercaCentro = new Button("Ricerca centro");
+        ricercaCentro.setOnAction(e -> {
+            String nomeCentro = tRicercaCentro.getText();
+            if(nomeCentro.isEmpty() || nomeCentro.equals("Nome del centro: ")){
+                new Alert(Alert.AlertType.ERROR, "Nome del centro non valido!").showAndWait();
+            }else{
+                try{
+                    Map<String, String> reqCmParams = RequestFactory.buildParams(
+                            ServerInterface.RequestType.selectAllWithCond,
+                            "nomecentro",
+                            nomeCentro
+                    );
+                    Request reqCm = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                            reqCmParams
+                    );
+                    client.addRequest(reqCm);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                }
+                Response resCm = client.getResponse();
+                if(resCm.getResponseType() == ServerInterface.ResponseType.Error ||
+                        resCm.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    new Alert(Alert.AlertType.ERROR, resCm.getResponseType().label).showAndWait();
+                }else{
+                    List<CentroMonitoraggio> result = (List<CentroMonitoraggio>) resCm.getResult();
+                    result.forEach(cm -> tableView.getItems().add(cm));
+                }
+            }
+        });
+
         Button bUpdateDenom = new Button("Aggiorna denominazione");
         bUpdateDenom.setOnAction(e -> {
             String nomeCentro = tRicercaCentro.getText();
-            Request centroIdRequest;
             try{
                 Map<String, String> reqCmIdParams = RequestFactory.buildParams(
                         ServerInterface.RequestType.selectObjWithCond,
                         "centroid",
                         "denominazione",
                         nomeCentro);
-                centroIdRequest = RequestFactory.buildRequest(
+                Request centroIdRequest = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.selectObjWithCond,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         reqCmIdParams);
+                client.addRequest(centroIdRequest);
             }catch(MalformedRequestException mre){
                 new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                return;
             }
-            client.addRequest(centroIdRequest);
-            Response centroIdResponse = client.getResponse(centroIdRequest.getClientId());
-            if(centroIdResponse.getResponseType() != ServerInterface.ResponseType.Error
-                    && centroIdResponse.getResponseType() != ServerInterface.ResponseType.NoSuchElement){
+            Response centroIdResponse = client.getResponse();
+            if(centroIdResponse.getResponseType() == ServerInterface.ResponseType.Error
+                    && centroIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label).showAndWait();
+            }else{
                 String centroId = centroIdResponse.toString();
                 updateDenomCentro(tUpdateDenominazione.getText(), centroId);
-            }else{
-                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label).showAndWait();
             }
         });
         Button bAggiungiAreaAssociata = new Button("Aggiungi area associata");
         bAggiungiAreaAssociata.setOnAction(e -> aggiungiAreaCentro());
         Button bRimuoviAreaAssociata = new Button("Rimuovi area associata");
         bRimuoviAreaAssociata.setOnAction(e -> {
-            String nomeCentroDaEliminare = tDenominazione.getText();
-            Request centroIdRequest;
-            try{
-                Map<String, String> reqCmIdParams = RequestFactory.buildParams(
-                        ServerInterface.RequestType.selectObjWithCond,
-                        "centroid",
-                        "denominazione",
-                        nomeCentroDaEliminare);
-                centroIdRequest = RequestFactory.buildRequest(
-                        client.getHostName(),
-                        ServerInterface.RequestType.selectObjWithCond,
-                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                        reqCmIdParams);
-            }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                return;
-            }
-            client.addRequest(centroIdRequest);
-            Response centroIdResponse = client.getResponse(centroIdRequest.getClientId());
-            if(centroIdResponse.getResponseType() != ServerInterface.ResponseType.Error
-                    && centroIdResponse.getResponseType() != ServerInterface.ResponseType.NoSuchElement){
-                String centroId = centroIdResponse.toString();
-                rimuoviAreaCentro(centroId);
+            String nomeAreaDaEliminare = tRemoveAreaAssociata.getText();
+            String nomeCentro = tRicercaCentro.getText();
+            if((!nomeAreaDaEliminare.isEmpty() && !nomeAreaDaEliminare.equals("area da rimuovere"))
+                    && (!nomeCentro.isEmpty() && !nomeCentro.equals("Nome del centro"))){
+                try{
+                    Map<String, String> reqAreaIdParams = RequestFactory.buildParams(
+                            ServerInterface.RequestType.selectObjWithCond,
+                            "areaid",
+                            "denominazione",
+                            nomeAreaDaEliminare
+                    );
+                    Request areaIdRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.selectObjWithCond,
+                            ServerInterface.Tables.AREA_INTERESSE,
+                            reqAreaIdParams
+                    );
+                    client.addRequest(areaIdRequest);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                Response areaIdResponse = client.getResponse();
+                try{
+                    Map<String, String> reqCmIdParams = RequestFactory.buildParams(
+                            ServerInterface.RequestType.selectObjWithCond,
+                            "centroid",
+                            "denominazione",
+                            nomeCentro);
+                    Request centroIdRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.selectObjWithCond,
+                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                            reqCmIdParams);
+                    client.addRequest(centroIdRequest);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
+                    return;
+                }
+                Response centroIdResponse = client.getResponse();
+                if((centroIdResponse.getResponseType() == ServerInterface.ResponseType.Error)
+                        || (centroIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
+                    new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label).showAndWait();
+                }else{
+                    String centroId = centroIdResponse.getResult().toString();
+                    String areaId = areaIdResponse.getResult().toString();
+                    rimuoviAreaCentro(areaId, centroId);
+                }
             }else{
-                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label).showAndWait();
+                new Alert(Alert.AlertType.ERROR, "Nome dell'area o del centro non valida!").showAndWait();
             }
         });
 
@@ -2010,46 +2036,31 @@ public class OperatoreViewController {
         this.borderPane.setRight(paramBox);
     }
 
-    private void rimuoviAreaCentro(String centroId){
+    private void rimuoviAreaCentro(String areaId, String centroId){
         if(centroId.isEmpty()){
             new Alert(Alert.AlertType.ERROR, "id del centro non valido").showAndWait();
         }else{
-            //TODO
+            try{
+                Map<String, String> deleteParams = RequestFactory.buildDeleteAiCmParams(areaId, centroId);
+                Request removeAreaRequest = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.executeDelete,
+                        ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                        deleteParams
+                );
+                client.addRequest(removeAreaRequest);
+            }catch(MalformedRequestException mre){
+                mre.printStackTrace();
+            }
+            Response deleteAreaResponse = client.getResponse();
+            if(deleteAreaResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
+                new Alert(Alert.AlertType.CONFIRMATION, "Area eliminata con successo").showAndWait();
+            }else{
+                new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione di eliminazione").showAndWait();
+            }
         }
     }
 
-    private void updateDenomCentro(String nuovaDenominazione, String centroId){
-        if(nuovaDenominazione.isEmpty() || nuovaDenominazione.equals("Nuova denominazone")){
-            new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
-            return;
-        }
-        Request updateDenomRequest;
-        try{
-            Map<String, String> updateParams = RequestFactory.buildParams(
-                    ServerInterface.RequestType.executeUpdate,
-                    "denominazione",
-                    nuovaDenominazione,
-                    centroId
-            );
-            updateDenomRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.executeUpdate,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    updateParams
-            );
-
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
-        }
-        client.addRequest(updateDenomRequest);
-        Response updateResponse = client.getResponse(updateDenomRequest.getRequestId());
-        if(updateResponse.getResponseType() == ServerInterface.ResponseType.updateOk){
-            new Alert(Alert.AlertType.CONFIRMATION, "Aggiornamento avvenuto con successo!").showAndWait();
-        }else{
-            new Alert(Alert.AlertType.ERROR, "Aggiornamento fallito").showAndWait();
-        }
-    }
 
     private void aggiungiAreaCentro() {
         String denomAi = tAreaInteresse.getText();
@@ -2073,7 +2084,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(requestAi);
-        Response responseAi = client.getResponse(requestAi.getRequestId());
+        Response responseAi = client.getResponse();
         String areaId = responseAi.getResult().toString();
         if (areaId.isEmpty()) {
             new Alert(Alert.AlertType.ERROR, "Area non esistente").showAndWait();
@@ -2095,7 +2106,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(requestCm);
-        Response responseCm = client.getResponse(requestCm.getRequestId());
+        Response responseCm = client.getResponse();
         String centroId = responseCm.getResult().toString();
         if (centroId.isEmpty()) {
             new Alert(Alert.AlertType.ERROR, "Centro non esistente").showAndWait();
@@ -2118,7 +2129,7 @@ public class OperatoreViewController {
             return;
         }
         client.addRequest(req);
-        Response response = client.getResponse(req.getRequestId());
+        Response response = client.getResponse();
         String areeAssociateAlCentro = response.getResult().toString();
         if (areeAssociateAlCentro.contains(areaId)) {
             new Alert(Alert.AlertType.INFORMATION, "area già associata al centro").showAndWait();
@@ -2141,7 +2152,7 @@ public class OperatoreViewController {
                 return;
             }
             client.addRequest(insertAreaRequest);
-            Response updateAi = client.getResponse(insertAreaRequest.getRequestId());
+            Response updateAi = client.getResponse();
             if(updateAi.getResponseType() == ServerInterface.ResponseType.updateOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Area aggiunta al centro").showAndWait();
             }else{
