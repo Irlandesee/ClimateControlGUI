@@ -392,37 +392,6 @@ public class OperatoreViewController {
         res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
 
-    private void showCentriInseriti(){
-        Request request = null;
-        tableView.getColumns().clear();
-        tableView.getItems().clear();
-        tableView.setRowFactory(null);
-        tableView.refresh();
-        try{
-            request = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.selectAll,
-                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                    null
-            );
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            mre.printStackTrace();
-            return;
-        }
-        client.addRequest(request);
-        Response response = client.getResponse();
-
-        if(response.getResponseType() == ServerInterface.ResponseType.Error){
-            resErrorAlert.showAndWait();
-            return;
-        }
-
-        List<CentroMonitoraggio> res = (List<CentroMonitoraggio>) response.getResult();
-        tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
-        res.forEach(centroMonitoraggio -> tableView.getItems().add(centroMonitoraggio));
-
-    }
 
     private void handleRicercaAreaPerDenominazione(){
         tableView.getItems().clear();
@@ -1614,8 +1583,7 @@ public class OperatoreViewController {
         this.borderPane.setRight(paramBox);
     }
 
-    private void rimuoviCentroPerDenom(){
-        String nomeCentroDaRimuovere = tDenominazione.getText();
+    private void rimuoviCentroPerDenom(String nomeCentroDaRimuovere){
         if(nomeCentroDaRimuovere.isEmpty() || nomeCentroDaRimuovere.equals("Nome")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
         }else{
@@ -1623,7 +1591,7 @@ public class OperatoreViewController {
                 Map<String, String> requestParams = RequestFactory.buildParams(
                         ServerInterface.RequestType.selectObjWithCond,
                         "centroid",
-                        "denominazione",
+                        "nomecentro",
                         nomeCentroDaRimuovere);
                 Request centroIdRequest = RequestFactory.buildRequest(
                         client.getHostName(),
@@ -1631,47 +1599,99 @@ public class OperatoreViewController {
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         requestParams);
                 client.addRequest(centroIdRequest);
-            }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            }
+            }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
             Response centroIdResponse = client.getResponse();
             if((centroIdResponse.getResponseType() == ServerInterface.ResponseType.Error) ||
                     (centroIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
-                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label);
+                new Alert(Alert.AlertType.ERROR, centroIdResponse.getResponseType().label).showAndWait();
             }else{
+                String centroId = centroIdResponse.getResult().toString();
+                logger.info("CentroID: " +centroId);
+                //check parametri climatici
                 try{
-                    Map<String, String> deleteParams = RequestFactory.buildParams(
-                            ServerInterface.RequestType.executeDelete, centroIdResponse.getResult().toString());
-                    Request deleteRequest = RequestFactory.buildRequest(
+                    Map<String, String> pcParams = RequestFactory.buildParams(
+                            ServerInterface.RequestType.selectAllWithCond,
+                            "centroid", centroId);
+                    Request pcRequest = RequestFactory.buildRequest(
                             client.getHostName(),
-                            ServerInterface.RequestType.executeDelete,
-                            ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                            deleteParams);
-                    client.addRequest(deleteRequest);
-                }catch(MalformedRequestException mre){
-                    mre.printStackTrace();
-                }
-                Response deleteResponse = client.getResponse();
-                if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
-                    new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
-                }else{
-                    new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
-                }
+                            ServerInterface.RequestType.selectAllWithCond,
+                            ServerInterface.Tables.PARAM_CLIMATICO,
+                            pcParams);
+                    client.addRequest(pcRequest);
+                    Response pcResponse = client.getResponse();
+
+                    if(pcResponse.getResponseType() == ServerInterface.ResponseType.Error){
+                        new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
+                    }
+                    //Non esistono parametri climatici associati a questo centro di monitoraggio
+                    if(pcResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                        try{
+                            Map<String, String> deleteParams = RequestFactory.buildDeleteParams(
+                                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                                    centroIdResponse.getResult().toString());
+                            Request deleteRequest = RequestFactory.buildRequest(
+                                    client.getHostName(),
+                                    ServerInterface.RequestType.executeDelete,
+                                    ServerInterface.Tables.CENTRO_MONITORAGGIO,
+                                    deleteParams);
+                            client.addRequest(deleteRequest);
+                        }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
+                        Response deleteResponse = client.getResponse();
+                        if(deleteResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
+                            new Alert(Alert.AlertType.CONFIRMATION, "Elemento eliminato con successo").showAndWait();
+                            tableView.getItems().clear();
+                            client.addRequest(PredefinedRequest.getRequestCm(client.getHostName()));
+                            Response resCentri = client.getResponse();
+                            if(resCentri.getResponseType() != ServerInterface.ResponseType.Error){
+                                List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) resCentri.getResult();
+                                centri.forEach(centro -> tableView.getItems().add(centro));
+                            }else{
+                                new Alert(Alert.AlertType.ERROR, "Errore nell'ogettto risposta").showAndWait();
+                            }
+                        }else{
+                            new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione!").showAndWait();
+                        }
+
+                    }else{
+                        List<ParametroClimatico> pc = (List<ParametroClimatico>) pcResponse.getResult();
+                        if(!pc.isEmpty()){
+                            new Alert(Alert.AlertType.ERROR, "Centro non eliminato: presenza di parametri climatici associati")
+                                    .showAndWait();
+                        }
+                    }
+                }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
             }
         }
     }
     @FXML
     public void handleRimuoviCentroMonitoraggio(ActionEvent event){
-        if(paramBox != null && !paramBox.getChildren().isEmpty())
-            paramBox.getChildren().clear();
+        if(paramBox != null && !paramBox.getChildren().isEmpty()) paramBox.getChildren().clear();
         this.paramBox = new VBox(2);
         paramBox.getStyleClass().add("param-box");
-        this.tDenominazione = new TextField("Nome");
-        this.tDenominazione.setOnMouseClicked(e -> this.tDenominazione.clear());
-        this.btnRicercaAreaPerDenom = new Button("Rimuovi");
-        this.btnRicercaAreaPerDenom.setOnAction(e -> rimuoviCentroPerDenom());
-        paramBox.getChildren().add(tDenominazione);
-        paramBox.getChildren().add(btnRicercaAreaPerDenom);
+
+        TextField tNomeCentro = new TextField("Nome Centro");
+        tNomeCentro.setOnMouseClicked(e -> tNomeCentro.clear());
+
+        Button btnVisualizzaCentri = new Button("Visualizza centri");
+        btnVisualizzaCentri.setOnAction(e -> {
+            tableView.getItems().clear();
+            Request centriRequest = PredefinedRequest.getRequestCm(client.getHostName());
+            client.addRequest(centriRequest);
+            Response resCentri = client.getResponse();
+            if(resCentri.getResponseType() == ServerInterface.ResponseType.Error){
+                logger.info("Errore nell'oggetto risposta");
+            }
+            List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>) resCentri.getResult();
+            centri.forEach(centro -> tableView.getItems().add(centro));
+        });
+
+        Button btnRimuoviCentro = new Button("Rimuovi Centro");
+        btnRimuoviCentro.setOnAction(e -> rimuoviCentroPerDenom(tNomeCentro.getText()));
+
+        paramBox.getChildren().add(tNomeCentro);
+        paramBox.getChildren().add(btnVisualizzaCentri);
+        paramBox.getChildren().add(btnRimuoviCentro);
+
         //set up tableView
         tableView.getItems().clear();
         tableView.getColumns().clear();
@@ -1681,23 +1701,13 @@ public class OperatoreViewController {
             row.setOnMouseClicked(e -> {
                 if(e.getClickCount() == 2 && (!row.isEmpty())){
                     CentroMonitoraggio cm = (CentroMonitoraggio) row.getItem();
-                    tDenominazione.setText(cm.getDenominazione());
+                    tNomeCentro.setText(cm.getDenominazione());
                 }
             });
             return row;
         });
         tableView.refresh();
         this.borderPane.setRight(paramBox);
-
-        Request centriMonitoraggioRequest = PredefinedRequest.getRequestCm(client.getHostName());
-        client.addRequest(centriMonitoraggioRequest);
-        Response centriMonitoraggioResponse = client.getResponse();
-        if(centriMonitoraggioResponse.getResponseType() == ServerInterface.ResponseType.Error){
-            new Alert(Alert.AlertType.ERROR, "Errore nell'oggetto risposta").showAndWait();
-        }else{
-            List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) centriMonitoraggioResponse.getResult();
-            centriMonitoraggio.forEach(cm -> tableView.getItems().add(cm));
-        }
     }
 
     @FXML
