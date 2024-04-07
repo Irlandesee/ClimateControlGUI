@@ -1838,13 +1838,13 @@ public class OperatoreViewController {
     }
 
     private void updateDenomCentro(String nuovaDenominazione, String centroId){
-        if(nuovaDenominazione.isEmpty() || nuovaDenominazione.equals("Nuova denominazone")){
+        if(nuovaDenominazione.isEmpty() || nuovaDenominazione.equals("Nuova denominazione")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
         }else{
             try{
                 Map<String, String> updateParams = RequestFactory.buildParams(
                         ServerInterface.RequestType.executeUpdate,
-                        "denominazione",
+                        "nomecentro",
                         nuovaDenominazione,
                         centroId
                 );
@@ -1963,7 +1963,7 @@ public class OperatoreViewController {
                 Map<String, String> reqCmIdParams = RequestFactory.buildParams(
                         ServerInterface.RequestType.selectObjWithCond,
                         "centroid",
-                        "denominazione",
+                        "nomecentro",
                         nomeCentro);
                 Request centroIdRequest = RequestFactory.buildRequest(
                         client.getHostName(),
@@ -1989,8 +1989,8 @@ public class OperatoreViewController {
                 tUpdateAreeAssociate.getText(),
                 tRicercaCentro.getText()));
 
-        Button bRimuoviAreaAssociata = new Button("Rimuovi area associata");
-        bRimuoviAreaAssociata.setOnAction(e -> {
+    Button bRimuoviAreaAssociata = new Button("Rimuovi area associata");
+    bRimuoviAreaAssociata.setOnAction(e -> {
             String nomeAreaDaEliminare = tRemoveAreaAssociata.getText();
             String nomeCentro = tRicercaCentro.getText();
             if((!nomeAreaDaEliminare.isEmpty() && !nomeAreaDaEliminare.equals("area da rimuovere"))
@@ -2010,8 +2010,7 @@ public class OperatoreViewController {
                     );
                     client.addRequest(areaIdRequest);
                 }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    return;
+                    logger.info(mre.getMessage());
                 }
                 Response areaIdResponse = client.getResponse();
                 try{
@@ -2144,7 +2143,6 @@ public class OperatoreViewController {
             } else {
                 //area non è associata al centro -> si aggiunge l'area al array associato al centro
                 try{
-                    //TODO: aree_interesse_ids -> column to update
                     Map<String, String> updateParams = RequestFactory.buildParams(ServerInterface.RequestType.executeUpdate, "aree_interesse_ids", areaId, centroId);
                     Request insertAreaRequest = RequestFactory.buildRequest(
                             client.getHostName(),

@@ -90,7 +90,7 @@ public class Client extends Thread{
             } catch(IOException ioe){
                 System.out.println("Server has disconnected, closing the connection...");
                 clientProxy.quit();
-                ioe.printStackTrace();
+                logger.info(ioe.getMessage());
             }
         }
     }
