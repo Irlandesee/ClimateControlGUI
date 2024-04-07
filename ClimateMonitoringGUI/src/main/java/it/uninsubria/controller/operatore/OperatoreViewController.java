@@ -1726,6 +1726,9 @@ public class OperatoreViewController {
             LocalDate date = startDatePicker.getValue();
             LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
             LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
+            if(date.isBefore(canonicalStartDate) || date.isAfter(canonicalEndDate)){
+                new Alert(Alert.AlertType.ERROR, "Data inserita non valida").showAndWait();
+            }
             //delete query
             try{
                 Map<String, String> deleteParams = RequestFactory.buildDeleteParams(ServerInterface.Tables.PARAM_CLIMATICO, parameterId, date.toString());
@@ -1870,6 +1873,7 @@ public class OperatoreViewController {
         this.paramBox.getStyleClass().add("param-box");
         tableView.getColumns().clear();
         tableView.getItems().clear();
+        tableView.refresh();
 
         TextField tRicercaCentro = new TextField("Nome del centro");
         tRicercaCentro.setOnMouseClicked(e -> tRicercaCentro.clear());
@@ -1886,6 +1890,8 @@ public class OperatoreViewController {
             tableView.getItems().clear();
             tableView.getColumns().addAll(TableViewBuilder.getColumnsAi());
             tableView.setRowFactory(tv -> TableViewBuilder.getRowAi(client));
+            tableView.refresh();
+
             Request reqAi = PredefinedRequest.getRequestAi(client.getHostName());
             client.addRequest(reqAi);
             Response resAi = client.getResponse();
@@ -1903,6 +1909,7 @@ public class OperatoreViewController {
             tableView.getItems().clear();
             tableView.getColumns().addAll(TableViewBuilder.getColumnsCm());
             tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryHandleVisualizzaCentri(client));
+            tableView.refresh();
 
             Request reqCm = PredefinedRequest.getRequestCm(client.getHostName());
             client.addRequest(reqCm);
@@ -2007,7 +2014,7 @@ public class OperatoreViewController {
                     Map<String, String> reqCmIdParams = RequestFactory.buildParams(
                             ServerInterface.RequestType.selectObjWithCond,
                             "centroid",
-                            "denominazione",
+                            "nomecentro",
                             nomeCentro);
                     Request centroIdRequest = RequestFactory.buildRequest(
                             client.getHostName(),
@@ -2015,10 +2022,7 @@ public class OperatoreViewController {
                             ServerInterface.Tables.CENTRO_MONITORAGGIO,
                             reqCmIdParams);
                     client.addRequest(centroIdRequest);
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    return;
-                }
+                }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
                 Response centroIdResponse = client.getResponse();
                 if((centroIdResponse.getResponseType() == ServerInterface.ResponseType.Error)
                         || (centroIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement)){
@@ -2026,7 +2030,7 @@ public class OperatoreViewController {
                 }else{
                     String centroId = centroIdResponse.getResult().toString();
                     String areaId = areaIdResponse.getResult().toString();
-                    rimuoviAreaCentro(areaId, centroId);
+                    rimuoviAreaDaCentro(areaId, centroId);
                 }
             }else{
                 new Alert(Alert.AlertType.ERROR, "Nome dell'area o del centro non valida!").showAndWait();
@@ -2047,9 +2051,9 @@ public class OperatoreViewController {
         this.borderPane.setRight(paramBox);
     }
 
-    private void rimuoviAreaCentro(String areaId, String centroId){
-        if(centroId.isEmpty()){
-            new Alert(Alert.AlertType.ERROR, "id del centro non valido").showAndWait();
+    private void rimuoviAreaDaCentro(String areaId, String centroId){
+        if(centroId.isEmpty() || areaId.isEmpty()){
+            new Alert(Alert.AlertType.ERROR, "id del centro o dell'area non valido").showAndWait();
         }else{
             try{
                 Map<String, String> deleteParams = RequestFactory.buildDeleteAiCmParams(areaId, centroId);
@@ -2060,9 +2064,7 @@ public class OperatoreViewController {
                         deleteParams
                 );
                 client.addRequest(removeAreaRequest);
-            }catch(MalformedRequestException mre){
-                mre.printStackTrace();
-            }
+            }catch(MalformedRequestException mre){logger.info(mre.getMessage());}
             Response deleteAreaResponse = client.getResponse();
             if(deleteAreaResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Area eliminata con successo").showAndWait();
