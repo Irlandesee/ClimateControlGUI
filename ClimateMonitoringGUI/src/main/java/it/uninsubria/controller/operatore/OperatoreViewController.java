@@ -1062,21 +1062,75 @@ public class OperatoreViewController {
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
         paramBox = new VBox();
         paramBox.getStyleClass().add("param-box");
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.getColumns().add(TableViewBuilder.getDateColumn());
+        tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
+        tableView.setRowFactory(tv -> TableViewBuilder.getRowPc(client));
 
-        TextField tRicercaAreaDenom = new TextField("Ricerca area");
-        tRicercaAreaDenom.setOnMouseClicked(e -> tRicercaAreaDenom.clear());
-        Button bRicercaAreaDenom = new Button("Ricerca");
-        bRicercaAreaDenom.setOnAction(e-> {
-            String denom = tRicercaAreaDenom.getText();
-            if(denom.isEmpty() || denom.equals("Ricerca area")){
-                new Alert(Alert.AlertType.ERROR, "denominazione non valida").showAndWait();
-                return;
+        TextField tRicercaArea = new TextField("Denominazione area");
+        tRicercaArea.setOnMouseClicked(e -> tRicercaArea.clear());
+        Button bRicercaPcArea = new Button("Ricerca");
+        bRicercaPcArea.setOnAction(e -> {
+                String denom = tRicercaArea.getText();
+                if(denom.equals("Denominazione area") || denom.isEmpty()){
+                    new Alert(Alert.AlertType.ERROR, "Denominazione non valida!").showAndWait();
+                }else{
+                    try{
+                        Map<String, String> reqAreaIdParams = RequestFactory.buildParams(
+                                ServerInterface.RequestType.selectObjWithCond,
+                                "areaid",
+                                "denominazione",
+                                denom);
+                        Request areaIdRequest = RequestFactory.buildRequest(
+                                client.getHostName(),
+                                ServerInterface.RequestType.selectObjWithCond,
+                                ServerInterface.Tables.AREA_INTERESSE,
+                                reqAreaIdParams
+                        );
+                        client.addRequest(areaIdRequest);
+                    }catch(MalformedRequestException mre){
+                        logger.info(mre.getMessage());
+                    }
+                    Response areaIdResponse = client.getResponse();
+                    if(areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error ||
+                            areaIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                        new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label).showAndWait();
+                    }else{
+                        String areaId = areaIdResponse.getResult().toString();
+                        try{
+                            Map<String, String> reqParams = RequestFactory.buildParams(
+                                    ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
+                            Request pcRequest = RequestFactory.buildRequest(
+                                    client.getHostName(),
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    ServerInterface.Tables.PARAM_CLIMATICO,
+                                    reqParams
+                            );
+                            client.addRequest(pcRequest);
+                        }catch(MalformedRequestException mre){
+                            logger.info(mre.getMessage());
+
+                        }
+                        Response pcResponse = client.getResponse();
+                        if(pcResponse.getResponseType() == ServerInterface.ResponseType.Error
+                                || pcResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                            new Alert(Alert.AlertType.ERROR, pcResponse.getResponseType().label).showAndWait();
+                        }else{
+                            List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>) pcResponse.getResult();
+                            parametriClimatici.forEach(pc -> tableView.getItems().add(pc));
+                        }
+                    }
+
+                }
+
             }
-            //TODO: build and send request
-        });
+        );
+
+        this.paramBox.getChildren().add(tRicercaArea);
+        this.paramBox.getChildren().add(bRicercaPcArea);
         this.borderPane.setRight(paramBox);
 
-        prepTableAreaInteresse();
         try{
             FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("fxml/parametro_climatico-scene.fxml"));
             loader.setController(parametroClimaticoController);
@@ -1089,14 +1143,13 @@ public class OperatoreViewController {
     }
 
 
-    //TODO: Bugged -> throws malformed request exception even though the parameters lengths are correct
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
         logger.info("Nome centro: " + centroMon);
         logger.info("Parameterid: " +parameterId);
         logger.info("Notaid:  "+ notaId);
+        paramValues.forEach((key, value) -> {logger.info(key + ": " + value);});
 
-        Request requestAreaId;
         try{
             Map<String, String> reqAreaIdParams = RequestFactory
                     .buildParams(
@@ -1104,19 +1157,23 @@ public class OperatoreViewController {
                             "areaid",
                             "denominazione",
                             nomeArea);
-            requestAreaId = RequestFactory.buildRequest(
+            Request requestAreaId = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.AREA_INTERESSE,
                     reqAreaIdParams);
+            client.addRequest(requestAreaId);
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
         }
-        client.addRequest(requestAreaId);
+
         Response respAreaId = client.getResponse();
 
-        Request requestCentroId;
+        if(respAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement
+                || respAreaId.getResponseType() == ServerInterface.ResponseType.Error){
+            new Alert(Alert.AlertType.ERROR, respAreaId.getResponseType().label).showAndWait();
+        }
+
         try{
             Map<String, String> reqCentroIdParams = RequestFactory
                     .buildParams(
@@ -1124,88 +1181,70 @@ public class OperatoreViewController {
                             "centroid",
                             "nomecentro",
                             centroMon);
-            requestCentroId = RequestFactory.buildRequest(
+            Request requestCentroId = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO,
                     reqCentroIdParams
             );
+
+            client.addRequest(requestCentroId);
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
         }
-        client.addRequest(requestCentroId);
         Response respCentroId = client.getResponse();
-        /**
-         * TODO:
-         * NullPointerException se non c'e' risultato... add checks...
-         * **/
-        if(respAreaId.getResponseType() != ServerInterface.ResponseType.Object){
-            ServerInterface.ResponseType responseType = respAreaId.getResponseType();
-            if(responseType == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
-            }else if(responseType == ServerInterface.ResponseType.Error){
-                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.Error.label).showAndWait();
-            }
-            return;
+        if(respCentroId.getResponseType() == ServerInterface.ResponseType.Error
+                || respCentroId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+            new Alert(Alert.AlertType.ERROR, respCentroId.getResponseType().label).showAndWait();
         }
-        if(respCentroId.getResponseType() != ServerInterface.ResponseType.Object){
-            ServerInterface.ResponseType responseType = respAreaId.getResponseType();
-            if(responseType == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.NoSuchElement.label).showAndWait();
-            }else if(responseType == ServerInterface.ResponseType.Error){
-                new Alert(Alert.AlertType.ERROR, ServerInterface.ResponseType.Error.label).showAndWait();
-            }
-            return;
-        }
+
         String areaId = respAreaId.getResult().toString();
         String centroId = respCentroId.getResult().toString();
         logger.info(areaId);
         logger.info(centroId);
 
-        Request insertNotaRequest;
-        notaInsertParams.replace(RequestFactory.notaIdKey, notaId);
+        notaInsertParams.put(RequestFactory.notaIdKey, notaId);
         try{
-            insertNotaRequest = RequestFactory.buildRequest(
+            Request insertNotaRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
                     notaInsertParams);
+            client.addRequest(insertNotaRequest);
         }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            logger.info("Mre costruzione insertNota");
-            return;
+            logger.info(mre.getMessage());
         }
-        client.addRequest(insertNotaRequest);
         Response responseNota = client.getResponse();
-        if(responseNota.getResponseType() == ServerInterface.ResponseType.insertKo){
+        if(responseNota.getResponseType() == ServerInterface.ResponseType.Error ||
+                responseNota.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "errore inserimento nota").showAndWait();
-            return;
         }
 
-        Map<String, String> insertParams;
-        Request insertPcRequest;
         try{
-            insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
-                    parameterId, areaId, centroId, pubdate.toString(), notaId,
-                    paramValues.get(RequestFactory.valoreVentoKey), paramValues.get(RequestFactory.valoreUmiditaKey),
-                    paramValues.get(RequestFactory.valorePressioneKey), paramValues.get(RequestFactory.valorePrecipitazioniKey),
-                    paramValues.get(RequestFactory.valoreTemperaturaKey), paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
+            Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
+                    parameterId, centroId, areaId, pubdate.toString(), notaId,
+                    paramValues.get(RequestFactory.valoreVentoKey),
+                    paramValues.get(RequestFactory.valoreUmiditaKey),
+                    paramValues.get(RequestFactory.valorePressioneKey),
+                    paramValues.get(RequestFactory.valorePrecipitazioniKey),
+                    paramValues.get(RequestFactory.valoreTemperaturaKey),
+                    paramValues.get(RequestFactory.valoreAltGhiacciaiKey),
                     paramValues.get(RequestFactory.valoreMassaGhiacciaiKey));
-            insertPcRequest = RequestFactory.buildRequest(
+            Request insertPcRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.insert,
                     ServerInterface.Tables.PARAM_CLIMATICO,
                     insertParams
             );
+            client.addRequest(insertPcRequest);
         }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            logger.info("Mre costruzione insertPc");
-            return;
+            logger.info(mre.getMessage());
         }
-        client.addRequest(insertPcRequest);
         Response insertPcResponse = client.getResponse();
-        if(insertPcResponse.getResponseType() == ServerInterface.ResponseType.insertKo){
+
+        if(
+                insertPcResponse.getResponseType() == ServerInterface.ResponseType.Error
+                        ||insertPcResponse.getResponseType() == ServerInterface.ResponseType.insertKo){
             new Alert(Alert.AlertType.ERROR, "Errore inserimento del parametro").showAndWait();
         }else{
             if((boolean) insertPcResponse.getResult()){
@@ -1347,20 +1386,18 @@ public class OperatoreViewController {
 
         this.borderPane.setRight(paramBox);
 
-        Request opAutorizzatiRequest;
         try{
-            opAutorizzatiRequest = RequestFactory.buildRequest(
+            Request opAutorizzatiRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     null
             );
+            client.addRequest(opAutorizzatiRequest);
         }catch(MalformedRequestException mre){
             new Alert(Alert.AlertType.ERROR, mre.getMessage());
-            return;
         }
 
-        client.addRequest(opAutorizzatiRequest);
         Response response = client.getResponse();
         List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
 
@@ -1373,28 +1410,45 @@ public class OperatoreViewController {
         String codFisc = tCodFiscField.getText();
         if(email.isEmpty() || codFisc.isEmpty() || email.equals("email") || codFisc.equals("codice fiscale")){
             new Alert(Alert.AlertType.ERROR, "Campo non valido").showAndWait();
-            return;
-        }
-        Map<String, String> insertAuthOpParams;
-        Request insertAuthOpRequest;
-        try{
-            insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
-            insertAuthOpRequest = RequestFactory.buildRequest(
-                    client.getHostName(),
-                    ServerInterface.RequestType.insert,
-                    ServerInterface.Tables.OP_AUTORIZZATO,
-                    insertAuthOpParams);
-        }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            return;
-        }
-        client.addRequest(insertAuthOpRequest);
-        Response res = client.getResponse();
-        //TODO: Test, add better checks, refresh table view in order to show the newly inserted op
-        if((boolean)res.getResult()){
-            new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo").showAndWait();
         }else{
-            new Alert(Alert.AlertType.ERROR, "L'inserimento non ha avuto successo").showAndWait();
+            try{
+                Map<String, String> insertAuthOpParams = RequestFactory.buildInsertParams(ServerInterface.Tables.OP_AUTORIZZATO, email, codFisc);
+                Request insertAuthOpRequest = RequestFactory.buildRequest(
+                        client.getHostName(),
+                        ServerInterface.RequestType.insert,
+                        ServerInterface.Tables.OP_AUTORIZZATO,
+                        insertAuthOpParams);
+                client.addRequest(insertAuthOpRequest);
+            }catch(MalformedRequestException mre){
+                logger.info(mre.getMessage());
+            }
+            Response res = client.getResponse();
+            if(res.getResponseType() == ServerInterface.ResponseType.Error
+                    || res.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, res.getResponseType().label).showAndWait();
+            }
+            if((boolean)res.getResult()){
+                new Alert(Alert.AlertType.CONFIRMATION, "L'inserimento ha avuto successo").showAndWait();
+                try{
+                    Request opAutorizzatiRequest = RequestFactory.buildRequest(
+                            client.getHostName(),
+                            ServerInterface.RequestType.selectAll,
+                            ServerInterface.Tables.OP_AUTORIZZATO,
+                            null
+                    );
+                    client.addRequest(opAutorizzatiRequest);
+                }catch(MalformedRequestException mre){
+                    new Alert(Alert.AlertType.ERROR, mre.getMessage());
+                }
+
+                Response response = client.getResponse();
+                List<OperatoreAutorizzato> opAutorizzati = (List<OperatoreAutorizzato>)response.getResult();
+                tableView.getItems().clear();
+                opAutorizzati.forEach(op -> tableView.getItems().add(op));
+
+            }else{
+                new Alert(Alert.AlertType.ERROR, "L'inserimento non ha avuto successo").showAndWait();
+            }
         }
 
     }

@@ -139,6 +139,13 @@ public class RequestFactory {
                             return new Request(clientId, requestType, table, params);
                         }
                     }
+                    case OP_AUTORIZZATO -> {
+                        if(params.keySet().size() < ServerInterface.insertAuthOpParamsLength){
+                            throw new MalformedRequestException(paramLengthError);
+                        }else{
+                            return new Request(clientId, requestType, table, params);
+                        }
+                    }
                     case PARAM_CLIMATICO -> {
                         if(params.keySet().size() < ServerInterface.insertPcParamsLength){
                             throw new MalformedRequestException(paramLengthError);
@@ -216,8 +223,8 @@ public class RequestFactory {
             }
             case OP_AUTORIZZATO -> {
                 if(s.length < 2) throw new MalformedRequestException(paramLengthError);
-                params.put(codFiscOpKey, s[0]);
-                params.put(emailOpKey, s[1]);
+                params.put(emailOpKey, s[0]);
+                params.put(codFiscOpKey, s[1]);
             }
             default -> {return null;}
         }
