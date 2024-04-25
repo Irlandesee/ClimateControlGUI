@@ -29,13 +29,10 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
@@ -388,7 +385,6 @@ public class OperatoreViewController {
         }
 
         List<AreaInteresse> res = (List<AreaInteresse>)response.getResult();
-        //prepTableAreaInteresse();
         res.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
     }
 
@@ -397,36 +393,30 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
         if(!denom.isEmpty() && !(denom.equals("nome"))){
-            Request request;
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "denominazione", denom);
-                request = RequestFactory.buildRequest(
+                Request request = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
+                client.addRequest(request);
                 System.out.println("Build request: " + request);
             }catch(MalformedRequestException mre){
                 new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                 mre.printStackTrace();
                 return;
             }
-            client.addRequest(request);
             Response response = client.getResponse();
-
-            if(response.getResponseType() == ServerInterface.ResponseType.Error){
-                resErrorAlert.showAndWait();
-                return;
+            if(response.getResponseType() == ServerInterface.ResponseType.Error || response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+            }else{
+                List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
+                areeInteresseRichieste.forEach((areaInteresse -> {
+                    tableView.getItems().add(areaInteresse);
+                }));
             }
-            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                resNoSuchElementAlert.showAndWait();
-                return;
-            }
 
-            List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
-            areeInteresseRichieste.forEach((areaInteresse -> {
-                tableView.getItems().add(areaInteresse);
-            }));
         }
         else{
             denomAlert.showAndWait();
@@ -437,34 +427,28 @@ public class OperatoreViewController {
         tableView.getItems().clear();
         String stato = this.tStato.getText();
         if(!stato.isEmpty() && !(stato.equals("stato"))){
-            Request request;
             try{
                 Map<String, String> params = RequestFactory.buildParams(ServerInterface.RequestType.selectAllWithCond, "stato", stato);
-                request = RequestFactory.buildRequest(
+                Request request = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.selectAllWithCond,
                         ServerInterface.Tables.AREA_INTERESSE,
                         params);
+                client.addRequest(request);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                mre.printStackTrace();
-                return;
+                logger.info(mre.getMessage());
             }
 
-            client.addRequest(request);
             Response response = client.getResponse();
 
-            if(response.getResponseType() == ServerInterface.ResponseType.Error){
-                resErrorAlert.showAndWait();
-                return;
+            if(response.getResponseType() == ServerInterface.ResponseType.Error
+                    || response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+            }else{
+                List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
+                queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
+                queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
             }
-            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                resNoSuchElementAlert.showAndWait();
-                return;
-            }
-            List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
-            queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
-            queryResult.forEach(areaInteresse -> tableView.getItems().add(areaInteresse));
 
         }else{
             statoAlert.showAndWait();
@@ -482,39 +466,34 @@ public class OperatoreViewController {
             float lo = Float.parseFloat(longi);
             float la = Float.parseFloat(lati);
 
-            Request request;
             try{
-                request = RequestFactory.buildRequest(
+                Request request = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.selectAll,
                         ServerInterface.Tables.AREA_INTERESSE,
                         null);
+                client.addRequest(request);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                mre.printStackTrace();
-                return;
+                logger.info(mre.getMessage());
             }
-            client.addRequest(request);
             List<AreaInteresse> areeInteresse = new LinkedList<AreaInteresse>();
             Response response = client.getResponse();
-            if(response.getResponseType() == ServerInterface.ResponseType.Error){
-                resErrorAlert.showAndWait();
-                return;
-            }
-            if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                resNoSuchElementAlert.showAndWait();
-                return;
+            if(response.getResponseType() == ServerInterface.ResponseType.Error ||
+                    response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+            }else{
+                areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
+                List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
+                areeInteresse.forEach(area -> {
+                    float distance = Util.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
+                    //50 km
+                    if(distance < 50) areeVicine.add(area);
+                });
+                tableView.getItems().clear();
+                areeVicine.forEach(area -> tableView.getItems().add(area));
+
             }
 
-            areeInteresse = (LinkedList<AreaInteresse>) response.getResult();
-            List<AreaInteresse> areeVicine = new LinkedList<AreaInteresse>();
-            areeInteresse.forEach(area -> {
-                float distance = Util.haversineDistance(lo, la, area.getLongitudine(), area.getLatitudine());
-                //50 km
-                if(distance < 50) areeVicine.add(area);
-            });
-            tableView.getItems().clear();
-            areeVicine.forEach(area -> tableView.getItems().add(area));
         }
     }
 
@@ -592,21 +571,20 @@ public class OperatoreViewController {
             if(denomAiCercata.isEmpty() || denomAiCercata.equals("AreaInteresse")){
                 this.areaInteresseAlert.showAndWait();
             }else{
-                Request requestAreaId;
                 try{
                     Map<String, String> reqAreaIdParams = RequestFactory
                             .buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", denomAiCercata);
-                    requestAreaId = RequestFactory.buildRequest(
+                    Request requestAreaId = RequestFactory.buildRequest(
                             client.getHostName(),
                             ServerInterface.RequestType.selectObjWithCond,
                             ServerInterface.Tables.AREA_INTERESSE,
                             reqAreaIdParams);
+                    client.addRequest(requestAreaId);
                 }catch(MalformedRequestException mre){
                     new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
                     mre.printStackTrace();
                     return;
                 }
-                client.addRequest(requestAreaId);
                 Response resAreaId = client.getResponse();
 
                 if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
@@ -1605,6 +1583,9 @@ public class OperatoreViewController {
     }
 
     @FXML
+    /**
+     *  Questo metodo qui si occupa di rimuovere un area di interesse dal database
+     */
     public void handleRimuoviAreaInteresse(ActionEvent event){
         if(paramBox != null && !paramBox.getChildren().isEmpty())
             paramBox.getChildren().clear();
@@ -2221,7 +2202,11 @@ public class OperatoreViewController {
 
     @FXML
     public void handleAggiornaParametroClimatico(ActionEvent event){
-        //TODO
+
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+        tableView.refresh();
+
         this.paramBox = new VBox();
         this.paramBox.getStyleClass().add("param-box");
         TextField tArea = new TextField("Nome dell'area");
