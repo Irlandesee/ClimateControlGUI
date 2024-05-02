@@ -2172,11 +2172,67 @@ public class OperatoreViewController {
             tableView.getColumns().clear();
             tableView.getItems().clear();
             tableView.refresh();
+            tableView.getColumns().add(TableViewBuilder.getDateColumn());
+            tableView.getColumns().addAll(TableViewBuilder.getColumnsPc());
+            tableView.setRowFactory(tv -> TableViewBuilder.getRowPc(client));
+
+
 
             this.paramBox = new VBox();
             this.paramBox.getStyleClass().add("param-box");
             TextField tArea = new TextField("Nome dell'area");
             Button bRicercaArea = new Button("Ricerca area");
+            bRicercaArea.setOnMouseClicked(e -> {
+                String nomeArea = tArea.getText();
+                if(nomeArea.isEmpty() || nomeArea.equalsIgnoreCase("Nome dell'area"))
+                    new Alert(Alert.AlertType.ERROR, "Nome dell'area non valido").showAndWait();
+                else{
+                    try{
+                        Map<String, String> areaIdReqParams =
+                                RequestFactory.buildParams(ServerInterface.RequestType.selectObjWithCond, "areaid", "denominazione", nomeArea);
+                        Request areaIdRequest = RequestFactory.buildRequest(
+                                client.getHostName(),
+                                ServerInterface.RequestType.selectObjWithCond,
+                                ServerInterface.Tables.AREA_INTERESSE,
+                                areaIdReqParams);
+                        client.addRequest(areaIdRequest);
+                    }catch(MalformedRequestException mre){
+                        logger.info(mre.getMessage());
+                    }
+                    Response areaIdResponse = client.getResponse();
+                    if(areaIdResponse.getResponseType() == ServerInterface.ResponseType.Error ||
+                        areaIdResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                        new Alert(Alert.AlertType.ERROR, areaIdResponse.getResponseType().label).showAndWait();
+                    }else{
+                        String areaId = areaIdResponse.getResult().toString();
+                        try{
+                            Map<String, String> params = RequestFactory.buildParams(
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    "areaid",
+                                    areaId);
+                            Request paramClimaticiRequest = RequestFactory.buildRequest(
+                                    client.getHostName(),
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    ServerInterface.Tables.PARAM_CLIMATICO,
+                                    params);
+                            client.addRequest(paramClimaticiRequest);
+                        }catch(MalformedRequestException mre){
+                            logger.info(mre.getMessage());
+                        }
+                        Response paramClimaticiResponse = client.getResponse();
+                        if(paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.Error ||
+                            paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                            new Alert(Alert.AlertType.ERROR, paramClimaticiResponse.getResponseType().label).showAndWait();
+                        }else{
+                            List<ParametroClimatico> paramClimatici = (List<ParametroClimatico>)paramClimaticiResponse.getResult();
+                            paramClimatici.forEach(pc -> tableView.getItems().add(pc));
+                        }
+
+                    }
+
+
+                }
+            });
 
             tArea.setOnMouseClicked(e -> tArea.clear());
             ComboBox<String> itemBox = new ComboBox<String>();
@@ -2184,14 +2240,69 @@ public class OperatoreViewController {
             ComboBox<Integer> valueBox = new ComboBox<Integer>();
             valueBox.getStyleClass().add("combo-box");
             String[] items = {"vento", "umidita", "pressione", "temperatura", "precipitazioni", "alt. ghiacciai", "m. ghiacciai"};
-            for(String item : items) itemBox.getItems().add(item);
+            itemBox.getItems().addAll(items);
             for(int i = 1; i < 6; i++) valueBox.getItems().add(i);
 
             Button aggiornaPc = new Button("Aggiorna");
             aggiornaPc.setOnMouseClicked(e -> {
                 String item = itemBox.getSelectionModel().getSelectedItem();
-                int value = valueBox.getSelectionModel().getSelectedItem();
-                System.out.println(item + ":" + value);
+                Integer value = valueBox.getSelectionModel().getSelectedItem();
+                ParametroClimatico pc = (ParametroClimatico) tableView.getSelectionModel().getSelectedItem();
+                if(item != null && pc != null && value != null){
+                    logger.info("{%s}{%s}{%s}".formatted(item, value, pc));
+                    String columnToUpdate = mapString(item);
+                    try{
+                        Map<String, String> updateParams = RequestFactory.buildParams(
+                                ServerInterface.RequestType.executeUpdate,
+                                columnToUpdate,
+                                value.toString(),
+                                pc.getParameterId()
+                                );
+                        Request updateRequest = RequestFactory.buildRequest(
+                                client.getHostName(),
+                                ServerInterface.RequestType.executeUpdate,
+                                ServerInterface.Tables.PARAM_CLIMATICO,
+                                updateParams
+                        );
+                        client.addRequest(updateRequest);
+                    }catch(MalformedRequestException mre){
+                        logger.info(mre.getMessage());
+                    }
+                    Response updateResponse = client.getResponse();
+                    if(updateResponse.getResponseType() == ServerInterface.ResponseType.Error){
+                        new Alert(Alert.AlertType.ERROR, updateResponse.getResponseType().label).showAndWait();
+                    }
+                    if(updateResponse.getResponseType() == ServerInterface.ResponseType.updateOk){
+                        new Alert(Alert.AlertType.CONFIRMATION, "Update avvenuto con successo").showAndWait();
+                        tableView.getItems().clear();
+                        try{
+                            Map<String, String> params = RequestFactory.buildParams(
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    "areaid",
+                                    pc.getAreaInteresseId());
+                            Request paramClimaticiRequest = RequestFactory.buildRequest(
+                                    client.getHostName(),
+                                    ServerInterface.RequestType.selectAllWithCond,
+                                    ServerInterface.Tables.PARAM_CLIMATICO,
+                                    params);
+                            client.addRequest(paramClimaticiRequest);
+                        }catch(MalformedRequestException mre){
+                            logger.info(mre.getMessage());
+                        }
+                        Response paramClimaticiResponse = client.getResponse();
+                        if(paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.Error ||
+                                paramClimaticiResponse.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                            new Alert(Alert.AlertType.ERROR, paramClimaticiResponse.getResponseType().label).showAndWait();
+                        }else{
+                            List<ParametroClimatico> paramClimatici = (List<ParametroClimatico>)paramClimaticiResponse.getResult();
+                            paramClimatici.forEach(paramClimatico -> tableView.getItems().add(paramClimatico));
+                        }
+                    }else if(updateResponse.getResponseType() == ServerInterface.ResponseType.updateKo){
+                        new Alert(Alert.AlertType.ERROR, "Operazione di update fallita").showAndWait();
+                    }
+                }else{
+                    new Alert(Alert.AlertType.ERROR, "Selezionare dei valori validi!").showAndWait();
+                }
             });
 
             paramBox.getChildren().addAll(tArea, bRicercaArea, itemBox, valueBox, aggiornaPc);
@@ -2200,6 +2311,20 @@ public class OperatoreViewController {
         }else{
             clientNotConnected.showAndWait();
         }
+    }
+
+    private String mapString(String item) {
+        String columnToUpdate = "";
+        switch(item){
+            case "vento" -> columnToUpdate = RequestFactory.valoreVentoKey;
+            case "umidita" -> columnToUpdate = RequestFactory.valoreUmiditaKey;
+            case "pressione" -> columnToUpdate = RequestFactory.valorePressioneKey;
+            case "temperatura" -> columnToUpdate = RequestFactory.valoreTemperaturaKey;
+            case "precipitazioni" -> columnToUpdate = RequestFactory.valorePrecipitazioniKey;
+            case "alt. ghiacciai" -> columnToUpdate = RequestFactory.valoreAltGhiacciaiKey;
+            case "m. ghiacciai" -> columnToUpdate = RequestFactory.valoreMassaGhiacciaiKey;
+        }
+        return columnToUpdate;
     }
 
 }

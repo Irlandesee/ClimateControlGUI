@@ -487,7 +487,6 @@ public class MainWindowController{
             new Alert(Alert.AlertType.ERROR, "nome area non valido").showAndWait();
             return;
         }
-        System.out.println("Creating chart for" + nomeArea);
 
         try{
             Map<String, String> params = RequestFactory
@@ -506,24 +505,20 @@ public class MainWindowController{
         }
         Response response = client.getResponse();
 
-        if(response.getResponseType() == ServerInterface.ResponseType.Error){
-            resErrorAlert.showAndWait();
-            return;
+        if(response.getResponseType() == ServerInterface.ResponseType.Error
+                || response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+            new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+        }else{
+            String areaId = response.getResult().toString();
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
+                fxmlLoader.setController(new GraphDialog(client, areaId));
+                Stage chartStage = new Stage();
+                Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
+                chartStage.setScene(scene);
+                chartStage.show();
+            }catch(IOException ioe){ioe.printStackTrace();}
         }
-        if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-            resNoSuchElementAlert.showAndWait();
-            return;
-        }
-
-        String areaId = response.getResult().toString();
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/graph-dialog.fxml"));
-            fxmlLoader.setController(new GraphDialog(client, areaId));
-            Stage chartStage = new Stage();
-            Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
-            chartStage.setScene(scene);
-            chartStage.show();
-        }catch(IOException ioe){ioe.printStackTrace();}
 
     }
 
@@ -573,136 +568,44 @@ public class MainWindowController{
                 client.addRequest(requestAreaId);
                 Response resAreaId = client.getResponse();
 
-                if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error){
-                    resErrorAlert.showAndWait();
-                    return;
-                }
-                if(resAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    resNoSuchElementAlert.showAndWait();
-                    return;
+                if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error ||
+                        resAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    new Alert(Alert.AlertType.ERROR, resAreaId.getResponseType().label).showAndWait();
+                }else{
+                    String areaInteresseId = resAreaId.getResult().toString();
+                    try{
+                        Map<String, String> reqParamClimatici = RequestFactory
+                                .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
+                        Request requestParamClimatici = RequestFactory.buildRequest(
+                                client.getHostName(),
+                                ServerInterface.RequestType.selectAllWithCond,
+                                ServerInterface.Tables.PARAM_CLIMATICO,
+                                reqParamClimatici
+                        );
+                        client.addRequest(requestParamClimatici);
+                    }catch(MalformedRequestException mre){
+                        logger.info(mre.getMessage());
+                    }
+                    Response responseParametriClimatici = client.getResponse();
+
+                    if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error
+                        || responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                        new Alert(Alert.AlertType.ERROR, responseParametriClimatici.getResponseType().label).showAndWait();
+                    }else{
+                        List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
+                        tableView.getItems().clear();
+                        if(ricercaPerData){
+                            LocalDate finalStartDate = startDate;
+                            LocalDate finalEndDate = endDate;
+                            parametriClimatici.removeIf(parametroClimatico -> Util.isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
+                        }
+                        parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
+
+                    }
+
+
                 }
 
-                String areaInteresseId = resAreaId.getResult().toString();
-                Request requestParamClimatici;
-                try{
-                    Map<String, String> reqParamClimatici = RequestFactory
-                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaInteresseId);
-                    requestParamClimatici = RequestFactory.buildRequest(
-                            client.getHostName(),
-                            ServerInterface.RequestType.selectAllWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO,
-                            reqParamClimatici
-                    );
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    mre.printStackTrace();
-                    return;
-                }
-                client.addRequest(requestParamClimatici);
-                Response responseParametriClimatici = client.getResponse();
-
-                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
-                    resErrorAlert.showAndWait();
-                    return;
-                }
-                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    resNoSuchElementAlert.showAndWait();
-                    return;
-                }
-
-                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
-                tableView.getItems().clear();
-                if(ricercaPerData){
-                    LocalDate finalStartDate = startDate;
-                    LocalDate finalEndDate = endDate;
-                    parametriClimatici.removeIf(parametroClimatico -> Util.isBetweenDates(finalStartDate, finalEndDate, parametroClimatico.getPubDate()));
-                }
-                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
-            }
-        }
-        //ricerca cm
-        else if(event.getSource().equals(btnRicercaPcCm)){
-            if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
-                this.centroMonitoraggioAlert.showAndWait();
-            }else{
-                Request requestCentroId;
-                try{
-                    Map<String, String> requestCentroIdParams = RequestFactory
-                            .buildParams(ServerInterface.RequestType.selectObjJoinWithCond,
-                                    "centroid",
-                                    ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
-                                    "nomecentro",
-                                    denomCmCercato
-                            );
-                    requestCentroId = RequestFactory.buildRequest(
-                            client.getHostName(),
-                            ServerInterface.RequestType.selectObjJoinWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
-                            requestCentroIdParams);
-
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    mre.printStackTrace();
-                    return;
-                }
-                client.addRequest(requestCentroId);
-                Response responseCentroId = client.getResponse();
-
-                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
-                    resErrorAlert.showAndWait();
-                    return;
-                }
-                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    resNoSuchElementAlert.showAndWait();
-                    return;
-                }
-
-                /**
-                List<String> result = (List<String>)responseCentroId.getResult(); //returns multiple...
-                String centroId = result.get(0);
-                 **/
-                String centroId = responseCentroId.getResult().toString();
-                System.out.println(centroId);
-
-                Request requestParametriClimatici;
-                try{
-                    Map<String, String> requestParametriClimaticiParams = RequestFactory
-                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
-                    requestParametriClimatici = RequestFactory.buildRequest(
-                            client.getHostName(),
-                            ServerInterface.RequestType.selectAllWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO,
-                            requestParametriClimaticiParams);
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    mre.printStackTrace();
-                    return;
-                }
-                client.addRequest(requestParametriClimatici);
-                Response responseParametriClimatici = client.getResponse();
-
-                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error){
-                    resErrorAlert.showAndWait();
-                    return;
-                }
-                if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    resNoSuchElementAlert.showAndWait();
-                    return;
-                }
-
-                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
-
-                tableView.getItems().clear();
-                if(ricercaPerData){
-                    LocalDate finalStartDate = startDate;
-                    LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> {
-                            return Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
-                        });
-                    });
-                }
-                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
             }
         }
     }
@@ -714,91 +617,79 @@ public class MainWindowController{
             tableView.getItems().clear();
             if(paramBox != null)
                 if(!paramBox.getChildren().isEmpty()) paramBox.getChildren().clear();
-            Request requestCentro = null;
             try{
-                requestCentro = RequestFactory.buildRequest(
+                Request requestCentro = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.selectAll,
                         ServerInterface.Tables.CENTRO_MONITORAGGIO,
                         null);
+                client.addRequest(requestCentro);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage());
-                mre.printStackTrace();
-                return;
+                logger.info(mre.getMessage());
             }
-            client.addRequest(requestCentro);
             Response responseCentriMonitoraggio = client.getResponse();
 
-            if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error){
-                resErrorAlert.showAndWait();
-                return;
-            }
-            if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                resNoSuchElementAlert.showAndWait();
-                return;
-            }
+            if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error
+                || responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, responseCentriMonitoraggio.getResponseType().label).showAndWait();
+            }else{
 
-            List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
-            TableColumn<CentroMonitoraggio, String> denomCentro = new TableColumn("Denominazione");
-            denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
-            tableView.getColumns().add(denomCentro);
+                List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
+                TableColumn<CentroMonitoraggio, String> denomCentro = new TableColumn("Denominazione");
+                denomCentro.setCellValueFactory(new PropertyValueFactory<CentroMonitoraggio, String>("denominazione"));
+                tableView.getColumns().add(denomCentro);
 
-            centriMonitoraggio.forEach(cm -> {tableView.getItems().add(cm);});
+                centriMonitoraggio.forEach(cm -> {tableView.getItems().add(cm);});
 
-            tableView.setRowFactory(tv -> {
-                TableRow row = new TableRow<>();
-                row.setOnMouseClicked(event -> {
-                    if(event.getClickCount() == 2 && !(row.isEmpty())){
-                        CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
-                        //System.out.println("Item double clicked: " + c);
-                        List<String> areeId = c.getAreeInteresseIdAssociate();
-                        List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
-                        for(String areaId : areeId){
-                            Request requestAi;
+                tableView.setRowFactory(tv -> {
+                    TableRow row = new TableRow<>();
+                    row.setOnMouseClicked(event -> {
+                        if(event.getClickCount() == 2 && !(row.isEmpty())){
+                            CentroMonitoraggio c = (CentroMonitoraggio) row.getItem();
+                            List<String> areeId = c.getAreeInteresseIdAssociate();
+                            List<String> areeInteresseAssociateAlCentro = new LinkedList<String>();
+                            for(String areaId : areeId){
+                                try{
+                                    Map<String, String> reqAiParams = RequestFactory
+                                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
+                                    Request requestAi = RequestFactory.buildRequest(
+                                            client.getHostName(),
+                                            ServerInterface.RequestType.selectAllWithCond,
+                                            ServerInterface.Tables.AREA_INTERESSE,
+                                            reqAiParams
+                                    );
+                                    client.addRequest(requestAi);
+                                }catch(MalformedRequestException mre){
+                                    logger.info(mre.getMessage());
+                                }
+                                Response responseAi = client.getResponse();
+
+                                if(responseAi.getResponseType() == ServerInterface.ResponseType.Error ||
+                                        responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                                    new Alert(Alert.AlertType.ERROR, responseAi.getResponseType().label).showAndWait();
+                                }else{
+                                    List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
+                                    responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
+                                }
+                            }
                             try{
-                                Map<String, String> reqAiParams = RequestFactory
-                                        .buildParams(ServerInterface.RequestType.selectAllWithCond, "areaid", areaId);
-                                requestAi = RequestFactory.buildRequest(
-                                        client.getHostName(),
-                                        ServerInterface.RequestType.selectAllWithCond,
-                                        ServerInterface.Tables.AREA_INTERESSE,
-                                        reqAiParams
-                                );
-                            }catch(MalformedRequestException mre){
-                                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                                mre.printStackTrace();
-                                return;
-                            }
-                            client.addRequest(requestAi);
-                            Response responseAi = client.getResponse();
-
-                            if(responseAi.getResponseType() == ServerInterface.ResponseType.Error){
-                                resErrorAlert.showAndWait();
-                                return;
-                            }
-                            if(responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                                resNoSuchElementAlert.showAndWait();
-                                return;
-                            }
-
-                            List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
-                            responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
+                                Stage cmDialogStage = new Stage();
+                                CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
+                                FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
+                                fxmlLoader.setController(cmDialogController);
+                                Scene dialogScene = new Scene(fxmlLoader.load());
+                                cmDialogStage.setScene(dialogScene);
+                                cmDialogStage.show();
+                            }catch(IOException ioe){ioe.printStackTrace();}
                         }
-                        try{
-                            Stage cmDialogStage = new Stage();
-                            CmDialog cmDialogController = new CmDialog(areeInteresseAssociateAlCentro);
-                            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/cm-dialog.fxml"));
-                            fxmlLoader.setController(cmDialogController);
-                            Scene dialogScene = new Scene(fxmlLoader.load());
-                            cmDialogStage.setScene(dialogScene);
-                            cmDialogStage.show();
-                        }catch(IOException ioe){ioe.printStackTrace();}
-                    }
-                });
+                    });
 
-                return row;
-            });
-            tableView.refresh();
+                    return row;
+                });
+                tableView.refresh();
+
+            }
+
         }else{
             clientNotConnected.showAndWait();
         }
@@ -807,23 +698,20 @@ public class MainWindowController{
     public boolean onExecuteLoginQuery(String userID, String password){
         System.out.printf("Userid & password: %s %s\n", userID, password);
 
-        Request loginRequest;
         try{
             Map<String, String> loginParams = RequestFactory
                     .buildParams(ServerInterface.RequestType.executeLogin, userID, password);
-            loginRequest = RequestFactory.buildRequest(
+            Request loginRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.executeLogin,
                     ServerInterface.Tables.OPERATORE,
                     loginParams
             );
+            client.addRequest(loginRequest);
         }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            mre.printStackTrace();
+            logger.info(mre.getMessage());
             return false;
         }
-        System.out.println(loginRequest);
-        client.addRequest(loginRequest);
         Response response = client.getResponse();
         if(response.getResponseType() == ServerInterface.ResponseType.loginKo) return false;
         else{
@@ -842,19 +730,17 @@ public class MainWindowController{
     }
 
     private boolean requestSignUp(String codFisc, String email){
-        Request request;
         try{
-            request = RequestFactory.buildRequest(
+            Request signUpRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectAll,
                     ServerInterface.Tables.OP_AUTORIZZATO,
                     null);
+            client.addRequest(signUpRequest);
         }catch(MalformedRequestException mre){
-            new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-            mre.printStackTrace();
+            logger.info(mre.getMessage());
             return false;
         }
-        client.addRequest(request);
         Response response = client.getResponse();
         List<OperatoreAutorizzato> operatoriAutorizzati = (List<OperatoreAutorizzato>) response.getResult();
         for(OperatoreAutorizzato op : operatoriAutorizzati){
@@ -870,58 +756,48 @@ public class MainWindowController{
             new Alert(Alert.AlertType.ERROR, "Operatore non abilitato alla registrazione.").showAndWait();
             return false;
         }else{
-            Request requestCentroId;
             try{
                 Map<String, String> reqCmIdParams = RequestFactory
                         .buildParams(ServerInterface.RequestType.selectObjWithCond, "centroid", "comune", centroAfferenza);
-                requestCentroId = RequestFactory.buildRequest(
+                Request requestCentroId = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.selectObjWithCond,
                     ServerInterface.Tables.CENTRO_MONITORAGGIO, reqCmIdParams);
+                client.addRequest(requestCentroId);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                mre.printStackTrace();
+                logger.info(mre.getMessage());
                 return false;
             }
-            client.addRequest(requestCentroId);
             Response responseCmId = client.getResponse();
             String centroId = responseCmId.getResult().toString();
 
-            if(responseCmId.getResponseType() == ServerInterface.ResponseType.Error){
-                resErrorAlert.showAndWait();
-                return false;
-            }
-            if(responseCmId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                resNoSuchElementAlert.showAndWait();
+            if(responseCmId.getResponseType() == ServerInterface.ResponseType.Error ||
+                    responseCmId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                new Alert(Alert.AlertType.ERROR, responseCmId.getResponseType().label).showAndWait();
                 return false;
             }
 
-            System.out.println(centroId);
-            Request signUpRequest;
             try{
                 Map<String, String> requestSignUpParams = RequestFactory
                         .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, userID, email, password, centroId);
-                signUpRequest = RequestFactory.buildRequest(
+                Request signUpRequest = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.executeSignUp,
                         ServerInterface.Tables.OPERATORE,
                         requestSignUpParams);
+                client.addRequest(signUpRequest);
             }catch(MalformedRequestException mre){
-                new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                mre.printStackTrace();
+                logger.info(mre.getMessage());
                 return false;
             }
-            System.out.println(signUpRequest);
-            client.addRequest(signUpRequest);
             Response responseSignUp = client.getResponse();
-            System.out.println(responseSignUp);
             return (boolean) responseSignUp.getResult();
         }
     }
 
     @FXML
     public void handleNewConnection(){
-        System.out.println("New connection");
+        logger.info("new Connection");
         try{
             Stage connectionStage = new Stage();
             NewConnectionDialog connectionDialog = new NewConnectionDialog(this);
@@ -936,7 +812,7 @@ public class MainWindowController{
     @FXML
     public void handleDisconnect(){
         if(client != null){
-            System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
+            logger.info("Disconnecting from: %s:%s\n".formatted(client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber()));
             client.getClientProxy().sendQuitRequest();
             client.setRunCondition(false);
             client = null;
@@ -949,7 +825,7 @@ public class MainWindowController{
                 tableView.getItems().clear();
             }
 
-            this.clientHasDisconnected.showAndWait();
+            clientHasDisconnected.showAndWait();
         }
         else{
             clientNotConnected.showAndWait();
