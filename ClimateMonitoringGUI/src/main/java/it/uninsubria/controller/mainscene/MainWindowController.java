@@ -779,7 +779,7 @@ public class MainWindowController{
 
             try{
                 Map<String, String> requestSignUpParams = RequestFactory
-                        .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, userID, email, password, centroId);
+                        .buildParams(ServerInterface.RequestType.executeSignUp, nomeOp, cognomeOp, codFisc, email, userID, password, centroId);
                 Request signUpRequest = RequestFactory.buildRequest(
                         client.getHostName(),
                         ServerInterface.RequestType.executeSignUp,
