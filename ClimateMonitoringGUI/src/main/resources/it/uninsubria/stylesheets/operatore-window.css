@@ -45,6 +45,30 @@
     -fx-font-weight: 700;
 }
 
+.param-box Button {
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 1px;
+}
+
+.param-box ToggleButton{
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 1px;
+}
+
+.combo-box{
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 1px;
+}
+
 #footer-section {
     -fx-alignment: center;
     -fx-padding: 10 10 10 10;

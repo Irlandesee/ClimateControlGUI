@@ -136,18 +136,18 @@ public class TableViewBuilder {
 
                 //get response
                 Response response = null;
-                response = client.getResponse(request.getRequestId());
-                if(response == null){
-                    new Alert(Alert.AlertType.ERROR, "Error in the response object").showAndWait();
+                response = client.getResponse();
+
+                if(response.getResponseType() == ServerInterface.ResponseType.Error){
+                    new Alert(Alert.AlertType.ERROR, "Errore in risposta").showAndWait();
                     return;
                 }
-                List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
-                if(response.getTable() == ServerInterface.Tables.PARAM_CLIMATICO
-                    && response.getResponseType() == ServerInterface.ResponseType.List){
-                    parametriClimatici = (List<ParametroClimatico>) response.getResult();
+                if(response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
+                    new Alert(Alert.AlertType.INFORMATION, "Area senza prametri Climatici").showAndWait();
+                    return;
                 }
 
-
+                List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
                 try{
                     Stage aiDialogStage = new Stage();
                     AiDialog aiDialogController = new AiDialog(aiDialogStage, client, a, parametriClimatici);
@@ -235,8 +235,8 @@ public class TableViewBuilder {
                         Response respDenom = null;
                         Response respNomeCentro = null;
                         if(requestDenominazione != null && requestNomeCentro != null){
-                            respDenom = client.getResponse(requestDenominazione.getRequestId());
-                            respNomeCentro = client.getResponse(requestNomeCentro.getRequestId());
+                            respDenom = client.getResponse();
+                            respNomeCentro = client.getResponse();
 
                         }
 
@@ -314,7 +314,7 @@ public class TableViewBuilder {
                     }
 
                     client.addRequest(requestAi);
-                    Response responseAi = client.getResponse(requestAi.getRequestId());
+                    Response responseAi = client.getResponse();
                     if(responseAi == null){
                         new Alert(Alert.AlertType.ERROR, "Error in response object").showAndWait();
                         return;

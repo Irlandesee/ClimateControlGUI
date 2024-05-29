@@ -6,6 +6,7 @@ import it.uninsubria.servercm.ServerInterface;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestFactory {
 
@@ -13,7 +14,11 @@ public class RequestFactory {
     static final String undefinedRequestType = "Tipo richiesta non definito";
     public static final String condKey = "cond";
     public static final String fieldKey = "field";
+    public static final String columnKey = "column";
+    public static final String columnToUpdateKey = "columnToUpdate";
+    public static final String objectIdKey = "objectId";
     public static final String objectKey = "object";
+    public static final String updateValueKey = "updateValue";
     public static final String joinKey = "joinTable";
     public static final String userKey = "user";
     public static final String passwordKey = "password";
@@ -84,6 +89,9 @@ public class RequestFactory {
                     return new Request(clientId, requestType, table, params);
                 }
             }
+            case executeLogout -> {
+                return new Request(clientId, requestType, null, null);
+            }
             case executeSignUp -> {
                 if(params.keySet().size() < ServerInterface.executeSignUpParamsLength){
                     throw new MalformedRequestException(paramLengthError);
@@ -91,11 +99,20 @@ public class RequestFactory {
                     return new Request(clientId, requestType, table, params);
                 }
             }
-            case executeUpdateAi -> {
+            case executeDelete -> {
+                if (Objects.requireNonNull(table) == ServerInterface.Tables.PARAM_CLIMATICO) {
+                    if (params.keySet().size() < ServerInterface.executeDeletePcParamsLength)
+                        throw new MalformedRequestException(paramLengthError);
+                    else return new Request(clientId, requestType, table, params);
+                }
+                if (params.keySet().isEmpty())
+                    throw new MalformedRequestException(paramLengthError);
+                else return new Request(clientId, requestType, table, params);
+            }
+            case executeUpdate ->{
                 if(params.keySet().size() < ServerInterface.executeUpdateParamsLength){
                     throw new MalformedRequestException(paramLengthError);
-                }
-                else{
+                }else{
                     return new Request(clientId, requestType, table, params);
                 }
             }
@@ -117,6 +134,13 @@ public class RequestFactory {
                     }
                     case OPERATORE -> {
                         if(params.keySet().size() < ServerInterface.insertOpParamsLength){
+                            throw new MalformedRequestException(paramLengthError);
+                        }else{
+                            return new Request(clientId, requestType, table, params);
+                        }
+                    }
+                    case OP_AUTORIZZATO -> {
+                        if(params.keySet().size() < ServerInterface.insertAuthOpParamsLength){
                             throw new MalformedRequestException(paramLengthError);
                         }else{
                             return new Request(clientId, requestType, table, params);
@@ -199,14 +223,49 @@ public class RequestFactory {
             }
             case OP_AUTORIZZATO -> {
                 if(s.length < 2) throw new MalformedRequestException(paramLengthError);
-                params.put(codFiscOpKey, s[0]);
-                params.put(emailOpKey, s[1]);
+                params.put(emailOpKey, s[0]);
+                params.put(codFiscOpKey, s[1]);
             }
             default -> {return null;}
         }
         return params;
     }
 
+    public static Map<String, String> buildDeleteAiCmParams(String areaId, String centroId){
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(RequestFactory.areaIdKey, areaId);
+        params.put(RequestFactory.centroIdKey, centroId);
+        return params;
+    }
+    public static Map<String, String> buildDeleteParams(ServerInterface.Tables table, String... s) throws MalformedRequestException{
+        Map<String, String> params = new HashMap<String, String>();
+        switch(table){
+            case AREA_INTERESSE -> {
+                if(s.length < ServerInterface.executeDeleteAiParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.areaIdKey, s[0]);
+            }
+            case CENTRO_MONITORAGGIO -> {
+                if(s.length < ServerInterface.executeDeleteCmParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.centroIdKey, s[0]);
+            }
+            case PARAM_CLIMATICO -> {
+                if(s.length < ServerInterface.executeDeletePcParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.parameterIdKey, s[0]);
+                params.put(RequestFactory.pubDateKey, s[1]);
+            }
+            case NOTA_PARAM_CLIMATICO -> {
+                if(s.length < ServerInterface.executeDeleteNpcParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.notaIdKey, s[0]);
+            }
+            case OPERATORE -> {
+                if(s.length < ServerInterface.executeDeleteOpParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.codFiscOpKey, s[0]);
+            }
+            default -> {return null;}
+        }
+        return params;
+
+    }
     public static Map<String, String> buildParams(ServerInterface.RequestType requestType, String... s) throws MalformedRequestException{
         Map<String, String> params = new HashMap<String, String>();
         switch(requestType){
@@ -240,10 +299,11 @@ public class RequestFactory {
                 params.put(RequestFactory.userKey, s[0]);
                 params.put(RequestFactory.passwordKey, s[1]);
             }
-            case executeUpdateAi -> {
-                if(s.length < 2) throw new MalformedRequestException(paramLengthError);
-                params.put(areaIdKey, s[0]);
-                params.put(centroIdKey, s[1]);
+            case executeUpdate -> {
+                if(s.length < ServerInterface.executeUpdateParamsLength) throw new MalformedRequestException(paramLengthError);
+                params.put(RequestFactory.columnToUpdateKey, s[0]);
+                params.put(RequestFactory.updateValueKey, s[1]);
+                params.put(RequestFactory.objectIdKey, s[2]);
             }
             case executeSignUp -> {
                 if(s.length < 7) throw new MalformedRequestException(paramLengthError);
@@ -255,9 +315,7 @@ public class RequestFactory {
                 params.put(passwordKey, s[5]);
                 params.put(centroAfferenzaKey, s[6]);
             }
-            default -> {
-                return null;
-            }
+            default -> {return null;}
         }
 
         return params;
