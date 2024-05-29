@@ -10,6 +10,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Pane?>
 <BorderPane xmlns="http://javafx.com/javafx/17.02.2-ea"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="borderPane">
@@ -41,9 +42,13 @@
                 <Button text="Visualizza grafici" fx:id="buttonVisualizzaGrafici" onAction="#handleVisualizzaGrafici"/>
                 <Button text="Visualizza centri" fx:id="buttonVisualizzaCentri" onAction="#handleVisualizzaCentri"/>
                 <Button text="Inserisci Nuova Area Interesse" fx:id="buttonInserisciAreaInteresse" onAction="#handleInserisciAreaInteresse"/>
-                <Button text="Aggiungi Area a centro" fx:id="buttonAggiungiArea" onAction="#handleAggiungiAreaACentro"/>
                 <Button text="Inserisci Parametro climatico" fx:id="buttonInserisciParametri" onAction="#handleInserisciParametriClimatici"/>
                 <Button text="Inserisci Centro Monitoraggio" fx:id="buttonInserisciCentroMonitoraggio" onAction="#handleInserisciCentroMonitoraggio"/>
+                <Button text="Elimina area interesse" fx:id="buttonRimuoviAreaInteresse" onAction="#handleRimuoviAreaInteresse"/>
+                <Button text="Elimina centro monitoraggio" fx:id="buttonRimuoviCentroMonitoraggio" onAction="#handleRimuoviCentroMonitoraggio"/>
+                <Button text="Elimina Parametro climatico" fx:id="buttonRimuoviParametroClimatico" onAction="#handleRimuoviParametroClimatico"/>
+                <Button text="Aggiorna centro monitoraggio" fx:id="buttonAggiornaCentroMonitoraggio" onAction="#handleAggiornaCentroMonitoraggio"/>
+                <Button text="Aggiorna Parametro climatico" fx:id="buttonAggiornaParametroClimatico" onAction="#handleAggiornaParametroClimatico"/>
                 <Button text="Abilita nuovo operatore" fx:id="buttonRegistraOp" onAction="#handleAbilitaNuovoOperatore"/>
             </children>
         </VBox>
@@ -63,6 +68,6 @@
         </HBox>
     </bottom>
     <stylesheets>
-        <URL value="@../stylesheets/main-window.css"/>
+        <URL value="@../stylesheets/operatore-window.css"/>
     </stylesheets>
 </BorderPane>

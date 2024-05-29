@@ -15,6 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ParametroClimaticoController {
@@ -177,27 +178,24 @@ public class ParametroClimaticoController {
             pcAlert.showAndWait();
             return;
         }
-        Map<String, String> paramValues;
-        Map<String, String> notes;
-        try{
-            paramValues = RequestFactory
-                    .buildInsertParams(ServerInterface.Tables.PARAM_CLIMATICO,
-                            String.valueOf(ventoValue),
-                            String.valueOf(umiditaValue),
-                            String.valueOf(pressioneValue),
-                            String.valueOf(precipitazioniValue),
-                            String.valueOf(tempValue),
-                            String.valueOf(altGhiacciaiValue),
-                            String.valueOf(massaGhiacciaiValue));
-            notes = RequestFactory.buildInsertParams(ServerInterface.Tables.NOTA_PARAM_CLIMATICO,
-                    notaVento,
-                    notaPressione,
-                    notaUmidita,
-                    notaPrecipitazioni,
-                    notaTemperatura,
-                    notaAltGhiacciai,
-                    notaMassaGhiacciai);
-        }catch(MalformedRequestException mre){mre.printStackTrace(); return;}
+        Map<String, String> paramValues = new HashMap<String, String>();
+        Map<String, String> notes = new HashMap<String, String>();
+        paramValues.put(RequestFactory.valoreVentoKey, String.valueOf(ventoValue));
+        paramValues.put(RequestFactory.valoreUmiditaKey, String.valueOf(umiditaValue));
+        paramValues.put(RequestFactory.valorePressioneKey, String.valueOf(pressioneValue));
+        paramValues.put(RequestFactory.valorePrecipitazioniKey, String.valueOf(precipitazioniValue));
+        paramValues.put(RequestFactory.valoreTemperaturaKey, String.valueOf(tempValue));
+        paramValues.put(RequestFactory.valoreAltGhiacciaiKey, String.valueOf(altGhiacciaiValue));
+        paramValues.put(RequestFactory.valoreMassaGhiacciaiKey, String.valueOf(massaGhiacciaiValue));
+
+        notes.put(RequestFactory.notaVentoKey, notaVento);
+        notes.put(RequestFactory.notaUmiditaKey, notaUmidita);
+        notes.put(RequestFactory.notaPressioneKey, notaPressione);
+        notes.put(RequestFactory.notaPrecipitazioniKey, notaPrecipitazioni);
+        notes.put(RequestFactory.notaTemperaturaKey, notaTemperatura);
+        notes.put(RequestFactory.notaAltGhiacciaiKey, notaAltGhiacciai);
+        notes.put(RequestFactory.notaMassaGhiacciaiKey, notaMassaGhiacciai);
+
         String parameterId = IDGenerator.generateID();
         String notaId = IDGenerator.generateID();
         operatoreViewController.executeInsertPCQuery(parameterId, nomeArea, centroMon, pubDate, paramValues, notaId, notes);
@@ -232,6 +230,7 @@ public class ParametroClimaticoController {
     }
 
 
+   @FXML
     public void cancel(ActionEvent actionEvent) {
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
         if(s != null)
