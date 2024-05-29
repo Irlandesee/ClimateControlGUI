@@ -221,6 +221,10 @@ public class MainWindowController{
 
     }
 
+    /**
+     * @param actionEvent
+     * Creazione della finestra di login
+     */
     @FXML
     public void handleLogin(ActionEvent actionEvent) {
         if(client != null){
@@ -240,6 +244,10 @@ public class MainWindowController{
     }
 
 
+    /**
+     * @param actionEvent
+     * Set up della schermata principale per la ricerca di aree di interesse
+     */
     public void handleRicercaAreaInteresse(ActionEvent actionEvent) {
         if(client != null){
             tableView.getColumns().clear();
@@ -278,6 +286,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Preparazione della tabella per la visualizzazione di parametri climatici
+     */
     private void prepTableParamClimatici(){
         System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
@@ -290,6 +301,9 @@ public class MainWindowController{
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
+    /**
+     * Preparazione della tabella per la visualizzazione di aree di interesse
+     */
     private void prepTableAreaInteresse(){
         tableView.getItems().clear();
         tableView.getColumns().clear();
@@ -321,6 +335,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Effettua la ricerca di aree d'interesse per denominazione
+     */
     private void handleRicercaAreaDenom(){
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
@@ -355,6 +372,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Effettua la ricerca di aree per stato
+     */
     private void handleRicercaAreaPerStato(){
         tableView.getItems().clear();
         String stato = this.tStato.getText().trim();
@@ -388,6 +408,9 @@ public class MainWindowController{
 
     }
 
+    /**
+     * Effettua la ricerca di aree tramite coordinate
+     */
     private void handleRicercaAreaPerCoordinate(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
@@ -431,6 +454,10 @@ public class MainWindowController{
 
     }
 
+    /**
+     * @param actionEvent
+     * Set up della schermata principale per la visualizzazione di parametri climatici
+     */
     public void handleVisualizzaParametriClimatici(ActionEvent actionEvent) {
         if(client != null){
             tableView.getColumns().clear();
@@ -458,6 +485,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Set up della schermata principale per la visualizzazione di grafici
+     */
     @FXML
     public void handleVisualizzaGrafici(){
         if(client != null){
@@ -481,6 +511,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Richiesta dati e creazione di finestra contenente grafici relativi all'area richiesta
+     */
     private void createChart(){
         String nomeArea = tAreaInteresse.getText();
         if(nomeArea.isEmpty() || nomeArea.equals("Nome Area")){
@@ -523,9 +556,12 @@ public class MainWindowController{
     }
 
 
+    /**
+     * Ricerca di parametri climatici
+     * @param event
+     */
     private void handleRicercaPc(ActionEvent event){
         String denomAiCercata = tAreaInteresse.getText();
-        String denomCmCercato = tCentroMonitoraggio.getText();
         LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
         LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
         boolean ricercaPerData = false;
@@ -602,14 +638,16 @@ public class MainWindowController{
                         parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
 
                     }
-
-
                 }
 
             }
         }
     }
 
+    /**
+     * Set up della schermata principale per la visualizzazione di centri di monitoraggio attualmente
+     * presenti nel database
+     */
     @FXML
     public void handleVisualizzaCentri(){
         if(client != null){
@@ -695,8 +733,15 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Gestisce il processo di login, in caso di riscontro positivo dal server switcha la schermata principale,
+     * impostandola automaticamente su quella per operatori
+     * @param userID
+     * @param password
+     * @return
+     */
     public boolean onExecuteLoginQuery(String userID, String password){
-        System.out.printf("Userid & password: %s %s\n", userID, password);
+        //System.out.printf("Userid & password: %s %s\n", userID, password);
 
         try{
             Map<String, String> loginParams = RequestFactory
@@ -729,6 +774,12 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Gestisce la richiesta sign up di un utente, creando la finestra per la registrazione
+     * @param codFisc
+     * @param email
+     * @return
+     */
     private boolean requestSignUp(String codFisc, String email){
         try{
             Request signUpRequest = RequestFactory.buildRequest(
@@ -751,6 +802,17 @@ public class MainWindowController{
     }
 
 
+    /**
+     * Inoltra la richiesta di signup al server
+     * @param nomeOp
+     * @param cognomeOp
+     * @param codFisc
+     * @param userID
+     * @param email
+     * @param password
+     * @param centroAfferenza
+     * @return
+     */
     public boolean onExecuteRegistraOpQuery(String nomeOp, String cognomeOp, String codFisc, String userID, String email, String password, String centroAfferenza){
         if(!requestSignUp(codFisc, email)){
             new Alert(Alert.AlertType.ERROR, "Operatore non abilitato alla registrazione.").showAndWait();
@@ -795,6 +857,9 @@ public class MainWindowController{
         }
     }
 
+    /**
+     * Gestisce la creazione di una nuova connessione a un server
+     */
     @FXML
     public void handleNewConnection(){
         logger.info("new Connection");
@@ -809,6 +874,9 @@ public class MainWindowController{
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
+    /**
+     * Gestisce la richiesta di chiusura di connessione da parte di un utente
+     */
     @FXML
     public void handleDisconnect(){
         if(client != null){
@@ -830,10 +898,6 @@ public class MainWindowController{
         else{
             clientNotConnected.showAndWait();
         }
-    }
-
-    public void handleServerDisconnect(){
-        serverHasDisconnected.showAndWait();
     }
 
 }

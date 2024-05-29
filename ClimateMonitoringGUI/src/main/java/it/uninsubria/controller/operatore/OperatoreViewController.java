@@ -139,6 +139,11 @@ public class OperatoreViewController {
         props.put("password", password);
     }
 
+    /**
+     * Gestisce la richiesta di uscita da parte dell'utente, disconnettendosi dal server, ritornando poi
+     * alla schermata comune.
+     * @param actionEvent
+     */
     @FXML
     public void exit(ActionEvent actionEvent){
 
@@ -158,6 +163,9 @@ public class OperatoreViewController {
         }catch(IOException ioe){}
     }
 
+    /**
+     * Gestisce la richiesta di nuova connessione a un server
+     */
     @FXML
     public void handleNewConnection(){
         System.out.println("New connection");
@@ -171,10 +179,12 @@ public class OperatoreViewController {
             connectionStage.show();
         }catch(IOException ioe){ioe.printStackTrace();}
     }
+
+    /**
+     * Gestisce la richiesta di disconnessione dal server
+     */
     @FXML
     public void handleDisconnect(){
-
-
         if(client != null){
             System.out.printf("Disconnecting from: %s:%s\n",  client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber());
             client.getClientProxy().sendQuitRequest();
@@ -196,18 +206,16 @@ public class OperatoreViewController {
         }
     }
 
-    public void handleServerDisconnect(){
-        serverHasDisconnected.showAndWait();
-    }
-
     public Client getClient(){return this.client;}
     public void setClient(Client client){this.client = client;}
     public ClientProxy getClientProxy(){return this.clientProxy;}
     public void setClientProxy(ClientProxy clientProxy){this.clientProxy = clientProxy;}
 
 
+    /**
+     * Prepara la tabella per la visualizzazione di oggetti di tipo City
+     */
     private void prepTableCity(){
-
         tableView.getColumns().clear();
         tableView.getItems().clear();
         tableView.refresh();
@@ -217,6 +225,9 @@ public class OperatoreViewController {
         tableView.setRowFactory(tv -> TableViewBuilder.getRowFactoryPrepTableCity(tDenominazione, tStato, tLatitudine, tLongitudine));
     }
 
+    /**
+     * Prepara la tabella per la visualizzazione di oggetti di tipo CentroMonitoraggio
+     */
     private void prepTableCentroMonitoraggio(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
@@ -229,6 +240,9 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Prepara la tabella per la visualizzazione di oggetti di tipo Operatore
+     */
     private void prepTableOperatore(){
         tableView.getColumns().clear();
         tableView.getItems().clear();
@@ -238,7 +252,10 @@ public class OperatoreViewController {
 
     }
 
-
+    /**
+     * Set up della schermata per la visualizzazione e ricerca di AreaInteresse
+     * @param actionEvent
+     */
     public void handleRicercaAreaInteresse(ActionEvent actionEvent){
         if(client != null){
             prepTableAreaInteresse();
@@ -274,6 +291,9 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Prepara la tabella per la visualizzazione di oggetti di tipo AreaInteresse
+     */
     private void prepTableAreaInteresse(){
         if(paramBox != null && !paramBox.getChildren().isEmpty())
             paramBox.getChildren().clear();
@@ -316,6 +336,9 @@ public class OperatoreViewController {
     }
 
 
+    /**
+     * Gestisce la ricerca di oggetti di tipo AreaInteresse tramite denominazione
+     */
     private void handleRicercaAreaPerDenominazione(){
         tableView.getItems().clear();
         String denom = this.tDenominazione.getText();
@@ -350,6 +373,9 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce la ricerca di oggetti di tipo AreaInteresse tramite Stato
+     */
     private void handleRicercaAreaPerStato(){
         tableView.getItems().clear();
         String stato = this.tStato.getText();
@@ -382,6 +408,9 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce la ricerca di oggetti di tipo AreaInteresse tramite coordinate
+     */
     private void handleRicercaAreaPerCoordinate(){
         String longi = this.tLongitudine.getText();
         String lati = this.tLatitudine.getText();
@@ -424,6 +453,9 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Prepara la tabella per la visualizzazione di oggetti di tipo ParametroClimatico
+     */
     private void prepTableParamClimatici(){
         System.out.println("preparo tabella per parametri climatici");
         tableView.getColumns().clear();
@@ -437,6 +469,10 @@ public class OperatoreViewController {
         tableView.refresh(); //forces the tableview to refresh the listeners
     }
 
+    /**
+     * @param actionEvent
+     * Set up della schermata per la visualizzazione di oggetti di tipo ParametroClimatico
+     */
     public void handleVisualizzaParametriClimatici(ActionEvent actionEvent){
         if(client != null){
             tableView.getColumns().clear();
@@ -468,9 +504,12 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * @param event
+     * Gestisce la ricerca di oggetti ParametroClimatico
+     */
     private void handleRicercaPc(ActionEvent event){
         String denomAiCercata = tAreaInteresse.getText();
-        String denomCmCercato = tCentroMonitoraggio.getText();
         LocalDate canonicalStartDate = LocalDate.of(1900, 1, 1);
         LocalDate canonicalEndDate = LocalDate.of(2100, 1, 1);
         boolean ricercaPerData = false;
@@ -563,78 +602,11 @@ public class OperatoreViewController {
                 });
             }
         }
-        //ricerca cm
-        else if(event.getSource().equals(btnRicercaPcCm)){
-            if(denomCmCercato.isEmpty() || denomCmCercato.equals("CentroMonitoraggio")){
-                centroMonitoraggioAlert.showAndWait();
-            }else{
-                Request requestCentroId;
-                try{
-                    Map<String, String> requestCentroIdParams = RequestFactory
-                            .buildParams(
-                                    ServerInterface.RequestType.selectObjJoinWithCond,
-                                    "centroid",
-                                    ServerInterface.Tables.CENTRO_MONITORAGGIO.label,
-                                    "nomecentro",
-                                    denomCmCercato
-                            );
-                    requestCentroId = RequestFactory.buildRequest(
-                            client.getHostName(),
-                            ServerInterface.RequestType.selectObjJoinWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO, //join pc -> cm
-                            requestCentroIdParams);
-
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    mre.printStackTrace();
-                    return;
-                }
-                client.addRequest(requestCentroId);
-                Response responseCentroId = client.getResponse();
-                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.Error){
-                    resErrorAlert.showAndWait();
-                    return;
-                }
-                if(responseCentroId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    resNoSuchElementAlert.showAndWait();
-                    return;
-                }
-
-                String centroId = responseCentroId.getResult().toString();
-
-                Request requestParametriClimatici;
-                try{
-                    Map<String, String> requestParametriClimaticiParams = RequestFactory
-                            .buildParams(ServerInterface.RequestType.selectAllWithCond, "centroid", centroId);
-                    requestParametriClimatici = RequestFactory.buildRequest(
-                            client.getHostName(),
-                            ServerInterface.RequestType.selectAllWithCond,
-                            ServerInterface.Tables.PARAM_CLIMATICO,
-                            requestParametriClimaticiParams);
-                }catch(MalformedRequestException mre){
-                    new Alert(Alert.AlertType.ERROR, mre.getMessage()).showAndWait();
-                    mre.printStackTrace();
-                    return;
-                }
-                client.addRequest(requestParametriClimatici);
-                Response responseParametriClimatici = client.getResponse();
-                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
-
-                tableView.getItems().clear();
-                if(ricercaPerData){
-                    LocalDate finalStartDate = startDate;
-                    LocalDate finalEndDate = endDate;
-                    parametriClimatici.forEach((param) -> {
-                        parametriClimatici.removeIf((pc) -> {
-                            return Util.isBetweenDates(finalStartDate, finalEndDate, pc.getPubDate());
-                        });
-                    });
-                }
-                parametriClimatici.forEach((pc) -> tableView.getItems().add(pc));
-            }
-        }
     }
 
+    /**
+     * Gestisce l'inserimento di una nuova area d'interesse
+     */
     @FXML
     public void handleInserisciAreaInteresse(){
         if(client != null){
@@ -675,6 +647,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce la richiesta di visualizzazione di oggetti di tipo CentroMonitoraggio
+     * @param event
+     */
     private void visualizeCmData(ActionEvent event){
         tableView.getColumns().clear();
         tableView.getItems().clear();
@@ -725,6 +701,10 @@ public class OperatoreViewController {
         centri.forEach(centro -> tableView.getItems().add(centro));
     }
 
+    /**
+     * @param event
+     * Gestisce la visualizzazione di oggetti di tipo City, CentroMonitoraggio e AreaInteresse
+     */
     private void visualizeData(ActionEvent event){
         tableView.getItems().clear();
         Request request;
@@ -911,6 +891,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce l'inserimento di una nuova area interesse
+     * @param event
+     */
     private void executeInsertAreaInteresse(ActionEvent event){
         String denom = tDenominazione.getText();
         String stato = tStato.getText();
@@ -966,6 +950,10 @@ public class OperatoreViewController {
         tLongitudine.setText("Longitudine");
     }
 
+    /**
+     * Set up della schermata per l'inserimento di un nuovo parametro climatico
+     * @param actionEvent
+     */
     @FXML
     public void handleInserisciParametriClimatici(ActionEvent actionEvent){
         if(client != null){
@@ -1056,6 +1044,16 @@ public class OperatoreViewController {
     }
 
 
+    /**
+     * Gestisce l'inserimento del parametro climatico
+     * @param parameterId
+     * @param nomeArea
+     * @param centroMon
+     * @param pubdate
+     * @param paramValues
+     * @param notaId
+     * @param notaInsertParams
+     */
     public void executeInsertPCQuery(String parameterId, String nomeArea, String centroMon, LocalDate pubdate, Map<String, String> paramValues, String notaId, Map<String, String> notaInsertParams){
         logger.info("nome area: "+ nomeArea);
         logger.info("Nome centro: " + centroMon);
@@ -1168,6 +1166,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Set up della schermata per la visualizzazione di oggetti di tipo CentroMonitoraggio
+     * @param actionEvent
+     */
     public void handleInserisciCentroMonitoraggio(ActionEvent actionEvent){
         if(client != null){
             prepTableCentroMonitoraggio();
@@ -1206,6 +1208,13 @@ public class OperatoreViewController {
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
+    /**
+     * Gestisce l'esecuzione della richiesta d'inserimento di un nuovo CentroMonitoraggio
+     * @param nomeCentro
+     * @param comuneCentro
+     * @param statoCentro
+     * @param areeAssociate
+     */
     public void executeInsertCMQuery(String nomeCentro, String comuneCentro, String statoCentro, String areeAssociate){
 
         List<String> l = new LinkedList<String>();
@@ -1278,6 +1287,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Set up della schermata per l'abilitazione di un nuovo operatore
+     * @param actionEvent
+     */
     public void handleAbilitaNuovoOperatore(ActionEvent actionEvent){
         if(client != null){
 
@@ -1324,6 +1337,9 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Gestisce la richiesta di inserimento di un nuovo operatore
+     */
     private void executeAbilitaNuovoOperatore(){
         String email = tEmailField.getText();
         String codFisc = tCodFiscField.getText();
@@ -1371,8 +1387,10 @@ public class OperatoreViewController {
     }
 
 
-
-
+    /**
+     * Set up della schermata per la visualizzazione di grafici
+     * @param event
+     */
     @FXML
     public void handleVisualizzaGrafici(ActionEvent event){
         if(client != null){
@@ -1398,6 +1416,9 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Richiesta dati e creazione della finestra per la visualizzazione grafici per l'area richiesta
+     */
     private void createChart(){
         String nomeArea = tAreaInteresse.getText();
         if(nomeArea.isEmpty() || nomeArea.equals("Nome Area")){
@@ -1438,6 +1459,9 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Gestisce la richiesta di visualizzazione di oggetti di tipo CentroMonitoraggio
+     */
     @FXML
     public void handleVisualizzaCentri(){
         if(client != null){
@@ -1481,6 +1505,10 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Gestisce la richiesta di eliminazione di AreaInteresse
+     * @param denominazioneAreaDaRimuovere
+     */
     private void rimuoviAreaPerDenom(String denominazioneAreaDaRimuovere){
         if(denominazioneAreaDaRimuovere.isEmpty() || denominazioneAreaDaRimuovere.equals("Nome")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
@@ -1528,6 +1556,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Set up della schermata per la rimozione di AreaInteresse
+     * @param event
+     */
     @FXML
     public void handleRimuoviAreaInteresse(ActionEvent event){
         if(client != null){
@@ -1566,6 +1598,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce la rimozione di CentroMonitoraggio tramite denominazione
+     * @param nomeCentroDaRimuovere
+     */
     private void rimuoviCentroPerDenom(String nomeCentroDaRimuovere){
         if(nomeCentroDaRimuovere.isEmpty() || nomeCentroDaRimuovere.equals("Nome")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
@@ -1647,6 +1683,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Setup della schermata principale per la rimozione di CentroMonitoraggio
+     * @param event
+     */
     @FXML
     public void handleRimuoviCentroMonitoraggio(ActionEvent event){
         if(client != null){
@@ -1699,6 +1739,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Set up della schermata per la rimozione di ParametroClimatico
+     * @param event
+     */
     @FXML
     public void handleRimuoviParametroClimatico(ActionEvent event){
         if(client != null){
@@ -1832,6 +1876,11 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     * Gestisce l'aggiornamento di un centro monitoraggio tramite denominazione
+     * @param nuovaDenominazione
+     * @param centroId
+     */
     private void updateDenomCentro(String nuovaDenominazione, String centroId){
         if(nuovaDenominazione.isEmpty() || nuovaDenominazione.equals("Nuova denominazione")){
             new Alert(Alert.AlertType.ERROR, "Denominazione non valida").showAndWait();
@@ -1862,6 +1911,10 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Set up della schermata per l'aggiornamento di un CentroMonitoraggio
+     * @param event
+     */
     @FXML
     public void handleAggiornaCentroMonitoraggio(ActionEvent event){
         if (client != null) {
@@ -2054,6 +2107,11 @@ public class OperatoreViewController {
         }
     }
 
+    /**
+     * Gestisce la rimozione di un AreaInteresse da un centro di monitoraggio
+     * @param areaId
+     * @param centroId
+     */
     private void rimuoviAreaDaCentro(String areaId, String centroId){
         if(centroId.isEmpty() || areaId.isEmpty()){
             new Alert(Alert.AlertType.ERROR, "id del centro o dell'area non valido").showAndWait();
@@ -2078,6 +2136,11 @@ public class OperatoreViewController {
     }
 
 
+    /**
+     * Gestisce l'aggiunta di un AreaInteresse a un CentroMonitoraggio
+     * @param denominazioneAreaInteresse
+     * @param denominazioneCentro
+     */
     private void aggiungiAreaCentro(String denominazioneAreaInteresse, String denominazioneCentro) {
         if (denominazioneAreaInteresse.isEmpty() || denominazioneCentro.isEmpty()) {
             new Alert(Alert.AlertType.ERROR, "Stringhe inserite non valide!");
@@ -2164,6 +2227,10 @@ public class OperatoreViewController {
 
     }
 
+    /**
+     *
+     * @param event
+     */
     @FXML
     public void handleAggiornaParametroClimatico(ActionEvent event){
         if (client != null) {
