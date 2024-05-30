@@ -73,13 +73,6 @@ public class GraphDialog {
     private final int defaultYear = 1900;
     private final int defaultMonth = 1;
 
-    public GraphDialog(Client client, String areaId, List<ParametroClimatico> params){
-        this.client = client;
-        this.params = params;
-        this.areaId = areaId;
-        denomArea = getDenomArea();
-    }
-
     public GraphDialog(Client client, String areaId){
         this.client = client;
         this.areaId = areaId;
@@ -87,6 +80,10 @@ public class GraphDialog {
         this.params = new LinkedList<ParametroClimatico>();
     }
 
+    /**
+     * Esegue una richiesta per la denominazione dell'area
+     * @return
+     */
     private String getDenomArea(){
 
 
@@ -116,6 +113,9 @@ public class GraphDialog {
         return denominazione;
     }
 
+    /**
+     * Inizializza i grafici, richiede i dati al database per la visualizzazione a schermo
+     */
     @FXML
     public void initialize(){
         //init the graphs
@@ -146,7 +146,6 @@ public class GraphDialog {
         tfYearFilter.setOnMouseClicked(e -> tfYearFilter.setText(""));
 
         //default charts - temperature charts
-
         if(!params.isEmpty()){
             XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
             series.setName(denomArea);
@@ -191,6 +190,12 @@ public class GraphDialog {
         contentBox.getChildren().add(monthlyTempLineChart);
     }
 
+    /**
+     * Calcola la media numerica del parametro climatico richiesto
+     * @param params
+     * @param parameterType
+     * @return
+     */
     private Number getAverageValue(List<ParametroClimatico> params, ParameterType parameterType){
         int averageValue = 0;
         switch(parameterType){
@@ -235,6 +240,12 @@ public class GraphDialog {
     }
 
 
+    /**
+     * Aggiunge la coppia alla serie che rappresenta l'andamento mensile dell'anno
+     * @param data
+     * @param series
+     * @return
+     */
     private XYChart.Series<String, Number> addMonthlyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
         data.forEach(param -> series
                 .getData()
@@ -242,6 +253,12 @@ public class GraphDialog {
         return series;
     }
 
+    /**
+     * Aggiunge la coppia alla serie che rappresenta l'andamento giornaliero del mese
+     * @param data
+     * @param series
+     * @return
+     */
     private XYChart.Series<String, Number> addDailyDataToSeries(List<Pair<LocalDate, Number>> data, XYChart.Series<String, Number> series){
         data.forEach(param -> series
                 .getData()
@@ -249,6 +266,9 @@ public class GraphDialog {
         return series;
     }
 
+    /**
+     * Calcola i parametri climatici per il grafico annuale a schermo, rendendoli visibili sui grafici dell'andamento annuale
+     */
     @FXML
     public void filterYear(){
         String yearFilterText = tfYearFilter.getText();
@@ -280,7 +300,6 @@ public class GraphDialog {
         System.out.println(filteredParams.size());
         filteredParams.forEach(System.out::println);
 
-        //if not working?
         if(filteredParams.isEmpty()){
             new Alert(Alert.AlertType.ERROR, "Dati non presenti per questa area e anno").showAndWait();
             return;
@@ -338,6 +357,10 @@ public class GraphDialog {
         }
         tfYearFilter.setText("Inserisci anno");
     }
+
+    /**
+     * Calcola i parametri climatici per il grafico giornaliero a schermo, rendendoli visibili sui grafici dell'andamento giornaliero
+     */
     @FXML
     public void filterMonth(){
         String monthFilterText = tfMonthFilter.getText();
@@ -490,6 +513,12 @@ public class GraphDialog {
         }
     }
 
+    /**
+     * Calcolo della media mensile per il parametro climatico specificato
+     * @param filteredParams
+     * @param pType
+     * @return
+     */
     private List<Pair<LocalDate, Number>> calcMonthlyData(List<ParametroClimatico> filteredParams, ParameterType pType){
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         for(ParametroClimatico param : filteredParams){
@@ -504,6 +533,12 @@ public class GraphDialog {
         return data;
     }
 
+    /**
+     * Calcolo della media giornaliera per il parametro climatico specificato
+     * @param filteredParams
+     * @param pType
+     * @return
+     */
     private List<Pair<LocalDate, Number>> calcDailyData(List<ParametroClimatico> filteredParams, ParameterType pType){
         List<Pair<LocalDate, Number>> data = new LinkedList<Pair<LocalDate, Number>>();
         for(ParametroClimatico param : filteredParams){

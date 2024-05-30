@@ -31,10 +31,9 @@ public class AiDialog {
 
     private static final int MAX_WINDOW_SIZE = 800;
 
-
     public TableView paramClimaticiTableView;
     private final Client client;
-    //private final QueryHandler queryHandler;
+
     public AiDialog(Stage stage, Client client, AreaInteresse ai, List<ParametroClimatico> parameters){
         this.stage = stage;
         this.ai = ai;
@@ -42,6 +41,9 @@ public class AiDialog {
         this.client = client;
     }
 
+    /**
+     * Prepara la finestra per la visualizzazione dei dati
+     */
     @FXML
     public void initialize(){
         nomeLabel.setText(ai.getDenominazione());
@@ -131,6 +133,10 @@ public class AiDialog {
         }
     }
 
+    /**
+     * Chiude la finestra associata all'evento
+     * @param actionEvent
+     */
     public void close(ActionEvent actionEvent){
         Stage s = (Stage)((Node)actionEvent.getSource()).getScene().getWindow();
         if(s != null)

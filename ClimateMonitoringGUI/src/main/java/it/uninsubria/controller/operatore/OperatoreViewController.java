@@ -2228,7 +2228,7 @@ public class OperatoreViewController {
     }
 
     /**
-     *
+     * Set up della schermata e gestione della richiesta di aggiornamento di un ParametroClimatico
      * @param event
      */
     @FXML

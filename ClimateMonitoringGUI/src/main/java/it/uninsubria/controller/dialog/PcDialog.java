@@ -25,6 +25,9 @@ public class PcDialog {
         this.nomeArea = nomeArea;
     }
 
+    /**
+     * Inizializzazione degli oggetti per la visualizzazione a schermo
+     */
     @FXML
     public void initialize(){
         paramIdLabel.setText(pc.getParameterId());

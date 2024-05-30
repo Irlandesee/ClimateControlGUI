@@ -55,6 +55,10 @@ public class RegistrazioneController {
         centroField.setText("Parma");
     }
 
+    /**
+     * Lettura dei campi per la registrazione e richiesta di registrazione
+     * @param actionEvent
+     */
     public void registraOp(ActionEvent actionEvent) {
         String nomeOp = nomeOpField.getText();
         String cognomeOp = cognomeField.getText();

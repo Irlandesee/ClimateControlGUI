@@ -34,6 +34,10 @@ import java.util.Map;
 public class TableViewBuilder {
     static short minWidth = 100;
 
+    /**
+     * Prepara le colonne della tabella per la visualizzazione di oggetti di tipo AreaInteresse
+     * @return
+     */
     public static List<TableColumn<AreaInteresse, String>> getColumnsAi(){
         List<TableColumn<AreaInteresse, String>> res = new LinkedList<TableColumn<AreaInteresse, String>>();
         String[] columnNames = {"denominazione", "stato", "latitudine", "longitudine"};
@@ -46,6 +50,10 @@ public class TableViewBuilder {
         return res;
     }
 
+    /**
+     * Prepara le colonne della tabella per la visualizzazione di oggetti di tipo CentroMonitoraggio
+     * @return
+     */
     public static List<TableColumn<CentroMonitoraggio, String>> getColumnsCm(){
         List<TableColumn<CentroMonitoraggio, String>> res = new LinkedList<TableColumn<CentroMonitoraggio, String>>();
         String[] columnNames = {"denominazione", "stato"};
@@ -61,6 +69,10 @@ public class TableViewBuilder {
         return res;
     }
 
+    /**
+     * Prepara le colonne della tabella per la visualizzazione di oggetti di tipo City
+     * @return
+     */
     public static List<TableColumn<City, String>> getColumnsCity(){
         List<TableColumn<City, String>> res = new LinkedList<TableColumn<City, String>>();
         String[] columnNames = {"asciiName", "country", "latitude", "longitude"};
@@ -76,6 +88,10 @@ public class TableViewBuilder {
         return res;
     }
 
+    /**
+     * Prepara le colonne della tabella per la visualizzazione di oggetti di tipo Operatore
+     * @return
+     */
     public static List<TableColumn<Operatore, String>> getColumnsOp(){
         List<TableColumn<Operatore, String>> res = new LinkedList<TableColumn<Operatore, String>>();
         String[] columnNames = {"email", "codice fiscale"};
@@ -91,12 +107,21 @@ public class TableViewBuilder {
         return res;
     }
 
+    /**
+     * Crea una colonna per la visualizzazione di LocalDate combinato a oggetti di tipo ParametroClimatico
+     * @return
+     */
     public static TableColumn<ParametroClimatico, LocalDate> getDateColumn(){
         TableColumn<ParametroClimatico, LocalDate> dateColumn = new TableColumn<ParametroClimatico, LocalDate>("Data");
         dateColumn.setCellValueFactory(new PropertyValueFactory<ParametroClimatico, LocalDate>("pubDate"));
         dateColumn.setMinWidth(minWidth);
         return dateColumn;
     }
+
+    /**
+     * Prepara le colonne della tabella per la visualizzazione di oggetti di tipo ParametroClimatico
+     * @return
+     */
     public static List<TableColumn<ParametroClimatico, Short>> getColumnsPc(){
         List<TableColumn<ParametroClimatico, Short>> res = new LinkedList<TableColumn<ParametroClimatico, Short>>();
         String[] columnNames = {"Vento", "Umidita", "Pressione", "Temperatura", "Precipitazioni", "Altitudine ghiacciai", "Massa ghiacciai"};
@@ -112,6 +137,11 @@ public class TableViewBuilder {
         return res;
     }
 
+    /**
+     * Prepara le righe della tabella, rendendole "Interattive" per lavorare con oggetti di tipo AreaInteresse
+     * @param client
+     * @return
+     */
     public static TableRow getRowAi(Client client){
         TableRow row = new TableRow<>();
         row.setOnMouseClicked(event -> {
@@ -169,17 +199,9 @@ public class TableViewBuilder {
     }
 
     /**
-     * Params (From: ParametroClimatico)
-     * "denominazione"
-     * "AREA_INTERESSE"
-     * "areaid"
-     * areaid: String
-     *
-     * Params(From: ParametroClimatico)
-     * "nomecentro"
-     * "CENTRO_MONITORAGGIO"
-     * "centroid"
-     * centroid: String
+     * Prepara le righe della tabella, rendendole "interattive" per lavorare con oggetti di tipo ParametroClimatico
+     * @param client
+     * @return
      */
     public static TableRow getRowPc(Client client){
         TableRow row = new TableRow<>();
@@ -277,6 +299,12 @@ public class TableViewBuilder {
         return row;
     }
 
+    /**
+     * Prepara le righe della tabella per l'abilitazione di un operatore
+     * @param tEmailField
+     * @param tCodFiscField
+     * @return
+     */
     public static TableRow getRowFactoryOpAbilitaOperatore(TextField tEmailField, TextField tCodFiscField){
         TableRow row = new TableRow<>();
         row.setOnMouseClicked(event -> {
@@ -289,6 +317,11 @@ public class TableViewBuilder {
         return row;
     }
 
+    /**
+     * Prepara le righe della tabella per la visualizzazione di centri di monitoraggio
+     * @param client
+     * @return
+     */
     public static TableRow getRowFactoryHandleVisualizzaCentri(Client client){
         TableRow row = new TableRow<>();
         row.setOnMouseClicked(event -> {
@@ -336,6 +369,14 @@ public class TableViewBuilder {
         return row;
     }
 
+    /**
+     * Prepara le righe della tabella per interagire con TextField
+     * @param tDenominazione
+     * @param tStato
+     * @param tLatitudine
+     * @param tLongitudine
+     * @return
+     */
     public static TableRow getRowFactoryPrepTableCity(TextField tDenominazione, TextField tStato, TextField tLatitudine, TextField tLongitudine){
         TableRow row = new TableRow<>();
         row.setOnMouseClicked(event -> {

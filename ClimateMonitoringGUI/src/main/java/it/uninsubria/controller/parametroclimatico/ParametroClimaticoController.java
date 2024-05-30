@@ -66,6 +66,10 @@ public class ParametroClimaticoController {
         
     }
 
+    /**
+     * Lettura dei campi dei parametri climatici inseriti e creazione di una richiesta di inserimento
+     * @param actionEvent
+     */
     public void insericiPC(ActionEvent actionEvent) {
         String nomeArea = areaInteresseField.getText();
         String centroMon = cmField.getText();

@@ -27,6 +27,11 @@ public class GraphBuilder {
     }
 
 
+    /**
+     * Crea un oggetto LineChart per la visualizzazione in vista mensile della risorsa passata come parametro
+     * @param r
+     * @return
+     */
     public static LineChart<String, Number> getBasicMonthLineChart(Resource r) {
         final CategoryAxis xAxis = new CategoryAxis();
         xAxis.setCategories(FXCollections.observableList(Arrays.asList(months)));
@@ -40,6 +45,13 @@ public class GraphBuilder {
         return prepareLineChart(r, xAxis, yAxis);
     }
 
+    /**
+     * Crea un oggetto LineChart per la visualizzazione Giornaliera della risorsa passata come parametro
+     * @param r
+     * @param year
+     * @param month
+     * @return
+     */
     public static LineChart<String, Number> getBasicDailyLineChart(Resource r, int year, int month){
         final CategoryAxis xAxis = new CategoryAxis();
         int monthLength = YearMonth.of(year, month).lengthOfMonth();
@@ -58,26 +70,13 @@ public class GraphBuilder {
         return prepareLineChart(r, xAxis, yAxis);
     }
 
-    public static CategoryAxis getDailyMonth(int year, int month){
-        final CategoryAxis xAxis = new CategoryAxis();
-        int monthLength = YearMonth.of(year, month).lengthOfMonth();
-        final int[] numbers = IntStream.rangeClosed(1, monthLength).toArray();
-        String[] days = new String[numbers.length];
-        for(int i = 0; i < numbers.length; i++) days[i] = String.valueOf(numbers[i]);
-        xAxis.setCategories(FXCollections.observableList(List.of(days)));
-        xAxis.setLabel("Giorno");
-        return xAxis;
-    }
-
-    public static NumberAxis getValuesAxis(){
-        final NumberAxis yAxis = new NumberAxis();
-        yAxis.setAutoRanging(false);
-        yAxis.setLowerBound(1);
-        yAxis.setUpperBound(5);
-        yAxis.setTickUnit(1);
-        return yAxis;
-    }
-
+    /**
+     * Crea un oggetto LineChart per la visualizzazione delle risorse
+     * @param r
+     * @param xAxis
+     * @param yAxis
+     * @return
+     */
     private static LineChart<String, Number> prepareLineChart(Resource r, Axis<String> xAxis, Axis<Number> yAxis){
         LineChart<String, Number> lineChart = new LineChart<String, Number>(xAxis, yAxis);
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();

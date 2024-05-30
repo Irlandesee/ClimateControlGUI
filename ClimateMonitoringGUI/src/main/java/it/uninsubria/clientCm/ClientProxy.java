@@ -51,6 +51,10 @@ public class ClientProxy implements ServerInterface{
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
+    /**
+     * Testa la connessione al server
+     * @return
+     */
     public boolean testConnection(){
         boolean res = false;
         try{
@@ -87,6 +91,11 @@ public class ClientProxy implements ServerInterface{
         return res;
     }
 
+    /**
+     * Invia la richiesta al server
+     * @param request
+     * @throws IOException
+     */
     public void sendRequest(Request request) throws IOException{
         try{
 
@@ -116,6 +125,9 @@ public class ClientProxy implements ServerInterface{
         }catch(ClassNotFoundException cnfe){cnfe.printStackTrace();}
     }
 
+    /**
+     * Invia una notifica chiusura della connessione al server
+     */
     public void sendQuitRequest(){
         try{
             if(outStream != null)
@@ -124,6 +136,9 @@ public class ClientProxy implements ServerInterface{
         this.quit();
     }
 
+    /**
+     * Invia una richiesta di logout al server
+     */
     public void sendLogoutRequest(){
         logger.info("Logger %s sending quit request".formatted(client.getHostName()));
         try{

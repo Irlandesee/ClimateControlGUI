@@ -43,6 +43,10 @@ public class LoginViewController {
     }
 
 
+    /**
+     * Creazione di una nuova finestra di registrazione utente
+     * @param actionEvent
+     */
     public void registra(ActionEvent actionEvent) {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/registrazione-scene.fxml"));
@@ -56,9 +60,12 @@ public class LoginViewController {
         }catch(IOException ioe){ioe.printStackTrace();}
     }
 
+    /**
+     * Creazione di una richiesta di login. In caso positivo, si passa automaticamente alla schermata per operatori
+     * @param actionEvent
+     */
     public void login(ActionEvent actionEvent) {
         String userID = useridField.getText();
-        //TODO: hash the password for security reasons
         String password = passwordField.getText();
         if(userID.isEmpty() && password.isEmpty()) {invalidUserNameOrPassword.showAndWait();}
         else{

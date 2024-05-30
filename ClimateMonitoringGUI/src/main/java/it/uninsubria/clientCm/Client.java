@@ -77,6 +77,9 @@ public class Client extends Thread{
         this.clientProxy = clientProxy;
     }
 
+    /**
+     * Attende richieste da parte dell'utente per inviarle al server
+     */
     public void run(){
         logger.info("Client started");
         while (getRunCondition()) {

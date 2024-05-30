@@ -4,6 +4,12 @@ import java.time.LocalDate;
 
 public class Util {
 
+    /**
+     * Metodo utilizzato per controllare se il parametro inputDate e compreso in un intervallo di tempo specificato
+     * @param startDate
+     * @param endDate
+     * @param inputDate
+     */
     public static boolean isBetweenDates(LocalDate startDate, LocalDate endDate, LocalDate inputDate){
         return inputDate.isAfter(startDate) && inputDate.isBefore(endDate);
     }
@@ -12,6 +18,14 @@ public class Util {
         return (float) (value * Math.PI / 180);
     }
 
+    /**
+     * Metodo utilizzato per calcolare la distanza tra due punti
+     * @param latFirstPoint
+     * @param longFirstPoint
+     * @param latSecondPoint
+     * @param longSecondPoint
+     * @return
+     */
     public static Float haversineDistance(Float latFirstPoint, Float longFirstPoint, Float latSecondPoint, Float longSecondPoint){
         final int earthRadius = 6731; // in kms
         float latDistance = toRad(latSecondPoint - latFirstPoint);

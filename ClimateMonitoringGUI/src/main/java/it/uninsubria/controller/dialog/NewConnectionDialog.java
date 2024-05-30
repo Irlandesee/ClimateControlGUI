@@ -35,6 +35,9 @@ public class NewConnectionDialog {
         whichController = false;
     }
 
+    /**
+     * Prova a creare una nuova connessione al server, associandola al controller corretto
+     */
     @FXML
     public void handleConnect(){
         String ipAddr = ipField.getText();

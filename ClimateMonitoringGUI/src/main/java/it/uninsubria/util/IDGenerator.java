@@ -7,8 +7,12 @@ import java.util.Random;
 
 public class IDGenerator {
 
+
+    /**
+     * Genera id univoci alfanumerici di 32 caratteri
+     * @return
+     */
     public static String generateID(){
-        //generates random alphanumeric string
         int leftLimit = 48; //0
         int rightLimit = 122; //z
         int targetStringLength = 10;
