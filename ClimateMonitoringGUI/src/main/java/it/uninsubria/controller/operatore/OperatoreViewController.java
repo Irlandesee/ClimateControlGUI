@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static it.uninsubria.controller.mainscene.MainWindowController.*;
 
@@ -761,9 +762,9 @@ public class OperatoreViewController {
                 List<AreaInteresse> areeInteresse = (List<AreaInteresse>) responseAi.getResult();
                 for(AreaInteresse area : areeInteresse){
                     cities = cities
-                                .stream()
-                                .filter(city -> !city.getAsciiName().equals(area.getDenominazione()))
-                                .toList();
+                            .stream()
+                            .filter(city -> !city.getAsciiName().equals(area.getDenominazione()))
+                            .collect(Collectors.toList());
                 }
                 cities.forEach(city -> tableView.getItems().add(city));
             }
@@ -843,7 +844,7 @@ public class OperatoreViewController {
                 List<City> cities = (List<City>) responseCities.getResult();
                 List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
                 for(CentroMonitoraggio cm : centriMonitoraggio){
-                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
+                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).collect(Collectors.toList());
                 }
 
                 citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
@@ -882,7 +883,7 @@ public class OperatoreViewController {
                 List<City> cities = (List<City>)responseCity.getResult();
                 List<City> citiesWithoutCm = new LinkedList<City>();
                 for(CentroMonitoraggio cm : centriMonitoraggio){
-                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).toList();
+                    citiesWithoutCm = cities.stream().filter(city -> !city.getAsciiName().equals(cm.getComune())).collect(Collectors.toList());
                 }
 
                 citiesWithoutCm.forEach(city -> tableView.getItems().add(city));
@@ -1262,8 +1263,6 @@ public class OperatoreViewController {
             }
         }
 
-        String params = "{%s}, {%s}, {%s}".formatted(nomeCentro, comuneCentro, statoCentro);
-        logger.info(params);
         logger.info(areaList.toString());
         try{
             Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
@@ -2316,7 +2315,6 @@ public class OperatoreViewController {
                 Integer value = valueBox.getSelectionModel().getSelectedItem();
                 ParametroClimatico pc = (ParametroClimatico) tableView.getSelectionModel().getSelectedItem();
                 if(item != null && pc != null && value != null){
-                    logger.info("{%s}{%s}{%s}".formatted(item, value, pc));
                     String columnToUpdate = mapString(item);
                     try{
                         Map<String, String> updateParams = RequestFactory.buildParams(

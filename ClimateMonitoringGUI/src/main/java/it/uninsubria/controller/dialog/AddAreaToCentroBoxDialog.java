@@ -9,6 +9,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddAreaToCentroBoxDialog {
     @FXML
@@ -54,9 +55,9 @@ public class AddAreaToCentroBoxDialog {
     public void handleRemoveAreaFromBox(ActionEvent actionEvent){
         String nomeAreaDaRimuovere = inputAreaTextField.getText();
         if(!nomeAreaDaRimuovere.isEmpty()){
-            List<String> nomiAree = Arrays.stream(areeInteresseBox.getText().split("\n")).toList();
+            List<String> nomiAree = Arrays.stream(areeInteresseBox.getText().split("\n")).collect(Collectors.toList());
             if(nomiAree.contains(nomeAreaDaRimuovere)){
-                nomiAree = nomiAree.stream().filter(nome -> !nome.equals(nomeAreaDaRimuovere)).toList();
+                nomiAree = nomiAree.stream().filter(nome -> !nome.equals(nomeAreaDaRimuovere)).collect(Collectors.toList());
                 areeInteresseBox.clear();
                 StringBuilder text = new StringBuilder();
                 for(String s : nomiAree) text.append(s).append("\n");

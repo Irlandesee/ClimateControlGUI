@@ -140,7 +140,6 @@ public class ClientProxy implements ServerInterface{
      * Invia una richiesta di logout al server
      */
     public void sendLogoutRequest(){
-        logger.info("Logger %s sending quit request".formatted(client.getHostName()));
         try{
             if(outStream != null) {
                 try{
@@ -153,9 +152,9 @@ public class ClientProxy implements ServerInterface{
                     outStream.writeObject(logoutRequest);
                     Response logoutResponse = (Response) inStream.readObject();
                     if(logoutResponse.getResponseType() == ServerInterface.ResponseType.logoutOk){
-                        logger.info("Logger %s has logged out successfully".formatted(client.getHostName()));
+                        logger.info("Proxy has logged out successfully");
                     }else{
-                        logger.info("Logger %s has failed to log out".formatted(client.getHostName()));
+                        logger.info("Logger %s has failed to log out");
                     }
                 }catch(MalformedRequestException mre){
                     mre.printStackTrace();

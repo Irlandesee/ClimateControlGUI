@@ -85,6 +85,7 @@ public class GraphBuilder {
                 series.setName("Vento");
                 lineChart.getData().add(series);
                 return lineChart;
+
             }
             case umidity -> {
                 series.setName("Umidita");

@@ -20,6 +20,7 @@ import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GraphDialog {
 
@@ -149,7 +150,7 @@ public class GraphDialog {
         if(!params.isEmpty()){
             XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
             series.setName(denomArea);
-            List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).toList();
+            List<ParametroClimatico> filteredParams = params.stream().filter(param -> param.getPubDate().getMonth().equals(Month.JANUARY)).collect(Collectors.toList());
             List<Pair<LocalDate, Number>> data = calcMonthlyData(filteredParams, ParameterType.temperatura);
             addMonthlyDataToSeries(data, series);
 
@@ -467,11 +468,11 @@ public class GraphDialog {
 
 
     private List<ParametroClimatico> filterListByMonth(List<ParametroClimatico> params, Month m){
-        return params.stream().filter(pc -> pc.getPubDate().getMonth().equals(m)).toList();
+        return params.stream().filter(pc -> pc.getPubDate().getMonth().equals(m)).collect(Collectors.toList());
     }
 
     private List<ParametroClimatico> filterListByYear(List<ParametroClimatico> params, int year){
-        return params.stream().filter(pc -> pc.getPubDate().getYear() == year).toList();
+        return params.stream().filter(pc -> pc.getPubDate().getYear() == year).collect(Collectors.toList());
     }
 
 
@@ -544,7 +545,7 @@ public class GraphDialog {
         for(ParametroClimatico param : filteredParams){
             LocalDate pubDate = param.getPubDate();
             if(getNumOccurrences(filteredParams, pubDate.getDayOfMonth()) > 1) {
-                List<ParametroClimatico> paramsSameDate = filteredParams.stream().filter(pc -> pc.getPubDate().equals(param.getPubDate())).toList();
+                List<ParametroClimatico> paramsSameDate = filteredParams.stream().filter(pc -> pc.getPubDate().equals(param.getPubDate())).collect(Collectors.toList());
                 addParamAverageToList(paramsSameDate, pType, data, param);
             } else {
                 addParamToList(pType, data, param);

@@ -880,7 +880,6 @@ public class MainWindowController{
     @FXML
     public void handleDisconnect(){
         if(client != null){
-            logger.info("Disconnecting from: %s:%s\n".formatted(client.getClientProxy().getIpAddr(), client.getClientProxy().getPortNumber()));
             client.getClientProxy().sendQuitRequest();
             client.setRunCondition(false);
             client = null;

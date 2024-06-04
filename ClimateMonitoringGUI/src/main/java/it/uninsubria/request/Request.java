@@ -46,6 +46,6 @@ public class Request implements Serializable {
     }
 
     public String toString(){
-        return "{%s, %s := %s}".formatted(this.clientId, this.requestId, this.requestType);
+        return this.requestId + " " + this.clientId + " " + this.requestType + " " + this.table;
     }
 }

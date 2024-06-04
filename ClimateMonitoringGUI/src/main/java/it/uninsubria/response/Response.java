@@ -49,7 +49,7 @@ public class Response implements Serializable {
     }
 
     public String toString(){
-        return "{%s, %s, %s := %s, %s}".formatted(this.clientId, this.requestId, this.responseId, this.respType, this.table);
+        return this.clientId +  this.requestId + this.responseId + this.respType+ this.table;
     }
 
 }
