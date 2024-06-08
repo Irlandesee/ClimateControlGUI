@@ -2,9 +2,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import java.net.URL?>
 <GridPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            prefHeight="300.0" prefWidth="400.0">
+          xmlns:fx="http://javafx.com/fxml"
+          prefHeight="50.0" prefWidth="350.0">
 
     <Label text="Indirizzo IP: "
            GridPane.columnIndex="0" GridPane.rowIndex="1"/>
@@ -27,5 +28,8 @@
             GridPane.columnIndex="0"
             GridPane.rowIndex="3"
     />
+    <stylesheets>
+        <URL value="@../stylesheets/new-connection.css"/>
+    </stylesheets>
 
 </GridPane>
