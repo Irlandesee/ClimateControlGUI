@@ -172,7 +172,7 @@ public class OperatoreViewController {
         System.out.println("New connection");
         try{
             Stage connectionStage = new Stage();
-            NewConnectionDialog connectionDialog = new NewConnectionDialog(this);
+            NewConnectionDialog connectionDialog = new NewConnectionDialog(this, connectionStage);
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
             fxmlLoader.setController(connectionDialog);
             Scene dialogScene = new Scene(fxmlLoader.load());
@@ -1263,10 +1263,9 @@ public class OperatoreViewController {
             }
         }
 
-        logger.info(areaList.toString());
         try{
             Map<String, String> insertParams = RequestFactory.buildInsertParams(ServerInterface.Tables.CENTRO_MONITORAGGIO,
-                nomeCentro, comuneCentro, statoCentro, areaList.toString());
+                IDGenerator.generateID(), nomeCentro, comuneCentro, statoCentro, areaList.toString());
             Request insertCmRequest = RequestFactory.buildRequest(
                     client.getHostName(),
                     ServerInterface.RequestType.insert,
@@ -1904,6 +1903,11 @@ public class OperatoreViewController {
             Response updateResponse = client.getResponse();
             if(updateResponse.getResponseType() == ServerInterface.ResponseType.updateOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Aggiornamento avvenuto con successo!").showAndWait();
+                tableView.getItems().clear();
+                client.addRequest(PredefinedRequest.getRequestCm(client.getHostName()));
+                Response resCm = client.getResponse();
+                List<CentroMonitoraggio> cm = (List<CentroMonitoraggio>)resCm.getResult();
+                cm.forEach(c-> tableView.getItems().add(c));
             }else{
                 new Alert(Alert.AlertType.ERROR, "Aggiornamento fallito").showAndWait();
             }
@@ -2128,6 +2132,11 @@ public class OperatoreViewController {
             Response deleteAreaResponse = client.getResponse();
             if(deleteAreaResponse.getResponseType() == ServerInterface.ResponseType.deleteOk){
                 new Alert(Alert.AlertType.CONFIRMATION, "Area eliminata con successo").showAndWait();
+                tableView.getItems().clear();
+                client.addRequest(PredefinedRequest.getRequestCm(client.getHostName()));
+                Response resCm = client.getResponse();
+                List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>)resCm.getResult();
+                centri.forEach(cm -> tableView.getItems().add(cm));
             }else{
                 new Alert(Alert.AlertType.ERROR, "Fallimento dell'operazione di eliminazione").showAndWait();
             }
@@ -2218,6 +2227,11 @@ public class OperatoreViewController {
                 Response updateAi = client.getResponse();
                 if(updateAi.getResponseType() == ServerInterface.ResponseType.updateOk){
                     new Alert(Alert.AlertType.CONFIRMATION, "Area aggiunta al centro").showAndWait();
+                    tableView.getItems().clear();
+                    client.addRequest(PredefinedRequest.getRequestCm(client.getHostName()));
+                    Response cmRes = client.getResponse();
+                    List<CentroMonitoraggio> centri = (List<CentroMonitoraggio>)cmRes.getResult();
+                    centri.forEach(cm -> tableView.getItems().add(cm));
                 }else{
                     new Alert(Alert.AlertType.ERROR, "Errore nell'aggiunta dell'area").showAndWait();
                 }

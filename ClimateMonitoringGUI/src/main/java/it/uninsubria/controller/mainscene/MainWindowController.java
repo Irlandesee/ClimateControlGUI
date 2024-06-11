@@ -865,7 +865,7 @@ public class MainWindowController{
         logger.info("new Connection");
         try{
             Stage connectionStage = new Stage();
-            NewConnectionDialog connectionDialog = new NewConnectionDialog(this);
+            NewConnectionDialog connectionDialog = new NewConnectionDialog(this, connectionStage);
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("fxml/new-connection-scene.fxml"));
             fxmlLoader.setController(connectionDialog);
             Scene dialogScene = new Scene(fxmlLoader.load());

@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -25,14 +26,17 @@ public class NewConnectionDialog {
     private MainWindowController mainWindowController;
     private OperatoreViewController operatoreViewController;
     private boolean whichController;
-    public NewConnectionDialog(MainWindowController mainWindowController){
+    private Stage connectionStage;
+    public NewConnectionDialog(MainWindowController mainWindowController, Stage connectionStage){
         this.mainWindowController = mainWindowController;
+        this.connectionStage = connectionStage;
         whichController = true;
     }
 
-    public NewConnectionDialog(OperatoreViewController operatoreViewController){
+    public NewConnectionDialog(OperatoreViewController operatoreViewController, Stage connectionStage){
         this.operatoreViewController = operatoreViewController;
         whichController = false;
+        this.connectionStage = connectionStage;
     }
 
     /**
@@ -71,6 +75,7 @@ public class NewConnectionDialog {
                 }
                 client.setRunCondition(true);
                 client.start();
+                connectionStage.close();
             }else{
                 new Alert(Alert.AlertType.ERROR, "Connessione al server fallita!").showAndWait();
             }

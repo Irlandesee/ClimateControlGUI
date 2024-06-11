@@ -57,7 +57,7 @@ public class AddAreaToCentroBoxDialog {
         if(!nomeAreaDaRimuovere.isEmpty()){
             List<String> nomiAree = Arrays.stream(areeInteresseBox.getText().split("\n")).collect(Collectors.toList());
             if(nomiAree.contains(nomeAreaDaRimuovere)){
-                nomiAree = nomiAree.stream().filter(nome -> !nome.equals(nomeAreaDaRimuovere)).collect(Collectors.toList());
+                nomiAree = nomiAree.stream().filter(nome -> !nome.equals(nomeAreaDaRimuovere)).toList();
                 areeInteresseBox.clear();
                 StringBuilder text = new StringBuilder();
                 for(String s : nomiAree) text.append(s).append("\n");

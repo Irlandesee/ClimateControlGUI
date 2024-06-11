@@ -177,7 +177,7 @@ public class TableViewBuilder {
                     return;
                 }
 
-                List<ParametroClimatico> parametriClimatici = new LinkedList<ParametroClimatico>();
+                List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>) response.getResult();
                 try{
                     Stage aiDialogStage = new Stage();
                     AiDialog aiDialogController = new AiDialog(aiDialogStage, client, a, parametriClimatici);

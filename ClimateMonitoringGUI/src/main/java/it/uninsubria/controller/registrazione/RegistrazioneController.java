@@ -46,12 +46,12 @@ public class RegistrazioneController {
         registrationSuccess = new Alert(Alert.AlertType.CONFIRMATION);
         registrationSuccess.setHeaderText("Registrazione Successo");
         registrationSuccess.setHeaderText("Registrazione avvenuta con successo!");
-        nomeOpField.setText("Nicole");
-        cognomeField.setText("Bagattini");
-        codFiscaleField.setText("UHUT3VQHGPHFE2I3");
-        userIDField.setText("bagatins");
-        emailField.setText("prova1234@gmail.com");
-        passwordField.setText("elocin");
+        nomeOpField.setText("Mattia");
+        cognomeField.setText("Lunardi");
+        codFiscaleField.setText("LNRMTM97L29F205L");
+        userIDField.setText("mattialun");
+        emailField.setText("mmlunardi@studenti.uninsubria.it");
+        passwordField.setText("pwd1234");
         centroField.setText("Parma");
     }
 
