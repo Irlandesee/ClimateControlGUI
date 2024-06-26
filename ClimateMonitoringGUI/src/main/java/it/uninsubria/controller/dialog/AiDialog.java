@@ -99,7 +99,6 @@ public class AiDialog {
                         denomCentro = res.getResult().toString();
                     }
 
-                    System.out.println("Aumento dimensioni");
                     if(stage.getWidth() < MAX_WINDOW_SIZE) stage.setWidth(MAX_WINDOW_SIZE);
 
                     if(!paramClimaticiTableView.getColumns().contains(tempColumn))

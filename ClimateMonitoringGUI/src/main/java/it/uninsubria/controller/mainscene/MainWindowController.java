@@ -359,7 +359,7 @@ public class MainWindowController{
 
             if(response.getResponseType() == ServerInterface.ResponseType.Error ||
                     response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+                resNoSuchElementAlert.showAndWait();
             }else{
                 List<AreaInteresse> areeInteresseRichieste = (List<AreaInteresse>) response.getResult();
                 areeInteresseRichieste.forEach((areaInteresse -> {
@@ -394,7 +394,7 @@ public class MainWindowController{
             Response response = client.getResponse();
             if(response.getResponseType() == ServerInterface.ResponseType.Error ||
                 response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+                resNoSuchElementAlert.showAndWait();
             }else{
                 List<AreaInteresse> queryResult = (List<AreaInteresse>)response.getResult();
                 queryResult.removeIf(areaInteresse -> !areaInteresse.getStato().equals(stato));
@@ -540,7 +540,7 @@ public class MainWindowController{
 
         if(response.getResponseType() == ServerInterface.ResponseType.Error
                 || response.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-            new Alert(Alert.AlertType.ERROR, response.getResponseType().label).showAndWait();
+            resNoSuchElementAlert.showAndWait();
         }else{
             String areaId = response.getResult().toString();
             try{
@@ -606,7 +606,7 @@ public class MainWindowController{
 
                 if(resAreaId.getResponseType() == ServerInterface.ResponseType.Error ||
                         resAreaId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                    new Alert(Alert.AlertType.ERROR, resAreaId.getResponseType().label).showAndWait();
+                    resNoSuchElementAlert.showAndWait();
                 }else{
                     String areaInteresseId = resAreaId.getResult().toString();
                     try{
@@ -626,7 +626,7 @@ public class MainWindowController{
 
                     if(responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.Error
                         || responseParametriClimatici.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                        new Alert(Alert.AlertType.ERROR, responseParametriClimatici.getResponseType().label).showAndWait();
+                        resNoSuchElementAlert.showAndWait();
                     }else{
                         List<ParametroClimatico> parametriClimatici = (List<ParametroClimatico>)responseParametriClimatici.getResult();
                         tableView.getItems().clear();
@@ -669,7 +669,7 @@ public class MainWindowController{
 
             if(responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.Error
                 || responseCentriMonitoraggio.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, responseCentriMonitoraggio.getResponseType().label).showAndWait();
+                resNoSuchElementAlert.showAndWait();
             }else{
 
                 List<CentroMonitoraggio> centriMonitoraggio = (List<CentroMonitoraggio>) responseCentriMonitoraggio.getResult();
@@ -704,7 +704,7 @@ public class MainWindowController{
 
                                 if(responseAi.getResponseType() == ServerInterface.ResponseType.Error ||
                                         responseAi.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                                    new Alert(Alert.AlertType.ERROR, responseAi.getResponseType().label).showAndWait();
+                                    resNoSuchElementAlert.showAndWait();
                                 }else{
                                     List<AreaInteresse> responseAree = (List<AreaInteresse>)responseAi.getResult();
                                     responseAree.forEach(area -> areeInteresseAssociateAlCentro.add(area.getDenominazione()));
@@ -835,7 +835,7 @@ public class MainWindowController{
 
             if(responseCmId.getResponseType() == ServerInterface.ResponseType.Error ||
                     responseCmId.getResponseType() == ServerInterface.ResponseType.NoSuchElement){
-                new Alert(Alert.AlertType.ERROR, responseCmId.getResponseType().label).showAndWait();
+                resNoSuchElementAlert.showAndWait();
                 return false;
             }
 

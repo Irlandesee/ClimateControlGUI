@@ -34,7 +34,7 @@
         </GridPane>
     </center>
     <stylesheets>
-        <URL value="@../stylesheets/add-area-centro-scene.css"/>
+        <URL value="@../stylesheets/update-centro-dialog.css"/>
     </stylesheets>
 
 </BorderPane>

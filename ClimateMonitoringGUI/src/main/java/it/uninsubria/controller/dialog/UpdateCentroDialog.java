@@ -1,6 +1,5 @@
 package it.uninsubria.controller.dialog;
 
-import it.uninsubria.clientCm.Client;
 import it.uninsubria.controller.operatore.OperatoreViewController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AddAreaToCentroBoxDialog {
+public class UpdateCentroDialog {
     @FXML
     private TextField inputNomeCentroField;
     @FXML
@@ -23,7 +22,7 @@ public class AddAreaToCentroBoxDialog {
     @FXML
     private TextArea areeInteresseBox;
     private OperatoreViewController operatoreViewController;
-    public AddAreaToCentroBoxDialog(OperatoreViewController operatoreViewController){
+    public UpdateCentroDialog(OperatoreViewController operatoreViewController){
         inputNomeCentroField = new TextField("Nome del centro");
         inputComuneCentroField = new TextField("Comune del centro");
         inputStatoCmField = new TextField("Stato del centro");
