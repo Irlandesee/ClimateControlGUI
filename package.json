@@ -1,0 +1,27 @@
+{
+    "bin": {"ClimateMonitoringGUI-1-0-SNAPSHOT-shaded": "jdeploy-bundle/jdeploy.js"},
+    "author": "Mattia Lunardi",
+    "description": "Uninsubria ClimateMonitoring project",
+    "main": "index.js",
+    "preferGlobal": true,
+    "repository": "",
+    "version": "1.0.0",
+    "jdeploy": {
+        "jdk": false,
+        "javaVersion": "19",
+        "jar": "ClimateMonitoringGUI/target/ClimateMonitoringGUI-1.0-SNAPSHOT-shaded.jar",
+        "javafx": true,
+        "title": "ClimateMonitoring"
+    },
+    "dependencies": {
+        "command-exists-promise": "^2.0.2",
+        "node-fetch": "2.6.7",
+        "tar": "^4.4.8",
+        "yauzl": "^2.10.0",
+        "shelljs": "^0.8.4"
+    },
+    "license": "ISC",
+    "name": "climate-monitoring-app",
+    "files": ["jdeploy-bundle"],
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"}
+}

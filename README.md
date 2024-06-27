@@ -1,5 +1,3 @@
-# ClimateControlGUI
-Gui for the climate control project
+# ClimateMonitoringGUI
 
-# FXML LOCATION NOT SET 
-https://stackoverflow.com/questions/45315121/java-lang-illegalstateexception-location-is-not-set-in-javafx-application
+GUI application for Uninsubria's project ClimateMonitoring.
