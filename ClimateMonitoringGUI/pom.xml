@@ -138,7 +138,7 @@
                             <transformers>
                                 <transformer implementation=
                                                      "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>it.uninsubria.Launcher</mainClass>
+                                    <mainClass>it.climatemonitoring.Launcher</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -155,7 +155,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                it.uninsubria.MainWindow
+                                it.climatemonitoring.MainWindow
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

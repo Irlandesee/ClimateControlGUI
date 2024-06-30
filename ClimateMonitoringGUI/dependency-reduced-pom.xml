@@ -25,7 +25,7 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <transformers>
                 <transformer>
-                  <mainClass>it.uninsubria.Launcher</mainClass>
+                  <mainClass>it.climatemonitoring.Launcher</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -40,7 +40,7 @@
           <execution>
             <id>default-cli</id>
             <configuration>
-              <mainClass>it.uninsubria.MainWindow</mainClass>
+              <mainClass>it.climatemonitoring.MainWindow</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
